@@ -55,5 +55,11 @@ namespace Erp.Server.Repository
             return customerorders;
         }
 
+        public List<CustomerOrder> getMyOrders(RequestParams requestParms)
+        {
+            var _user = new SqlParameter("user", requestParms.user + "");
+            var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getMyOrders @user;",  _user).ToList();
+            return customerorders;
+        }
     }
 }

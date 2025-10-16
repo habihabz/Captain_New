@@ -9,5 +9,6 @@ namespace Erp.Server.Services
         CustomerOrder getCustomerOrder(int id);
         List<CustomerOrderDetail> getCustomerOrderDetails(int id);
         List<CustomerOrder> getCustomerOrders(RequestParams requestParms);
+        List<CustomerOrder> getMyOrders(RequestParams requestParms);
     }
 }

@@ -41,6 +41,7 @@
                 <div class="col-xl-4 offset-xl-5 col-lg-6 col-md-6 col-sm-6 text-end">
                     <div class="gota_right">
                         <ul>
+                            <li><a (click)="navigateTo('myorders')" >My Orders</a></li>
                             <li><a (click)="navigateTo('favourites')" >favourites</a></li>
                             <li *ngIf="currentUser?.u_id"><a href="#">Hi, {{ currentUser.u_name}}</a>
                             </li>

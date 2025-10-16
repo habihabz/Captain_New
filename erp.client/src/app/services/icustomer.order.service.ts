@@ -36,6 +36,10 @@ export class ICustomerOrder {
     return this.http.post<CustomerOrderDetail[]>(this.apiUrl + "/getCustomerOrderDetails", id);  
   }
 
+  getMyOrders(requestParms: RequestParms): Observable<CustomerOrder[]> {
+    return this.http.post<CustomerOrder[]>(this.apiUrl + "/getMyOrders", requestParms); 
+  }
+
   get refresh$() {
     return this.refreshSubject.asObservable();
   }

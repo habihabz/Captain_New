@@ -71,7 +71,15 @@ namespace Erp.Server.Controllers
             return customerOrderDetails;
         }
 
-
+        [HttpPost("getMyOrders")]
+        [Authorize]
+        public List<CustomerOrder> getMyOrders([FromBody] RequestParams requestParms)
+        {
+            List<CustomerOrder> customerorders = new List<CustomerOrder>();
+            customerorders = icustomerOrder.getMyOrders(requestParms);
+            return customerorders;
+        }
+        
 
     }
 }

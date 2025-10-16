@@ -1,0 +1,13 @@
+ .order-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .order-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+  }
+
+  .pagination {
+    justify-content: center;
+  }
