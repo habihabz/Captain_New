@@ -7,6 +7,7 @@
                         <label for="status">Status</label>
                         <select appSelect2 #status id="status" class="form-control" name="status" required
                             (selectionChanged)="onCustomerOrderStatusChange($event);">
+                            <option [value]="0">Select Status</option>
                             <option *ngFor="let cos of customerOrderStatuses" [value]="cos.cos_id">{{ cos.cos_name }}
                             </option>
                         </select>
@@ -48,6 +49,36 @@
                 </ag-grid-angular>
             </div>
             <div class="modal-footer d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="StatusChangeModal" customer="dialog" aria-labelledby="customerOrderDetailModal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" customer="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Status</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="status">New Status</label>
+                            <select appSelect2 #status id="status" class="form-control" name="status" required
+                                (selectionChanged)="onNewStatusChange($event);">
+                                <option [value]="0">Select Status</option>
+                                <option *ngFor="let cos of customerOrderStatuses" [value]="cos.cos_id">{{ cos.cos_name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-end">
+                <button type="button" class="btn btn-success" (click)="updateStatusForCustomerOrder()">Update</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>

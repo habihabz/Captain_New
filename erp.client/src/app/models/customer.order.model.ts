@@ -7,6 +7,7 @@ export class CustomerOrder {
     co_qty:number;
     co_amount:number;
     co_status :number;
+    co_status_name :string;
     co_cre_by: number;
     co_cre_by_name: string;
     co_cre_date: string;
@@ -21,6 +22,7 @@ export class CustomerOrder {
         this.co_qty=0;
         this.co_amount=0;
         this.co_status = 0;
+        this.co_status_name='';
         this.co_cre_by = 0;
         this.co_cre_by_name = '';
         this.co_cre_date = '';

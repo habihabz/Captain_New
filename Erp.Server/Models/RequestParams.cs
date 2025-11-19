@@ -8,6 +8,7 @@
         public int country { get; set; } = 0;
         public int user { get; set; } = 0;
         public string details { get; set; } = string.Empty;
+        public int status { get; set; } = 0;
 
     }
 }

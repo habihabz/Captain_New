@@ -14,8 +14,6 @@ namespace Erp.Server.Repository
             db = _db;
         }
 
-       
-
         public DbResult createOrUpdateCustomerOrder(RequestParams requestParams)
         {
             var user = new SqlParameter("user", requestParams.user + "");
@@ -60,6 +58,16 @@ namespace Erp.Server.Repository
             var _user = new SqlParameter("user", requestParms.user + "");
             var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getMyOrders @user;",  _user).ToList();
             return customerorders;
+        }
+
+        public DbResult updateStatusForCustomerOrder(RequestParams requestParms)
+        {
+            var _id = new SqlParameter("id", requestParms.id + "");
+            var _status = new SqlParameter("status", requestParms.status + "");
+            var _user = new SqlParameter("user", requestParms.user + "");
+
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.updateStatusForCustomerOrder @id,@status,@user;", _id, _status, _user).ToList().FirstOrDefault() ?? new DbResult();
+            return dbresult;
         }
     }
 }

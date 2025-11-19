@@ -17,7 +17,7 @@ import { ActionRendererComponent } from '../../directives/action.renderer';
 import { GridService } from '../../services/igrid.service';
 import { AgGridAngular } from 'ag-grid-angular';
 import { CustomerOrderDetail } from '../../models/customer.order.detail.model';
-import { ICustomerOrderStatusService} from '../../services/icustomer.order.status.service';
+import { ICustomerOrderStatusService } from '../../services/icustomer.order.status.service';
 import { CustomerOrderStatus } from '../../models/customer.order.status.model';
 declare var $: any;
 
@@ -38,10 +38,10 @@ export class CustomerOrderComponent {
   customerOrder: CustomerOrder = new CustomerOrder();
   customerOrders: CustomerOrder[] = [];
   customerOrderDetails: CustomerOrderDetail[] = [];
-  customerOrderStatuses :CustomerOrderStatus[]=[];
+  customerOrderStatuses: CustomerOrderStatus[] = [];
   dbResult: DbResult = new DbResult();
   requestParms: RequestParms = new RequestParms();
-  customerOrderStatus:CustomerOrderStatus=new CustomerOrderStatus();
+  customerOrderStatus: CustomerOrderStatus = new CustomerOrderStatus();
   @ViewChild('customerOrderGrid') customerOrderGrid!: AgGridAngular;
 
   constructor(
@@ -54,7 +54,7 @@ export class CustomerOrderComponent {
     private icartService: ICartService,
     private iuser: IuserService,
     private icustomerOrder: ICustomerOrder,
-    private icustomerOrderStatus:ICustomerOrderStatusService,
+    private icustomerOrderStatus: ICustomerOrderStatusService,
     private geolocationService: GeolocationService
 
   ) {
@@ -68,6 +68,12 @@ export class CustomerOrderComponent {
     { headerName: "Quanitity", field: "co_qty" },
     { headerName: "Amount", field: "co_amount" },
     { headerName: "Status", field: "co_status_name" },
+    {
+      headerName: 'Status Change', cellRenderer: 'actionRenderer', cellRendererParams:
+      {
+        name: 'Status Change', action: 'onStatusChange', cssClass: 'btn btn-primary', icon: 'fa fa-exchange', onStatusChange: (data: any) => this.onAction('statusChange', data)
+      }
+    },
     {
       headerName: 'Details', cellRenderer: 'actionRenderer', cellRendererParams:
       {
@@ -88,8 +94,9 @@ export class CustomerOrderComponent {
   ];
 
   ngOnInit(): void {
-    this.getCustomerOrders();
+
     this.getCustomerOrderStatuses();
+    this.getCustomerOrders();
     this.subscription.add(
       this.icustomerOrder.refresh$.subscribe(() => {
         this.getCustomerOrders();
@@ -98,7 +105,7 @@ export class CustomerOrderComponent {
 
   }
 
-  getCustomerOrderStatuses() { 
+  getCustomerOrderStatuses() {
     this.icustomerOrderStatus.getCustomerOrderStatuses().subscribe(
       (data: CustomerOrderStatus[]) => {
         this.customerOrderStatuses = data;
@@ -123,13 +130,15 @@ export class CustomerOrderComponent {
       case 'details':
         this.onDetails(data);
         break;
-
+      case 'statusChange':
+        this.onStatusChange(data);
+        break;
       default:
         this.snackBarService.showError("Unknown Action " + action);;
     }
   }
 
-  onDetails(data: any) { 
+  onDetails(data: any) {
     this.icustomerOrder.getCustomerOrderDetails(data.co_id).subscribe(
       (data: CustomerOrderDetail[]) => {
         this.customerOrderDetails = data;
@@ -141,14 +150,19 @@ export class CustomerOrderComponent {
     );
   }
 
+  onStatusChange(data:any){
+    this.customerOrder=data;
+    $("#StatusChangeModal").modal("show");
+  }
+
   onGridReady(event: GridReadyEvent) {
     setTimeout(() => {
       this.customerOrderGrid.api.sizeColumnsToFit();
-    }, 500); 
+    }, 500);
   }
 
   getCustomerOrders() {
-    this.requestParms.user=this.currentUser.u_id;
+    this.requestParms.user = this.currentUser.u_id;
     this.icustomerOrder.getCustomerOrders(this.requestParms).subscribe(
       (data: CustomerOrder[]) => {
         this.customerOrders = data;
@@ -160,8 +174,32 @@ export class CustomerOrderComponent {
     );
 
   }
-  onCustomerOrderStatusChange(cos_id:number){
-    this.requestParms.id=cos_id;
+  onCustomerOrderStatusChange(cos_id: number) {
+    this.requestParms.id = cos_id;
     this.getCustomerOrders();
+  }
+  onNewStatusChange (s_id :number){
+    this.requestParms.status=s_id;
+  }
+  updateStatusForCustomerOrder(){
+    this.requestParms.user=this.currentUser.u_id;
+    this.requestParms.id=this.customerOrder.co_id;
+    this.icustomerOrder.updateStatusForCustomerOrder(this.requestParms).subscribe(
+      (data: DbResult) => {
+        if(data.message=="Success"){
+           this.getCustomerOrders();
+           this.customerOrder=new CustomerOrder();
+           this.requestParms=new RequestParms();
+            $("#StatusChangeModal").modal("show");
+        }else
+        {
+          this.snackBarService.showError(data.message);;
+        }
+
+      },
+      (error: any) => {
+
+      }
+    );
   }
 }

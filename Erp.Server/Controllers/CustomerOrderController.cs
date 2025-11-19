@@ -79,7 +79,14 @@ namespace Erp.Server.Controllers
             customerorders = icustomerOrder.getMyOrders(requestParms);
             return customerorders;
         }
-        
 
+        [HttpPost("updateStatusForCustomerOrder")]
+        [Authorize]
+        public DbResult updateStatusForCustomerOrder([FromBody] RequestParams requestParams)
+        {
+            DbResult dbResult = new DbResult();
+            dbResult = icustomerOrder.updateStatusForCustomerOrder(requestParams);
+            return dbResult;
+        }
     }
 }

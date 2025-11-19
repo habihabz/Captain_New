@@ -10,5 +10,6 @@ namespace Erp.Server.Services
         List<CustomerOrderDetail> getCustomerOrderDetails(int id);
         List<CustomerOrder> getCustomerOrders(RequestParams requestParms);
         List<CustomerOrder> getMyOrders(RequestParams requestParms);
+        DbResult updateStatusForCustomerOrder(RequestParams requestParams);
     }
 }

@@ -5,6 +5,7 @@ export class RequestParms {
   country :number;
   details:string;
   user:number;
+  status:number;
   constructor() {
     this.id = 0;
     this.name='',
@@ -12,6 +13,7 @@ export class RequestParms {
     this.country=0;
     this.details='';
     this.user=0;
+    this.status=0;
   }
 
 }

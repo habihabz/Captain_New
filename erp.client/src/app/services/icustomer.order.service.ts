@@ -40,6 +40,10 @@ export class ICustomerOrder {
     return this.http.post<CustomerOrder[]>(this.apiUrl + "/getMyOrders", requestParms); 
   }
 
+  updateStatusForCustomerOrder(requestParms: RequestParms): Observable<DbResult> {
+    return this.http.post<DbResult>(this.apiUrl + "/updateStatusForCustomerOrder", requestParms); 
+  }
+
   get refresh$() {
     return this.refreshSubject.asObservable();
   }
