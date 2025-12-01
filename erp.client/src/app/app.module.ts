@@ -64,6 +64,7 @@ import { PaymentFailureComponent } from './pages/website/payment.failure/payment
 import { PaymentSuccessComponent } from './pages/website/payment.success/payment.success.component';
 import { PaymentComponent } from './pages/website/payment/payment.component';
 import { MyOrdersComponent } from './pages/website/my.orders/my.orders.component';
+import { SliderComponent } from './pages/slider/slider.component';
 
 
 
@@ -124,7 +125,8 @@ const jwtConfig: JwtModuleOptions = {
     PaymentFailureComponent,
     PaymentSuccessComponent,
     PaymentComponent,
-    MyOrdersComponent
+    MyOrdersComponent,
+    SliderComponent
   ],
   imports: [
     BrowserModule,

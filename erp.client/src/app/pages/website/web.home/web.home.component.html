@@ -1,91 +1,37 @@
-<!-- cart area start  -->
-<div class="cart__sidebar">
-    <div class="container">
-        <div class="cart__content">
-            <div class="cart-text">
-                <h3 class="mb-40">Shopping cart</h3>
-                <div class="add_cart_product">
-                    <div class="add_cart_product__thumb">
-                        <img src="./assets/img/product/29-3.jpg" alt="">
-                    </div>
-                    <div class="add_cart_product__content">
-                        <h5><a href="shop.html">Running 3-Stripes</a></h5>
-                        <p>1 × $66.00</p>
-                        <button class="cart_close"><i class="fal fa-times"></i></button>
-                    </div>
-                </div>
-                <div class="add_cart_product">
-                    <div class="add_cart_product__thumb">
-                        <img src="./assets/img/product/17.jpg" alt="">
-                    </div>
-                    <div class="add_cart_product__content">
-                        <h5><a href="shop.html">Buddy non Stripes</a></h5>
-                        <p>1 × $40.00</p>
-                        <button class="cart_close"><i class="fal fa-times"></i></button>
-                    </div>
-                </div>
-            </div>
-            <div class="cart-icon">
-                <i class="fal fa-times"></i>
-            </div>
-            <div class="cart-bottom">
-                <div class="cart-bottom__text">
-                    <span>Subtotal:</span>
-                    <span class="end">$121.00</span>
-                    <a href="cart.html">view cart</a>
-                    <a href="checkout.html">checkout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="cart-offcanvas-overlay"></div>
-<!-- cart area end  -->
 
-<!-- slider start -->
-<div class="slider-active swiper-container height">
-    <div class="swiper-wrapper">
-        <div class="swiper-slide slider-item">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 justify-content-end">
-                        <div class="slider_images">
-                            <img class="back" src="./assets/img/slider/2.png" alt="" style="height: 70vh; width: auto;">
-                            <img class="top" src="./assets/img/slider/text.png" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="swiper-slide slider-item">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="slider_images">
-                            <img class="back" src="./assets/img/slider/2.png" alt="" style="height: 90vh; width: auto;">
-                            <img class="top" src="./assets/img/slider/text.png" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="swiper-slide slider-item">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="slider_images">
-                            <img class="back" src="./assets/img/slider/2.png" alt="" style="height: 90vh; width: auto;">
-                            <img class="top" src="./assets/img/slider/text.png" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Add Pagination -->
-    <div class="swiper-pagination"></div>
-</div>
+<div id="myCarousel" class="carousel slide carousel-fade" data-ride="carousel">
 
+  <!-- Indicators -->
+  <ol class="carousel-indicators">
+    <li *ngFor="let s of sliders; let i = index"
+        [attr.data-target]="'#myCarousel'"
+        [attr.data-slide-to]="i"
+        [class.active]="i === 0">
+    </li>
+  </ol>
+
+  <!-- Slides -->
+  <div class="carousel-inner">
+    <div *ngFor="let s of sliders; let i = index"
+         class="carousel-item"
+         [class.active]="i === 0">
+
+      <img class="d-block w-100"
+           [src]="this.attachmentUrl+s.s_image_url"
+           alt="Slide {{ i + 1 }}">
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </a>
+
+  <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </a>
+
+</div>
 <!-- Product area start -->
 <br />
 <div class="product-area mb-100">

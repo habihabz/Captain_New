@@ -16,6 +16,9 @@ namespace Erp.Server.Models
         [Display(Name = "Size")]
         public int? c_size { get; set; } = 0;
 
+        [Display(Name = "Size")]
+        public string? c_size_name { get; set; } = "";
+
         [Display(Name = "color")]
         public int? c_color { get; set; } = 0;
 

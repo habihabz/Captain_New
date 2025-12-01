@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.35013.160
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11206.111
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Erp.Server", "Erp.Server\Erp.Server.csproj", "{F9A5335E-2131-4FFF-9792-644E039928F7}"
 EndProject
@@ -20,7 +20,6 @@ Global
 		{331C5F1E-A2C5-4A81-A541-B76A57B4BB1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{331C5F1E-A2C5-4A81-A541-B76A57B4BB1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{331C5F1E-A2C5-4A81-A541-B76A57B4BB1A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{331C5F1E-A2C5-4A81-A541-B76A57B4BB1A}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

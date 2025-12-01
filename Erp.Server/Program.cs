@@ -1,26 +1,36 @@
-using Erp.Server.Middleware;
 using Erp.Server.Models;
 using Erp.Server.Repository;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Logging;
-using System.Text;
-using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register services
-builder.Services.AddSingleton<IJwtAuthManager, JwtAuthManager>();
-
-builder.Services.AddAuthentication(options =>
+// CORS
+builder.Services.AddCors(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+    options.AddPolicy("AllowSpecificOrigin", p =>
+        p.WithOrigins(
+                "http://localhost:4200",
+                "https://localhost:4200",
+                "https://husicaptain.com",
+                "http://72.61.226.117:443"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+    );
+});
+
+// Force lowercase routing (Linux safe)
+builder.Services.AddRouting(o => o.LowercaseUrls = true);
+
+// JWT
+builder.Services.AddSingleton<IJwtAuthManager, JwtAuthManager>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
@@ -28,113 +38,82 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("KDSFADSJFNFDGJASDFGADFNEJFWRWERdDSFHAKSD")),
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes("KDSFADSJFNFDGJASDFGADFNEJFWRWERdDSFHAKSD")
+        ),
         ValidateIssuer = false,
         ValidateAudience = false,
-        ValidateLifetime = true, // Enable lifetime validation
+        ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
-
-    options.Events = new JwtBearerEvents
-    {
-
-    };
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin",
-        builder => builder
-            .WithOrigins("https://localhost:4200", "http://localhost:4200")  // Replace with your Angular app URL
-            .AllowAnyMethod()
-            .AllowAnyHeader());
-});
-
-// Add services to the container
+// Controllers + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+
+builder.Services.AddSwaggerGen(o =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    o.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
+        In = ParameterLocation.Header
     });
 });
 
-// Retrieve configuration instance to get connection string
-builder.Services.AddDbContext<DBContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionStr"))
-);
+// DB
+builder.Services.AddDbContext<DBContext>(options =>
+{
+    var conn = builder.Environment.IsDevelopment()
+        ? builder.Configuration.GetConnectionString("DevelopmentConnectionStr")
+        : builder.Configuration.GetConnectionString("ConnectionStr");
 
+    options.UseSqlServer(conn);
+});
+
+// DI Services
 builder.Services.AddTransient<IUser, UserRepository>();
-builder.Services.AddTransient<IRole, RoleRepository>();
 builder.Services.AddTransient<ILogin, LoginRepository>();
-builder.Services.AddTransient<IPurchaseOrder, PurchaseOrderRepository>();
-builder.Services.AddTransient<IMenu, MenuRepository>();
-builder.Services.AddTransient<IRoleMenu, RoleMenuRepository>();
-builder.Services.AddTransient<ISupplier, SupplierRepository>();
-builder.Services.AddTransient<ICustomer, CustomerRepository>();
-builder.Services.AddTransient<IExpense, ExpenseRepository>();
-builder.Services.AddTransient<IIncome, IncomeRepository>();
-builder.Services.AddTransient<ICategory, CategoryRepository>();
-builder.Services.AddTransient<IMasterData, MasterDataRepository>();
-builder.Services.AddTransient<IProduct, ProductRepository>();
-builder.Services.AddTransient<IFeedback, FeedbackRepository>();
-builder.Services.AddTransient<IProductReview, ProductReviewRepository>();
-builder.Services.AddTransient<ISellingPrice, sellingPriceRepository>();
-builder.Services.AddTransient<ICart, CartRepository>();
-builder.Services.AddTransient<ICustomerOrder, CustomerOrderRepository>();
-builder.Services.AddTransient<ICustomerOrderStatus, CustomerOrderStatusRepository>();
-builder.Services.AddTransient<IAddress, AddressRepository>();
+// ... your other services
 
 var app = builder.Build();
 
-app.UseDefaultFiles();
+// Swagger
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = "swagger";
+});
+
+app.UseRouting();
+app.UseCors("AllowSpecificOrigin");
 app.UseStaticFiles();
 
-//// Middleware to log incoming request details
-//app.Use(async (context, next) =>
-//{
-//    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-//    logger.LogInformation("Handling request: {Method} {Path}", context.Request.Method, context.Request.Path);
-//    await next();
-//    logger.LogInformation("Finished handling request.");
-//});
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseCors("AllowSpecificOrigin");
-app.UseHttpsRedirection();
-
-app.UseAuthentication(); // Authentication should come before authorization
-app.UseAuthorization();  // Authorization should come after authentication
-
+// API first (critical)
 app.MapControllers();
-app.MapFallbackToFile("/Index.html");
+
+// ---------------- REAL FIX ----------------
+// Prevent Angular fallback from hijacking /api/* AND /swagger/*
+app.MapFallback(context =>
+{
+    var path = context.Request.Path.Value?.ToLower();
+
+    if (path.StartsWith("/api") || path.StartsWith("/swagger"))
+    {
+        context.Response.StatusCode = 404;
+        return context.Response.WriteAsync("API endpoint not found.");
+    }
+
+    return context.Response.SendFileAsync("wwwroot/index.html");
+});
+// ------------------------------------------
 
 app.Run();

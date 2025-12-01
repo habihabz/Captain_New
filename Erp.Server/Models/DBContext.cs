@@ -33,6 +33,7 @@ namespace Erp.Server.Models
         public DbSet<CustomerOrderDetail> CustomerOrderDetails { get; set; }
         public DbSet<CustomerOrderStatus> CustomerOrderStatus { get; set; }
         public DbSet<Address> Address { get; set; }
+        public DbSet<Slider> Sliders { get; set; }
 
 
     }

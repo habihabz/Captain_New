@@ -34,6 +34,7 @@ import { BlogComponent } from './pages/website/blog/blog.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { CustomerOrderComponent } from './pages/customer.order/customer.order.component';
 import { MyOrdersComponent } from './pages/website/my.orders/my.orders.component';
+import { SliderComponent } from './pages/slider/slider.component';
 
 
 
@@ -164,6 +165,11 @@ const routes: Routes = [
       {
         path: 'customer-order',
         component: CustomerOrderComponent
+
+      },
+      {
+        path: 'sliders',
+        component: SliderComponent
 
       }
     ]

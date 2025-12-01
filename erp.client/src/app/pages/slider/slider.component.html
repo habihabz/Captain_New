@@ -1,0 +1,83 @@
+<div class="right_col" style="min-height: 99vh;">
+    <div class="x_panel">
+        <div class="x_content" style="display: block;">
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <button class="btn btn-warning mb-3" (click)="openCreateModal()">
+                        <i class="fa fa-plus"></i> Create
+                    </button>
+
+                    <ag-grid-angular #sliderGrid class="ag-theme-quartz ag-theme-acmecorp" style="width: 100%;"
+                        [rowData]="sliders" [columnDefs]="colDefs" [pagination]="pagination"
+                        [defaultColDef]="defaultColDef" [enableCellTextSelection]="true"
+                        [components]="frameworkComponents" [paginationPageSize]="paginationPageSize10"
+                        [domLayout]="domLayout" [paginationPageSizeSelector]="paginationPageSizeSelector10"
+                        (gridReady)="onGridReady($event)">
+                    </ag-grid-angular>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sliderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header ">
+                <h5 class="modal-title">
+                    {{ slider.s_id === 0 ? 'Create Slider' : 'Update Slider' }}
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- TITLE -->
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" [(ngModel)]="slider.s_title"
+                        placeholder="Enter slider title">
+                </div>
+
+                <!-- IMAGE UPLOAD -->
+                <div class="form-group mt-3">
+                    <label>Image</label>
+                    <input type="file" class="form-control" (change)="onFileChange($event)">
+                </div>
+
+                <!-- IMAGE PREVIEW -->
+                <div *ngIf="slider.s_image_url" class="text-center mt-3">
+                    <img [src]="this.attachmentUrl+slider.s_image_url" class="img-thumbnail" width="160" style="object-fit:cover;">
+                </div>
+
+                <!-- ACTIVE -->
+                <div class="form-group mt-3" *ngIf="slider.s_id!=0">
+                    <label>Status</label>
+                    <select class="form-control" [(ngModel)]="slider.s_active_yn">
+                        <option value="Y" selected>Active</option>
+                        <option value="N">Inactive</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button class="btn btn-primary" (click)="createOrUpdateSlider()">
+                    <i class="fa fa-save"></i> Save
+                </button>
+                <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
