@@ -1,0 +1,107 @@
+/* ---- GLOBAL ---- */
+body, html {
+  overflow-x: hidden !important;
+}
+
+/* ---- LEFT FILTER PANEL ---- */
+.filter-panel {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.filter-panel h4 {
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* list items */
+mat-list-item {
+  font-size: 14px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+mat-list-item input {
+  transform: scale(1.1);
+}
+
+/* ---- PRODUCT CARD ---- */
+.product {
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+  margin-bottom: 20px;
+  transition: 0.3s;
+  border: 1px solid #f0f0f0;
+}
+
+.product:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product__thumb img {
+  width: 100%;
+  height: 250px;
+  object-fit: contain;
+}
+
+/* ---- PRICE AND ACTION ---- */
+.pro-price {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.pro-price a {
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* ---- DROPDOWN ---- */
+.filter-rating select {
+  border-radius: 6px;
+  padding: 8px;
+}
+
+/* ---- MOBILE RESPONSIVE ---- */
+@media (max-width: 768px) {
+
+  .container-fluid {
+    margin: 5px !important;
+  }
+
+  /* Collapse filter panel under products */
+  .filter-panel {
+    margin-bottom: 20px;
+  }
+
+  /* Make H4 bigger clickable for mobile */
+  .filter-panel h4 {
+    font-size: 18px;
+    padding: 10px 0;
+  }
+
+  /* Product grid full width */
+  .col-lg-3, .col-md-4, .col-sm-12 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  @media (max-width: 576px) {
+    .col-lg-3, .col-md-4, .col-sm-12 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+
+    .product__thumb img {
+      height: 200px;
+    }
+  }
+}

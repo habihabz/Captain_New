@@ -1,48 +1,44 @@
-
 <div id="myCarousel" class="carousel slide carousel-fade" data-ride="carousel">
 
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li *ngFor="let s of sliders; let i = index"
-        [attr.data-target]="'#myCarousel'"
-        [attr.data-slide-to]="i"
-        [class.active]="i === 0">
-    </li>
-  </ol>
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+        <li *ngFor="let s of sliders; let i = index" [attr.data-target]="'#myCarousel'" [attr.data-slide-to]="i"
+            [class.active]="i === 0">
+        </li>
+    </ol>
 
-  <!-- Slides -->
-  <div class="carousel-inner">
-    <div *ngFor="let s of sliders; let i = index"
-         class="carousel-item"
-         [class.active]="i === 0">
+    <!-- Slides -->
+    <div class="carousel-inner">
+        <div *ngFor="let s of sliders; let i = index" class="carousel-item" [class.active]="i === 0">
 
-      <img class="d-block w-100"
-           [src]="this.attachmentUrl+s.s_image_url"
-           alt="Slide {{ i + 1 }}">
+            <img class="d-block w-100" [src]="this.attachmentUrl+s.s_image_url" alt="Slide {{ i + 1 }}">
+        </div>
     </div>
-  </div>
 
-  <!-- Controls -->
-  <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </a>
+    <!-- Controls -->
+    <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </a>
 
-  <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </a>
+    <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </a>
 
 </div>
 <!-- Product area start -->
 <br />
-<div class="product-area mb-100">
+<div class="product-area">
     <div class="container-fluid">
-        <div class="section-wrapper text-center mb-35">
-            <h2 class="section-title"><a href="blog.html">Explore Our Sports Gear</a></h2>
-            <p>Discover top-quality sports equipment, apparel, and accessories designed to enhance your performance.<br>
-                Gear up for success with the best from our collection.</p>
-        </div>
-        <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
-            <!--<mat-tab label="Shoes">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="section-wrapper text-center mb-35">
+                    <h2 class="section-title"><a href="blog.html">Explore Our Sports Gear</a></h2>
+                    <p>Discover top-quality sports equipment, apparel, and accessories designed to enhance your
+                        performance.<br>
+                        Gear up for success with the best from our collection.</p>
+                </div>
+                <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+                    <!--<mat-tab label="Shoes">
                 <br />
                 <div class="container-fluid">
                     <div class="row">
@@ -99,61 +95,67 @@
                     </div>
                 </div>
             </mat-tab> -->
-            <mat-tab *ngFor="let category of categories" [label]="category.ct_name">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div *ngFor="let product of getProductsByCategory(category.ct_id)"
-                            class="col-lg-4 col-md-4 col-sm-12">
-                            <div class="product">
-                                <div class="product__thumb">
-                                    <a>
-                                       
-                                        <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"
-                                            [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
-                                            [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                                            style="height: 300px; width: auto;">
+                    <mat-tab *ngFor="let category of categories" [label]="category.ct_name">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div *ngFor="let product of getProductsByCategory(category.ct_id)"
+                                    class="col-lg-4 col-md-4 col-sm-12">
+                                    <div class="product">
+                                        <div class="product__thumb">
+                                            <a>
 
-                                    </a>
-                                <!--<div class="product__update">
+                                                <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"
+                                                    [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
+                                                    [src]="apiUrl + '/' + p_attachement.pa_image_path"
+                                                    alt="product_image" style="height: 300px; width: auto;">
+
+                                            </a>
+                                            <!--<div class="product__update">
                                         <a class="#">new</a>
                                     </div> -->
-                                    <div class="product-info mb-10">
-                                        <div class="product_category">
-                                            <span>{{ product.p_sub_category_name + ', ' + product.p_division_name }}</span>
-                                        </div>
-                                        <div class="product_rating">
-                                            <a href="#"><i class="fa fa-star start-color"></i></a>
-                                            <a href="#"><i class="fa fa-star start-color"></i></a>
-                                            <a href="#"><i class="fa fa-star start-color"></i></a>
-                                            <a href="#"><i class="fa fa-star"></i></a>
-                                            <a href="#"><i class="fa fa-star"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="product__name">
-                                        <h4><a href="shop.html">{{product.p_name}}</a></h4>
-                                        <div class="pro-price" *ngIf="product.p_price>=0">
-                                            <p class="p-absoulute pr-1"><span>&#x20B9;</span> {{ product.p_price}}</p>
-                                            <a class="p-absoulute pr-2" href="#">add to cart</a>
-                                        </div>
-                                    </div>
-                                    <div class="product__action">
-                                        <div class="inner__action">
-                                            <div class="wishlist">
-                                                <a href="#"><i class="fa fa-heart"></i></a>
+                                            <div class="product-info mb-10">
+                                                <div class="product_category">
+                                                    <span>{{ product.p_sub_category_name + ', ' +
+                                                        product.p_division_name }}</span>
+                                                </div>
+                                                <div class="product_rating">
+                                                    <a href="#"><i class="fa fa-star start-color"></i></a>
+                                                    <a href="#"><i class="fa fa-star start-color"></i></a>
+                                                    <a href="#"><i class="fa fa-star start-color"></i></a>
+                                                    <a href="#"><i class="fa fa-star"></i></a>
+                                                    <a href="#"><i class="fa fa-star"></i></a>
+                                                </div>
                                             </div>
-                                            <div class="view">
-                                                <a (click)="navigateToProduct(product.p_id)"><i class="fa fa-eye"></i></a>
+                                            <div class="product__name">
+                                                <h4><a href="shop.html">{{product.p_name}}</a></h4>
+                                                <div class="pro-price" *ngIf="product.p_price>=0">
+                                                    <p class="p-absoulute pr-1"><span>&#x20B9;</span> {{
+                                                        product.p_price}}</p>
+                                                    <a class="p-absoulute pr-2" href="#">add to cart</a>
+                                                </div>
                                             </div>
-                                         
+                                            <div class="product__action">
+                                                <div class="inner__action">
+                                                    <div class="wishlist">
+                                                        <a href="#"><i class="fa fa-heart"></i></a>
+                                                    </div>
+                                                    <div class="view">
+                                                        <a (click)="navigateToProduct(product.p_id)"><i
+                                                                class="fa fa-eye"></i></a>
+                                                    </div>
+
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </mat-tab>
-        </mat-tab-group>
+                    </mat-tab>
+                </mat-tab-group>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -208,7 +210,8 @@
                     </div>
                     <div class="bpost__content">
                         <span>Shoes, Clothing</span>
-                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Simple & Easy DIY Flower Deco</a></h3>
+                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Simple & Easy DIY Flower Deco</a>
+                        </h3>
                         <p>By <span>Erentheme </span>/September 16, 2019</p>
                         <p>Sapien luctus id justo suscipit nonummy eget hymenaeos...</p>
                     </div>
@@ -219,7 +222,8 @@
                     </div>
                     <div class="bpost__content">
                         <span>Shoes, Clothing</span>
-                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Take A Look At The Most Photo</a></h3>
+                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Take A Look At The Most Photo</a>
+                        </h3>
                         <p>By <span>Erentheme </span>/September 16, 2019</p>
                         <p>Sapien luctus id justo suscipit nonummy eget hymenaeos...</p>
                     </div>
@@ -230,7 +234,8 @@
                     </div>
                     <div class="bpost__content">
                         <span>Shoes, Clothing</span>
-                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Mauris rhoncus aliquet purus</a></h3>
+                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Mauris rhoncus aliquet purus</a>
+                        </h3>
                         <p>By <span>Erentheme </span>/September 16, 2019</p>
                         <p>Sapien luctus id justo suscipit nonummy eget hymenaeos...</p>
                     </div>

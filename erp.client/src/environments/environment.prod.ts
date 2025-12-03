@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  serverHostAddress: 'https://husicaptain.com'  ,
-  fileUrL: 'https://husicaptain.com'
+  serverHostAddress: 'https://api.husicaptain.com/'  ,
+  fileUrL: 'https://api.husicaptain.com'
 };

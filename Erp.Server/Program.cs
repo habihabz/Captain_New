@@ -2,6 +2,7 @@ using Erp.Server.Models;
 using Erp.Server.Repository;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -9,7 +10,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =======================
 // CORS
+// =======================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", p =>
@@ -17,7 +20,7 @@ builder.Services.AddCors(options =>
                 "http://localhost:4200",
                 "https://localhost:4200",
                 "https://husicaptain.com",
-                "http://72.61.226.117:443"
+                "https://api.husicaptain.com"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -28,7 +31,9 @@ builder.Services.AddCors(options =>
 // Force lowercase routing (Linux safe)
 builder.Services.AddRouting(o => o.LowercaseUrls = true);
 
+// =======================
 // JWT
+// =======================
 builder.Services.AddSingleton<IJwtAuthManager, JwtAuthManager>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
@@ -65,7 +70,9 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 
-// DB
+// =======================
+// Database
+// =======================
 builder.Services.AddDbContext<DBContext>(options =>
 {
     var conn = builder.Environment.IsDevelopment()
@@ -77,10 +84,37 @@ builder.Services.AddDbContext<DBContext>(options =>
 
 // DI Services
 builder.Services.AddTransient<IUser, UserRepository>();
+builder.Services.AddTransient<IRole, RoleRepository>();
 builder.Services.AddTransient<ILogin, LoginRepository>();
-// ... your other services
-
+builder.Services.AddTransient<IPurchaseOrder, PurchaseOrderRepository>();
+builder.Services.AddTransient<IMenu, MenuRepository>();
+builder.Services.AddTransient<IRoleMenu, RoleMenuRepository>();
+builder.Services.AddTransient<ISupplier, SupplierRepository>();
+builder.Services.AddTransient<ICustomer, CustomerRepository>();
+builder.Services.AddTransient<IExpense, ExpenseRepository>();
+builder.Services.AddTransient<IIncome, IncomeRepository>();
+builder.Services.AddTransient<ICategory, CategoryRepository>();
+builder.Services.AddTransient<IMasterData, MasterDataRepository>();
+builder.Services.AddTransient<IProduct, ProductRepository>();
+builder.Services.AddTransient<IFeedback, FeedbackRepository>();
+builder.Services.AddTransient<IProductReview, ProductReviewRepository>();
+builder.Services.AddTransient<ISellingPrice, sellingPriceRepository>();
+builder.Services.AddTransient<ICart, CartRepository>();
+builder.Services.AddTransient<ICustomerOrder, CustomerOrderRepository>();
+builder.Services.AddTransient<ICustomerOrderStatus, CustomerOrderStatusRepository>();
+builder.Services.AddTransient<IAddress, AddressRepository>();
+builder.Services.AddTransient<ISlider, SliderRepository>();
+builder.WebHost.CaptureStartupErrors(true);
+builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
 var app = builder.Build();
+
+// ----------------------------------------------------
+// TRUST FORWARDED HEADERS (REQUIRED FOR NGINX)
+// ----------------------------------------------------
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 // Swagger
 app.UseSwagger();
@@ -90,6 +124,8 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseDeveloperExceptionPage();
+
 app.UseRouting();
 app.UseCors("AllowSpecificOrigin");
 app.UseStaticFiles();
@@ -97,23 +133,14 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// API first (critical)
+// API Controller Endpoints
 app.MapControllers();
 
-// ---------------- REAL FIX ----------------
-// Prevent Angular fallback from hijacking /api/* AND /swagger/*
-app.MapFallback(context =>
-{
-    var path = context.Request.Path.Value?.ToLower();
+// ----------------------------------------------------
+// ANGULAR FALLBACK (ONLY for FRONTEND ROUTES)
+// ----------------------------------------------------
+// IMPORTANT: Do NOT block /api/ here. Let NGINX route it.
+app.MapFallbackToFile("index.html");
 
-    if (path.StartsWith("/api") || path.StartsWith("/swagger"))
-    {
-        context.Response.StatusCode = 404;
-        return context.Response.WriteAsync("API endpoint not found.");
-    }
-
-    return context.Response.SendFileAsync("wwwroot/index.html");
-});
-// ------------------------------------------
-
+// ----------------------------------------------------
 app.Run();

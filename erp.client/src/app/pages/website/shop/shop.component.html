@@ -1,70 +1,71 @@
-<div class="container-fluid" style="height: 100vh;">
+<div class="container-fluid" style="min-height: 70vh; margin: 20px; padding-bottom: 120px;">
   <div class="row">
-    <div class="col-2">
-      <mat-list>
-        <!-- Category Section -->
-        <h4 matSubheader (click)="toggleSection('category')"> Category &nbsp;
-          <i class="fa" [ngClass]="openSection === 'category' ? 'fa-angle-up' : 'fa-angle-down'"></i>
-        </h4>
-        <div *ngIf="openSection === 'category'">
-          <mat-list-item *ngFor="let category of categories">
-            <input type="checkbox" id="category-{{ category.ct_id }}"
-              (change)="onCategoryChange($event, category.ct_id)" />&nbsp;
-            <label for="category-{{ category.ct_id }}">
-              {{ category.ct_name }}
-            </label>
-          </mat-list-item>
+    <div class="col-md-12 col-sm-12">
+      <div class="filter-container d-flex justify-content-end">
+        <div class="filter-rating" style="margin: 10px;">
+          <select id="ratingFilter" [(ngModel)]="sortBy" (change)="getProductsByFilters()" class="form-control">
+            <option value="0">Sort By</option>
+            <option value="1">Featured</option>
+            <option value="2">Popularity</option>
+            <option value="3">Newest</option>
+            <option value="4">Price : Hight-Low</option>
+            <option value="5">Price : Low-High</option>
+          </select>
         </div>
-        <hr />
-        <!-- Subcategory Section -->
-        <h4 matSubheader (click)="toggleSection('subcategory')"> Sub Category &nbsp;
-          <i class="fa" [ngClass]="openSection === 'subcategory' ? 'fa-angle-up' : 'fa-angle-down'"></i>
-        </h4>
-        <div *ngIf="openSection === 'subcategory'">
-          <mat-list-item *ngFor="let sc of subcategories">
-            <input type="checkbox" id="subcategory-{{ sc.md_name }}"  (change)="onSubCategoryChange($event, sc.md_id)" /> &nbsp;
-            <label for="subcategory-{{ sc.md_name }}">
-              {{ sc.md_name }}
-            </label>
-          </mat-list-item>
-        </div>
-        <hr />
-        <!-- size Section -->
-        <h4 matSubheader (click)="toggleSection('size')"> Size &nbsp;
-          <i class="fa" [ngClass]="openSection === 'size' ? 'fa-angle-up' : 'fa-angle-down'"></i>
-        </h4>
-        <div *ngIf="openSection === 'size'">
-          <mat-list-item *ngFor="let sz of sizes">
-            <input type="checkbox" id="size-{{ sz.md_name }}"   (change)="onSizeChange($event, sz.md_id)"/> &nbsp;
-            <label for="size-{{ sz.md_name }}">
-              {{ sz.md_name }}
-            </label>
-          </mat-list-item>
-        </div>
-        <hr />
-      </mat-list>
-    </div>
-    <div class="col-10">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-12">
-            <div class="filter-container d-flex justify-content-end">
-              <div class="filter-rating">
-                <select id="ratingFilter" [(ngModel)]="sortBy" (change)="getProductsByFilters()" class="form-control">
-                  <option value="0">Sort By</option>
-                  <option value="1">Featured</option>
-                  <option value="2">Popularity</option>
-                  <option value="3">Newest</option>
-                  <option value="4">Price : Hight-Low</option>
-                  <option value="5">Price : Low-High</option>
-                </select>
-              </div>
-            </div>
-          </div>
+      </div>
 
-        </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2 col-sm-4">
+        <mat-list>
+          <!-- Category Section -->
+          <h4 matSubheader (click)="toggleSection('category')"> Category &nbsp;
+            <i class="fa" [ngClass]="openSection === 'category' ? 'fa-angle-up' : 'fa-angle-down'"></i>
+          </h4>
+          <div *ngIf="openSection === 'category'">
+            <mat-list-item *ngFor="let category of categories">
+              <input type="checkbox" id="category-{{ category.ct_id }}"
+                (change)="onCategoryChange($event, category.ct_id)" />&nbsp;
+              <label for="category-{{ category.ct_id }}">
+                {{ category.ct_name }}
+              </label>
+            </mat-list-item>
+          </div>
+          <hr />
+          <!-- Subcategory Section -->
+          <h4 matSubheader (click)="toggleSection('subcategory')"> Sub Category &nbsp;
+            <i class="fa" [ngClass]="openSection === 'subcategory' ? 'fa-angle-up' : 'fa-angle-down'"></i>
+          </h4>
+          <div *ngIf="openSection === 'subcategory'">
+            <mat-list-item *ngFor="let sc of subcategories">
+              <input type="checkbox" id="subcategory-{{ sc.md_name }}"
+                (change)="onSubCategoryChange($event, sc.md_id)" />
+              &nbsp;
+              <label for="subcategory-{{ sc.md_name }}">
+                {{ sc.md_name }}
+              </label>
+            </mat-list-item>
+          </div>
+          <hr />
+          <!-- size Section -->
+          <h4 matSubheader (click)="toggleSection('size')"> Size &nbsp;
+            <i class="fa" [ngClass]="openSection === 'size' ? 'fa-angle-up' : 'fa-angle-down'"></i>
+          </h4>
+          <div *ngIf="openSection === 'size'">
+            <mat-list-item *ngFor="let sz of sizes">
+              <input type="checkbox" id="size-{{ sz.md_name }}" (change)="onSizeChange($event, sz.md_id)" /> &nbsp;
+              <label for="size-{{ sz.md_name }}">
+                {{ sz.md_name }}
+              </label>
+            </mat-list-item>
+          </div>
+          <hr />
+        </mat-list>
+      </div>
+      <div class="col-md-10 col-sm-8">
+
         <div class="row">
-          <div *ngFor="let product of this.products" class="col-lg-3 col-md-4 col-sm-12">
+          <div *ngFor="let product of this.products" class="col-md-4 col-sm-12">
             <div class="product">
               <div class="product__thumb">
                 <a>

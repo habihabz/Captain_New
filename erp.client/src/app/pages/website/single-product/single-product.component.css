@@ -2,3 +2,15 @@
     margin-right: 10px;
     font-weight: bold;
 }
+.product {
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+  margin-bottom: 20px;
+  transition: 0.3s;
+  border: 1px solid #f0f0f0;
+}
+
+.product:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}

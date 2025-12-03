@@ -1,0 +1,34 @@
+/* Make carousel full & consistent height */
+#myCarousel,
+#myCarousel .carousel-item,
+#myCarousel img {
+    height: 280px;        /* default mobile height */
+    object-fit: cover;    /* crop instead of shrinking */
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    #myCarousel,
+    #myCarousel .carousel-item,
+    #myCarousel img {
+        height: 380px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 992px) {
+    #myCarousel,
+    #myCarousel .carousel-item,
+    #myCarousel img {
+        height: 480px;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+    #myCarousel,
+    #myCarousel .carousel-item,
+    #myCarousel img {
+        height: 550px;
+    }
+}

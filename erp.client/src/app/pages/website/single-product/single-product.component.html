@@ -1,6 +1,6 @@
-<div class="container">
+<div class="container" style="padding: 10px;">
     <div class="row">
-        <div class="col-1" >
+        <div class="col-md-1 col-sm-2" >
             <div class="d-flex flex-column" >
                 <div *ngFor="let attachment of getAttachementOfaProduct(product.p_attachements); let i = index"
                     class="thumbnail-item mb-2">
@@ -9,12 +9,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-6">
+        <div class="col-md-6 col-sm-10">
             <div class="main-image-container">
                 <img [src]="selectedImagePath" class="d-block w-100" alt="Primary product image">
             </div>
         </div>
-        <div class="col-5">
+        <div class="col-md-5 col-sm-12">
             <div class="product__details">
                 <h1><a href="shop.html">{{this.product.p_name}}</a></h1>
                 <h3>{{this.product.p_short_name}}</h3>
@@ -74,8 +74,8 @@
             </h1>
         </div>
         <div class="col-12">
-            <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-3 col-sm-6">
-                <div class="product">
+            <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-3 col-sm-12">
+                <div class="product" >
                     <div class="product__thumb">
                         <a>
                             <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"

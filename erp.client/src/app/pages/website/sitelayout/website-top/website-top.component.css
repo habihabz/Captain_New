@@ -1,0 +1,61 @@
+  .navbar-collapse {
+      transition: height 0.3s ease;
+      overflow: hidden;
+  }
+
+  .navbar-collapse.show {
+      overflow: visible;
+  }
+
+  /* Optional: force it to show over background layers */
+  @media (max-width: 991.98px) {
+      .navbar-collapse {
+          position: absolute;
+          top: 100px;
+          /* Height of navbar */
+          left: 0;
+          width: 100%;
+          background-color: #fff;
+          /* Match navbar bg */
+          z-index: 999;
+          padding: 1rem;
+      }
+  }
+
+  .fixed-top {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+
+  .glass-nav {
+      margin-top: 60px;
+      background-color: rgba(255, 255, 255, 0.7) !important;
+      backdrop-filter: blur(8px);
+  }
+
+  /* Make all nav text black */
+  .glass-nav .nav-link,
+  .glass-nav a,
+  .glass-nav .navbar-brand {
+      color: #000 !important;
+  }
+
+  /* Toggler icon black */
+  .glass-nav .navbar-toggler {
+      border-color: #000 !important;
+  }
+
+  .glass-nav .navbar-toggler-icon {
+      filter: invert(1);
+      /* Makes hamburger icon black */
+  }
+
+  .top-fixed-nav {
+      height: 60px;
+      background-color: black;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      /* keeps it above other elements */
+  }
