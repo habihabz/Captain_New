@@ -1,7 +1,7 @@
 <div class="container" style="padding: 10px;">
     <div class="row">
         <div class="col-md-1 col-sm-2" >
-            <div class="d-flex flex-column" >
+            <div class="d-flex flex-column " >
                 <div *ngFor="let attachment of getAttachementOfaProduct(product.p_attachements); let i = index"
                     class="thumbnail-item mb-2">
                     <img [src]="apiUrl + '/' + attachment.pa_image_path" class="img-thumbnail cursor-pointer"
@@ -9,7 +9,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-sm-10">
+        <div class="col-md-6 col-sm-2">
             <div class="main-image-container">
                 <img [src]="selectedImagePath" class="d-block w-100" alt="Primary product image">
             </div>

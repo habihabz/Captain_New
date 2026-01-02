@@ -30,11 +30,12 @@ import { CustomerLoginComponent } from './pages/website/customer-login/customer-
 import { MycartComponent } from './pages/website/mycart/mycart.component';
 import { UserRegistrationComponent } from './pages/website/user-registration/user-registration.component';
 import { FavouriteComponent } from './pages/website/favourite/favourite.component';
-import { BlogComponent } from './pages/website/blog/blog.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { CustomerOrderComponent } from './pages/customer.order/customer.order.component';
 import { MyOrdersComponent } from './pages/website/my.orders/my.orders.component';
 import { SliderComponent } from './pages/slider/slider.component';
+import { AboutUsComponent } from './pages/website/about.us/about.us.component';
+import { BlogComponent } from './pages/blog/blog.component';
 
 
 
@@ -55,9 +56,11 @@ const routes: Routes = [
         path: 'contact-us', component: ContactUsComponent
       },
       {
-        path: 'blogs', component: BlogsComponent
+        path: 'about-us', component: AboutUsComponent
       },
-      { path: 'blog/:id', component: BlogComponent },
+      {
+        path: 'blog/:id', component: BlogComponent
+      },
       {
         path: 'shop', component: ShopComponent
       },
@@ -115,6 +118,10 @@ const routes: Routes = [
       {
         path: 'roles',
         component: RoleComponent
+      },
+      {
+        path: 'blogs',
+        component: BlogComponent
       },
       {
         path: 'menus',

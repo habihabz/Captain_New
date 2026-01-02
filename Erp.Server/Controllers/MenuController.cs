@@ -84,6 +84,7 @@ namespace Erp.Server.Controllers
         [Authorize]
         public DbResult createOrUpdateMenu([FromBody] Menu menu)
         {
+       
             DbResult dbResult = new DbResult();
             dbResult = imenu.createOrUpdateMenu(menu);
             return dbResult;

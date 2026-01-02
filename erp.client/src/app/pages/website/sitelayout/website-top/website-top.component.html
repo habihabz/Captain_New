@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="/assets/css/slick.css">
 <link rel="stylesheet" href="/assets/css/style.css">
 <link rel="stylesheet" href="/assets/css/responsive.css">
-<header class="header-area">
+<header class="header-area" >
     <div class="container-fluid top-fixed-nav d-flex justify-content-between align-items-center">
 
         <!-- LEFT SIDE -->
@@ -34,11 +34,12 @@
 
         <!-- RIGHT SIDE -->
         <ul class="navbar-nav d-flex flex-row ms-auto gap-3">
-            <li class="nav-item"><a class="nav-link" routerLink="/myorders">My Orders</a></li>
-            <li class="nav-item"><a class="nav-link" (click)="navigateTo('favourites')">Favourites</a></li>
-            <li class="nav-item"><a class="nav-link" (click)="navigateTo('my-cart')">My Cart</a></li>
+
 
             <ng-container *ngIf="isLoggedIn; else guestLinks">
+                <li class="nav-item"><a class="nav-link" routerLink="/myorders">My Orders</a></li>
+                <li class="nav-item"><a class="nav-link" (click)="navigateTo('favourites')">Favourites</a></li>
+                <li class="nav-item"><a class="nav-link" (click)="navigateTo('my-cart')">My Cart</a></li>
                 <li class="nav-item"><a class="nav-link">Hi, {{ currentUser.u_name }}</a></li>
 
                 <li class="nav-item" *ngIf="currentUser.u_is_admin == 'Y'">
@@ -75,6 +76,7 @@
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('features')">Features</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('blogs')">Blogs</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('contact-us')">Contact Us</a>
+                    <li class="nav-item"><a class="nav-link" (click)="navigateTo('about-us')">About Us</a></li>
                 </ul>
 
             </div>

@@ -101,7 +101,7 @@ export class SingleProductComponent implements OnInit {
   getProductsMayLike(productId: number) {
     this.iproductService.getProducts().subscribe(
       (data: Product[]) => {
-        this.productsMayLike = data.filter(x => x.p_id != productId);
+        this.productsMayLike = data.filter(x => x.p_id != productId).slice(0,4);
       },
       (error: any) => {
       }

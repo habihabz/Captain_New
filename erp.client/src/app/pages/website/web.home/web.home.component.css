@@ -2,8 +2,8 @@
 #myCarousel,
 #myCarousel .carousel-item,
 #myCarousel img {
-    height: 280px;        /* default mobile height */
-    object-fit: cover;    /* crop instead of shrinking */
+    height: 300px;        /* default mobile height */
+    object-fit: fit;    /* crop instead of shrinking */
 }
 
 /* Tablet */
@@ -29,6 +29,6 @@
     #myCarousel,
     #myCarousel .carousel-item,
     #myCarousel img {
-        height: 550px;
+        height: 700px;
     }
 }

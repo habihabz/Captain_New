@@ -1,0 +1,27 @@
+.about-hero {
+    min-height: 70vh;
+    background:
+        linear-gradient(rgba(255, 255, 255, .65), rgba(0, 0, 0, .65)),
+        url('/assets/img/about-us/bg.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
+.about-hero .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 15, 15, 0.55);
+}
+
+.about-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+img {
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.02);
+}

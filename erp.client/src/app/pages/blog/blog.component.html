@@ -1,0 +1,126 @@
+<div class="right_col" style="min-height: 99vh;">
+  <div class="x_panel">
+    <div class="x_content">
+
+      <div class="row">
+        <div class="col-md-12">
+
+          <!-- CREATE BLOG -->
+          <button class="btn btn-warning mb-3" (click)="openCreateModal()">
+            <i class="fa fa-plus"></i> Create Blog
+          </button>
+
+          <!-- BLOG LIST -->
+          <ag-grid-angular
+            #blogGrid
+            class="ag-theme-quartz ag-theme-acmecorp"
+            style="width: 100%;"
+            [rowData]="blogs"
+            [columnDefs]="colDefs"
+            [pagination]="pagination"
+            [defaultColDef]="defaultColDef"
+            [enableCellTextSelection]="true"
+            [components]="frameworkComponents"
+            [paginationPageSize]="paginationPageSize10"
+            [domLayout]="domLayout"
+            [paginationPageSizeSelector]="paginationPageSizeSelector10"
+            (gridReady)="onGridReady($event)">
+          </ag-grid-angular>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- BLOG MODAL -->
+<div class="modal fade" id="blogModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ blog.b_id === 0 ? 'Create Blog' : 'Update Blog' }}
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <!-- BLOG TITLE -->
+        <div class="form-group">
+          <label>Blog Title</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="blog.b_title"
+            placeholder="Enter blog title">
+        </div>
+
+        <!-- BLOG DESCRIPTION -->
+        <div class="form-group mt-3">
+          <label>Short Description</label>
+          <textarea
+            class="form-control"
+            rows="3"
+            [(ngModel)]="blog.b_description"
+            placeholder="Short blog description">
+          </textarea>
+        </div>
+
+        <!-- BLOG CONTENT -->
+        <div class="form-group mt-3">
+          <label>Blog Content</label>
+          <textarea
+            class="form-control"
+            rows="6"
+            [(ngModel)]="blog.b_content"
+            placeholder="Write blog content here">
+          </textarea>
+        </div>
+
+        <!-- COVER IMAGE -->
+        <div class="form-group mt-3">
+          <label>Cover Image</label>
+          <input
+            type="file"
+            class="form-control"
+            (change)="onFileChange($event)">
+        </div>
+
+        <!-- IMAGE PREVIEW -->
+        <div *ngIf="blog.b_image_url" class="text-center mt-3">
+          <img
+            [src]="attachmentUrl + blog.b_image_url"
+            class="img-thumbnail"
+            width="200"
+            style="object-fit:cover;">
+        </div>
+
+        <!-- STATUS -->
+        <div class="form-group mt-3" *ngIf="blog.b_id != 0">
+          <label>Status</label>
+          <select class="form-control" [(ngModel)]="blog.b_active_yn">
+            <option value="Y">Active</option>
+            <option value="N">Inactive</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="createOrUpdateBlog()">
+          <i class="fa fa-save"></i> Save Blog
+        </button>
+        <button class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -57,7 +57,6 @@ import { UserRegistrationComponent } from './pages/website/user-registration/use
 import { CustomerLoginComponent } from './pages/website/customer-login/customer-login.component';
 import { MycartComponent } from './pages/website/mycart/mycart.component';
 import { FavouriteComponent } from './pages/website/favourite/favourite.component';
-import { BlogComponent } from './pages/website/blog/blog.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { CustomerOrderComponent } from './pages/customer.order/customer.order.component';
 import { PaymentFailureComponent } from './pages/website/payment.failure/payment.failure.component';
@@ -65,6 +64,8 @@ import { PaymentSuccessComponent } from './pages/website/payment.success/payment
 import { PaymentComponent } from './pages/website/payment/payment.component';
 import { MyOrdersComponent } from './pages/website/my.orders/my.orders.component';
 import { SliderComponent } from './pages/slider/slider.component';
+import { AboutUsComponent } from './pages/website/about.us/about.us.component';
+import { BlogComponent } from './pages/blog/blog.component';
 
 
 
@@ -126,7 +127,8 @@ const jwtConfig: JwtModuleOptions = {
     PaymentSuccessComponent,
     PaymentComponent,
     MyOrdersComponent,
-    SliderComponent
+    SliderComponent,
+    AboutUsComponent
   ],
   imports: [
     BrowserModule,

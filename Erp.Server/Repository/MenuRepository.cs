@@ -3,6 +3,7 @@ using Erp.Server.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Erp.Server.Repository
@@ -65,6 +66,8 @@ namespace Erp.Server.Repository
 
         public DbResult createOrUpdateMenu(Menu menu)
         {
+
+            Trace.WriteLine(menu.m_type);
             var m_id = new SqlParameter("m_id", menu.m_id + "");
             var m_name = new SqlParameter("m_name", menu.m_name + "");
             var m_link = new SqlParameter("m_link", menu.m_link + "");
@@ -72,9 +75,8 @@ namespace Erp.Server.Repository
             var m_type = new SqlParameter("m_type", menu.m_type + "");
             var m_parrent = new SqlParameter("m_parrent", menu.m_parrent + "");
             var m_cre_by = new SqlParameter("m_cre_by", menu.m_cre_by + "");
-            var dbResult = db.Set<DbResult>()
-                .FromSqlRaw("EXEC dbo.createOrUpdateMenu @m_id,@m_name,@m_link,@m_fa_icon,@m_parrent,@m_type,@m_cre_by;",
-                m_id, m_name, m_link, m_fa_icon, m_parrent,m_type,m_type ,m_cre_by                        
+            var dbResult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateMenu @m_id,@m_name,@m_link,@m_fa_icon,@m_parrent,@m_type,@m_cre_by;",
+                m_id, m_name, m_link, m_fa_icon, m_parrent,m_type ,m_cre_by                        
                 ).ToList().FirstOrDefault() ?? new DbResult();
 
             return dbResult;
