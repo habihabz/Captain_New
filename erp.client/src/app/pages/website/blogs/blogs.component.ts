@@ -10,7 +10,8 @@ export class BlogsComponent implements OnInit {
   constructor(
     private router: Router,
     private elRef: ElementRef,
-  ) {
+  ) 
+  {
 
   }
   ngOnInit(): void {
