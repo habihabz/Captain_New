@@ -59,7 +59,10 @@ const routes: Routes = [
         path: 'about-us', component: AboutUsComponent
       },
       {
-        path: 'blog/:id', component: BlogComponent
+        path: 'blog', component: BlogsComponent
+      },
+      {
+        path: 'blog/:id', component: BlogsComponent
       },
       {
         path: 'shop', component: ShopComponent

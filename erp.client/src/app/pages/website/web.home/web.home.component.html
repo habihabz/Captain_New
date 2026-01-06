@@ -184,65 +184,89 @@
 <!-- product show case area end  -->
 
 <!-- blog area start -->
-<div class="blog-area mb-100">
-    <div class="container">
-        <div class="section-wrapper text-center mb-35">
-            <h2 class="section-title"><a (click)="navigateToBlog(1);">from our blog</a></h2>
-            <p>Commodo sociosqu venenatis cras dolor sagittis integer luctus sem primis<br> eget maecenas sed urna
-                malesuada.</p>
-        </div>
-        <div class="row">
-            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                <div class="blog" style="background-image: url('./assets/img/blog/9.jpg');">
-                    <div class="blog__content">
-                        <span class="mb-15">Shoes, Clothing</span>
-                        <h3 class="blog-title "><a (click)="navigateToBlog(1);">Mauris rhoncus aliquet purus</a></h3>
-                        <p>By Erentheme /<span>September 16, 2019</span></p>
-                        <a href="blog.html">Continue reading</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                <div class="bpost">
-                    <div class="bpost__thumb">
-                        <img src="./assets/img/blog/blog1.jpg" alt="blog_post">
-                    </div>
-                    <div class="bpost__content">
-                        <span>Shoes, Clothing</span>
-                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Simple & Easy DIY Flower Deco</a>
-                        </h3>
-                        <p>By <span>Erentheme </span>/September 16, 2019</p>
-                        <p>Sapien luctus id justo suscipit nonummy eget hymenaeos...</p>
-                    </div>
-                </div>
-                <div class="bpost">
-                    <div class="bpost__thumb">
-                        <img src="./assets/img/blog/blog2.jpg" alt="blog_post">
-                    </div>
-                    <div class="bpost__content">
-                        <span>Shoes, Clothing</span>
-                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Take A Look At The Most Photo</a>
-                        </h3>
-                        <p>By <span>Erentheme </span>/September 16, 2019</p>
-                        <p>Sapien luctus id justo suscipit nonummy eget hymenaeos...</p>
-                    </div>
-                </div>
-                <div class="bpost m-0">
-                    <div class="bpost__thumb">
-                        <img src="./assets/img/blog/blog3.jpg" alt="blog_post">
-                    </div>
-                    <div class="bpost__content">
-                        <span>Shoes, Clothing</span>
-                        <h3 class="blog-title title-2"><a (click)="navigateToBlog(1);">Mauris rhoncus aliquet purus</a>
-                        </h3>
-                        <p>By <span>Erentheme </span>/September 16, 2019</p>
-                        <p>Sapien luctus id justo suscipit nonummy eget hymenaeos...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="blog-area mb-5">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="text-center mb-5">
+      <h2 class="font-weight-bold">From Our Blog</h2>
+      <p class="text-muted">Latest articles and updates from our blog</p>
     </div>
+
+    <div class="row" *ngIf="blogs.length">
+
+      <!-- FEATURED BLOG -->
+      <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow h-100">
+
+          <img
+            [src]="attachmentUrl + latestBlog.b_image_url"
+            class="card-img-top"
+            style="height:420px; object-fit:cover;"
+            alt="blog">
+
+          <div class="card-body">
+            <span class="badge badge-secondary mb-2">Blog</span>
+
+            <h4 class="font-weight-bold">
+              <a (click)="navigateToBlog(latestBlog.b_id)">
+                {{ latestBlog.b_title }}
+              </a>
+            </h4>
+
+            <p class="text-muted small mb-2">
+              By Admin · {{ latestBlog.b_cre_date | date:'MMMM dd, yyyy' }}
+            </p>
+
+            <a class="font-weight-bold" (click)="navigateToBlog(latestBlog.b_id)">
+              Continue reading →
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- OTHER BLOGS -->
+      <div class="col-lg-6">
+
+        <div class="media mb-4 align-items-start"
+             *ngFor="let blog of blogs.slice(1,4)">
+
+          <img
+            [src]="attachmentUrl + blog.b_image_url"
+            class="mr-3 rounded"
+            width="120"
+            height="90"
+            style="object-fit:cover;"
+            alt="blog">
+
+          <div class="media-body">
+            <span class="badge badge-light mb-1">Blog</span>
+
+            <h5 class="mt-0 font-weight-bold">
+              <a (click)="navigateToBlog(blog.b_id)">
+                {{ blog.b_title }}
+              </a>
+            </h5>
+
+            <p class="text-muted small mb-1">
+              By Admin · {{ blog.b_cre_date | date:'MMMM dd, yyyy' }}
+            </p>
+
+            <p class="mb-0 text-truncate">
+              {{ blog.b_description }}
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 </div>
+
+
 
 
 <!-- popup area start -->

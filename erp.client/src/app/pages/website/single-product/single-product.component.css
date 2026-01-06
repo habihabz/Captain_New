@@ -1,16 +1,45 @@
 .progress span {
-    margin-right: 10px;
-    font-weight: bold;
+  margin-right: 10px;
+  font-weight: bold;
 }
+
+/* PRODUCT CARD */
 .product {
-  border-radius: 10px;
   padding: 10px;
-  background: #fff;
   margin-bottom: 20px;
-  transition: 0.3s;
+  background: #fff;
   border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  transition: box-shadow 0.3s;
 }
 
 .product:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* THUMBNAILS */
+.thumbnail-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.thumb-img {
+  width: 100%;
+  max-width: 70px;
+  margin: 4px;
+  height: auto;
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+  .thumb-img {
+    max-width: 50px;
+     margin: 2px;
+  }
+
+  .thumbnail-wrapper {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+  }
 }

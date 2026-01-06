@@ -22,7 +22,9 @@ export class IBlogService {
   getBlogs(): Observable<Blog[]> {
     return this.http.post<Blog[]>(`${this.apiUrl}/getBlogs`, {});
   }
-
+  getBlogsForHomePage(): Observable<Blog[]> {
+    return this.http.post<Blog[]>(`${this.apiUrl}/getBlogs`, {});
+  }
   getBlog(id: number): Observable<Blog> {
     return this.http.post<Blog>(`${this.apiUrl}/getBlog`, id);
   }

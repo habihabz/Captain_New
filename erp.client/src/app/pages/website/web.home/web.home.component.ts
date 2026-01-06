@@ -13,6 +13,8 @@ import { environment } from '../../../../environments/environment';
 import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
 import { ISliderService } from '../../../services/islider.service';
 import { Slider } from '../../../models/slider.model';
+import { Blog } from '../../../models/blog.model';
+import { IBlogService } from '../../../services/iblog.service';
 
 @Component({
   selector: 'app-web.home',
@@ -33,6 +35,8 @@ export class WebHomeComponent implements OnInit {
   attachments: ProdAttachement[] = [];
   attachment: ProdAttachement = new ProdAttachement();
   sliders: Slider[] = [];
+  blogs: Blog[] = [];
+  latestBlog:Blog=new Blog();
 
   constructor(
     private elRef: ElementRef,
@@ -42,6 +46,7 @@ export class WebHomeComponent implements OnInit {
     private icategoryService: ICategoryService,
     private geolocationService: GeolocationService,
     private isliderService: ISliderService,
+    private iblogService: IBlogService,
 
   ) {
     this.country = this.geolocationService.getCurrentCountry();
@@ -53,9 +58,8 @@ export class WebHomeComponent implements OnInit {
     this.loadCategories();
     this.getSliders();
     this.getProductsByCountry();
+    this.getBlogsForHomePage();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
-
-
   }
 
   getSliders() {
@@ -64,6 +68,12 @@ export class WebHomeComponent implements OnInit {
     });
   }
 
+  getBlogsForHomePage(): void {
+    this.iblogService.getBlogsForHomePage().subscribe(res => {
+      this.blogs = res;
+      this.latestBlog=this.blogs[0];
+    });
+  }
   getProductsByCountry() {
     this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
       (data: Product[]) => {

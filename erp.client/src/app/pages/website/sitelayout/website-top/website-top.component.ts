@@ -39,6 +39,7 @@ export class WebsiteTopComponent {
 
   navigateTo(moveto: string) {
     this.router.navigate(['/' + moveto]);
+     this.closeMenu();
   }
 
   async fetchCurrentCountry() {

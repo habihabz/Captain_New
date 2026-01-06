@@ -1,0 +1,31 @@
+.blog-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+a {
+    cursor: pointer;
+}
+
+
+.blog-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+.blog-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.blog-content iframe {
+    max-width: 100%;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3 {
+    margin-top: 1.5rem;
+}

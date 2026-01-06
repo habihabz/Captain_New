@@ -66,7 +66,7 @@ import { MyOrdersComponent } from './pages/website/my.orders/my.orders.component
 import { SliderComponent } from './pages/slider/slider.component';
 import { AboutUsComponent } from './pages/website/about.us/about.us.component';
 import { BlogComponent } from './pages/blog/blog.component';
-
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 
 
 // Define a function to get the token
@@ -152,8 +152,8 @@ const jwtConfig: JwtModuleOptions = {
     MatTableModule,
     MatCardModule,
     MatChipsModule,
-    MatListModule
-
+    MatListModule,
+    CKEditorModule
   ],
   providers: [
     {

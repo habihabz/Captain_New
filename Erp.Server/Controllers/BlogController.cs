@@ -74,5 +74,46 @@ namespace Erp.Server.Controllers
 
             return iblogs.createOrUpdateBlog(blog);
         }
+
+        [HttpPost("upload-image")]
+        //[Authorize] // optional – remove if public
+        public async Task<IActionResult> UploadBlogImage(IFormFile upload)
+        {
+            if (upload == null || upload.Length == 0)
+                return BadRequest("No image uploaded");
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var ext = Path.GetExtension(upload.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(ext))
+                return BadRequest("Invalid image format");
+
+            var folderPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "uploads",
+                "blogs"
+            );
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var filePath = Path.Combine(folderPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await upload.CopyToAsync(stream);
+            }
+
+            var imageUrl = $"{Request.Scheme}://{Request.Host}/uploads/blogs/{fileName}";
+
+            // ✅ CKEditor REQUIRED RESPONSE FORMAT
+            return Ok(new
+            {
+                uploaded = true,
+                url = imageUrl
+            });
+        }
     }
 }

@@ -1,10 +1,10 @@
 <div class="container" style="padding: 10px;">
     <div class="row">
-        <div class="col-md-1 col-sm-2" >
-            <div class="d-flex flex-column " >
+        <div class="col-12 col-sm-12 col-md-1">
+            <div class="d-flex thumbnail-wrapper">
                 <div *ngFor="let attachment of getAttachementOfaProduct(product.p_attachements); let i = index"
-                    class="thumbnail-item mb-2">
-                    <img [src]="apiUrl + '/' + attachment.pa_image_path" class="img-thumbnail cursor-pointer"
+                    class="thumbnail-item">
+                    <img [src]="apiUrl + '/' + attachment.pa_image_path" class="img-thumbnail cursor-pointer thumb-img"
                         (click)="selectImage(i)" alt="Product Thumbnail Image">
                 </div>
             </div>
@@ -55,7 +55,8 @@
                         </button>
                     </div>
                 </div>
-                <button class="btn btn-primary" (click)="addToCart()"><i class="fa fa-shopping-bag"> </i> Add to Bag</button>
+                <button class="btn btn-primary" (click)="addToCart()"><i class="fa fa-shopping-bag"> </i> Add to
+                    Bag</button>
                 <button class="btn btn-default"> Favourite <i class="fa fa-heart"></i></button>
                 <h5>
                     {{ product.p_description }}
@@ -75,7 +76,7 @@
         </div>
         <div class="col-12">
             <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-3 col-sm-12">
-                <div class="product" >
+                <div class="product">
                     <div class="product__thumb">
                         <a>
                             <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"
@@ -110,7 +111,7 @@
                                 <div class="view">
                                     <a (click)="navigateToProduct(product.p_id)"><i class="fa fa-eye"></i></a>
                                 </div>
-                               
+
                             </div>
                         </div>
                     </div>
@@ -215,7 +216,7 @@
                 <div class="card-body">
                     <!-- Created date at the top-right corner -->
                     <p class="text-muted text-end mb-0"> {{ pr.pr_created_on | date: 'medium' }}</p>
-                    
+
                     <h5 class="card-title">{{ pr.pr_head_line }}</h5>
                     <div class="product_rating">
                         <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
@@ -230,5 +231,5 @@
             </div>
         </div>
     </div>
-    
+
 </div>

@@ -32,3 +32,21 @@
         height: 700px;
     }
 }
+
+a {
+  cursor: pointer;
+}
+
+.card a {
+  color: inherit;
+}
+
+.card a:hover {
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .card-img-top {
+    height: 260px !important;
+  }
+}

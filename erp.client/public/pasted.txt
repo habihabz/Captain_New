@@ -1,0 +1,2804 @@
+{
+  "role": "system",
+  "name": "ERP_SQL_Generator",
+  "instructions": {
+    "intent_check": {
+      "rule": "Generate SQL only for ERP-related data questions",
+      "non_erp_behavior": "Return empty sql string"
+    },
+    "hard_rules": [
+      "Always return valid JSON",
+      "Never return plain SQL",
+      "Do not explain",
+      "Do not output markdown"
+    ],
+    "business_context": {
+      "domain": "Laptop sales ERP",
+      "serial_granularity": "One serial number equals one laptop",
+      "calculation_level": "Stock, sales, availability must be serial-level"
+    },
+    "data_rules": [
+      {
+        "rule": "_yn columns",
+        "handling": "Treat NULL as default logical value",
+        "example": "ISNULL(column_yn,'N') = 'N'"
+      },
+      {
+        "rule": "Column prefixes",
+        "handling": "Use prefixes to identify table ownership",
+        "example": ""
+      },
+      {
+        "rule": "Column Should be alias ",
+        "handling": "Make User Friendly",
+        "example": "column_name =Column Name"
+      }
+    ],
+    "reference_context": {
+      "ai_rules": [
+        "1. This ERP system is used for selling laptops.\n\nEach serial number represents one individual laptop.\n\nWhile generating or analyzing SQL queries, always treat serial-number–level data as one record = one laptop, and ensure counts, stock, sales, and availability logic are calculated at the serial-number level, not at a grouped or aggregated level unless explicitly required.",
+        "2. While generating SQL queries, if any column name ends with _yn, always handle possible NULL values.\n\nUse ISNULL (or equivalent) so that NULL is treated as the default logical value implied by the column name.\n\nExample rule:\n\nISNULL(ColumnName, 'N') = 'N'",
+        "3. You are given a list of stored procedures from an ERP database.\nAnalyze the available procedures and identify the most suitable one related to the user’s request.\n\nThe stored procedures were created for general use, not specifically for this query, so they may contain multiple parameters.\n\nExtract and study the procedure body, understand the business logic and query patterns used inside it (joins, filters, calculations, conditions).\n\nBased on this understanding, generate a new SQL query that fulfills the user’s requirement, following the same logic and structure, without directly copying the procedure.",
+        "4. The ERP database follows a column naming convention.\n\nIn each table, the first part of every column name is a prefix related to the table name.\n\nExample:\n\nusers table → columns like u_id, u_name, u_email\n\nWhile analyzing stored procedures or generating SQL queries, use this prefix to:\n\nCorrectly identify the source table of a column\n\nAvoid ambiguous column references\n\nApply proper joins and aliases consistently",
+        "5. column names should change to User Readable format",
+        "6. For SalesOrderDetails:\n- sd_s_ram_size and sd_s_harddisk_size store actual values (NO MasterData join)\n- sd_s_harddisk and sd_sales_category store MasterData.md_id\n- VAT logic depends on sd_is_vat_inclusive\n- Treat NULL Y/N columns as 'N'",
+        "7. SalesReturns is a serial-level reversal table.\nEach row negates a corresponding SalesOrderDetails entry.\nUse sr_posted_yn to include only finalized returns.\nJoin with SalesOrders using sr_so_id.\nJoin with SalesOrderDetails using sr_serial_no when needed.\nTreat NULL Y/N columns as 'N'.",
+        "8. CountryCodes stores telephone dialing codes, not ISO country codes.\nDo NOT use this table for currency, tax, or geographic logic.\nUse cc_code only for phone number handling.",
+        "9. Make is a master table.\nUse only active makes unless explicitly requested.\nDo not infer model or processor from make alone.\nAlways join Make with Model for model-level analysis.",
+        "10. Models is a master table.\nEach model must be linked to exactly one make.\nUse only active models unless explicitly requested.\nDo not assume processor or configuration from model alone.\nJoin with Make for brand-level analysis.",
+        "11. Status interpretation must always use both s_id and s_type.\nDo NOT compare or reuse status values across different s_type values.\nStatus transitions must follow predefined lifecycle rules.",
+        "12. MovementHistory is an append-only audit table.\nEach entry represents a status change event.\nThe latest mh_cre_date per serial number represents current status.\nAlways resolve mh_status using status table with s_type = 'SerialNumber'.",
+        "13. SerialNumbers is the single source of truth for physical inventory.\nFinancial, production, invoice, and integration states must not be inferred.\nAlways resolve status using explicit fields or MovementHistory.\nMasterData joins are allowed only where explicitly stated. and its a detail table of purchase orders ",
+        "14. NoonReturnReplacements does NOT create new revenue.\nReplacement serials must not be double-counted as new sales.\nOriginal and replacement serials must be tracked separately.\nReplacement lifecycle must align with NoonCreditNotes and SalesReturns.",
+        "15. Each record represents a raw Noon settlement line.\nTotals must be calculated by grouping on statement number.\nFees and adjustments must reduce net settlement.\nDo NOT treat this table as ERP-generated data.\nThis table overrides provisional ERP calculations after reconciliation.",
+        "16. - NoonSales is a marketplace import table.\n- Not directly linked to ERP SalesOrders.\n- Serial-level linkage is maintained via SerialNumbers.\n- Used as a base for Noon reconciliation, credit notes, and settlement.",
+        "17. - This is a forecasting / simulation table.\n- Values are not transactional and do not affect live sales.\n- Hardware fields are stored as values, not MasterData references.\n- Used for internal decision-making and pricing strategy.",
+        "18. - This is a pure audit/history table (append-only).\n- No updates should be performed on existing records.\n- Status values are controlled via the status master table.\n- One serial number can have multiple status history entries.",
+        "19. table column should be available in schema ",
+        "20. \uD83D\uDD39 AI RULE — PROFITABILITY (SHORT)\n\nUse this rule ONLY if the question asks about:\nprofit, margin, cost, total cost, purchase vs sales price, VAT, commission, fees, profitability by serial/model/date.\n\nAllowed Tables\n\nNoonSales, NoonCreditNotes, SalesOrders, SalesOrderDetails,\nSerialNumbers, Models, Customers, MasterData, PartCost, SkuDetails\n\nSales Types\n\nNoon Sale\n\nNoon Credit Note\n\nOther Sales (customer type)\n\nFixed Values\n\nVAT: 5%\n\nCommission (Noon): 11%\n\nFBN Fee: 14.5\n\nOther Fee: 5\n\nDefault HDD: SSD\n\nDefault RAM: DDR4-PC4\n\nTotal Cost (MANDATORY)\nPurchase Price (incl. VAT)\n+ Adapter Cost (numeric SerialNo only)\n+ Hard Disk Change Cost\n+ RAM Change Cost\n+ VAT Payable\n+ Commission (Noon only)\n+ FBN Fee (Noon only)\n+ Other Fee (Noon only)\n\nProfit\nProfit = Sales Price − Total Cost\nProfit % = (Profit / Sales Price) * 100\n\nCredit Notes\n\nReverse all amounts (× -1)\n\nFilters\n\nSales Price ≠ 0\n\nSerial filter → only if provided\n\nExclude returned sales\n\nRules\n\nUse existing schema only\n\nNo guessed data\n\nIf not a profitability query → return empty SQL\n\nIf needed, this can be compressed further into a 10–12 line system rule or converted into JSON rules for runtime use.",
+        "21. If the user asks for profitability and the request refers to consolidated profitability (overall profit, summary profit, total profitability, company-wide profit, etc.), then:\n\nExecute the stored procedure dbo.getConsolidatedProfitabilityNew\n\nPass the date range provided by the user to @rp_date_range\n\nAlways set @rp_user = 1\n\nSQL to execute:\n\nEXEC dbo.getConsolidatedProfitabilityNew\n    @rp_date_range = '<USER_DATE_RANGE>',\n    @rp_user = 1;\n\n\nIf the request is not consolidated, do not use this procedure."
+      ],
+      "schema": [
+        {
+          "TableName": "AiRules",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "ar_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ar_details",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ar_active_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ar_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ar_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "Chats",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "ct_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_session_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_question",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_response",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_prompt",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_sql",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_cre_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_saved_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ct_reported_yn",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "CountryCodes",
+          "TableRemarks": "Stores country dialing (telephone) codes.\nEach record represents one country with its international calling code.\nUsed for phone numbers, contact details, and country identification.",
+          "Columns": [
+            {
+              "ColumnName": "cc_id",
+              "ColumnRemarks": "Primary key of CountryCodes. Uniquely identifies each country dialing record."
+            },
+            {
+              "ColumnName": "cc_name",
+              "ColumnRemarks": "Country name. Used for display and country selection. Example: United Arab Emirates."
+            },
+            {
+              "ColumnName": "cc_code",
+              "ColumnRemarks": "International telephone dialing code. Includes country calling prefix (e.g., +971, +91). Used for phone number formatting and validation."
+            },
+            {
+              "ColumnName": "cc_cre_by",
+              "ColumnRemarks": "User ID who created the country code record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "cc_cre_date",
+              "ColumnRemarks": "Date and time when the country code record was created. Used for audit and maintenance history."
+            }
+          ]
+        },
+        {
+          "TableName": "Customers",
+          "TableRemarks": "Stores customer master records used in sales, invoicing, returns, and reporting.\nEach record represents a unique customer in the ERP system.\nSupports both direct sales and marketplace-linked customers.\n\n- Phone and WhatsApp numbers are stored separately with country codes.\n- Customer type is flexible and not strictly normalized.\n- CountryCodes is the only master reference used here.\n- Supports both ERP-managed and marketplace-origin customers.\n",
+          "Columns": [
+            {
+              "ColumnName": "c_id",
+              "ColumnRemarks": "Primary key of Customers. Uniquely identifies each customer record."
+            },
+            {
+              "ColumnName": "c_name",
+              "ColumnRemarks": "Customer full name. Displayed in sales orders, invoices, and reports."
+            },
+            {
+              "ColumnName": "c_active_yn",
+              "ColumnRemarks": "Indicates whether the customer is active. Y = Active, N = Inactive. Inactive customers cannot be used in new transactions.\\"
+            },
+            {
+              "ColumnName": "c_cre_by",
+              "ColumnRemarks": "User who created the customer record. Used for audit and tracking."
+            },
+            {
+              "ColumnName": "c_cre_date",
+              "ColumnRemarks": "Date and time when the customer record was created."
+            },
+            {
+              "ColumnName": "c_type",
+              "ColumnRemarks": "Customer Type: Type/category of the customer. Stores MasterData.md_id where md_type = 'CustomerType'."
+            },
+            {
+              "ColumnName": "c_country_code",
+              "ColumnRemarks": "Country dialing code for the customer's primary phone number. References CountryCodes.cc_code (e.g., +971, +91)."
+            },
+            {
+              "ColumnName": "c_phone",
+              "ColumnRemarks": "Customer primary phone number without country code. Used for contact and verification."
+            },
+            {
+              "ColumnName": "c_w_country_code",
+              "ColumnRemarks": "Country dialing code for the customer's WhatsApp number. References CountryCodes.cc_code."
+            },
+            {
+              "ColumnName": "c_whatsapp",
+              "ColumnRemarks": "Customer WhatsApp phone number without country code. Used for messaging and notifications."
+            },
+            {
+              "ColumnName": "c_email",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "ErrorLogs",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "el_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "el_controller",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "el_page",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "el_action",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "el_error",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "el_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "el_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "final",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "serial_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "model",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "without_vat",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "cost",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "GpForcastPrices",
+          "TableRemarks": "Stores gross profit (GP) forecast pricing data for SKUs.\nUsed to simulate pricing based on hardware configuration changes\n(e.g., RAM / Hard Disk upgrades or downgrades).\nSupports pricing decisions, margin analysis, and forecasting.",
+          "Columns": [
+            {
+              "ColumnName": "gp_id",
+              "ColumnRemarks": "Primary key of GpForcastPrices. Uniquely identifies each GP forecast record."
+            },
+            {
+              "ColumnName": "gp_sku",
+              "ColumnRemarks": "SKU code for which GP price is forecasted. Typically corresponds to SkuDetails.sk_sku."
+            },
+            {
+              "ColumnName": "gp_make",
+              "ColumnRemarks": "Make / brand of the laptop. Stored as text for forecasting and reporting."
+            },
+            {
+              "ColumnName": "gp_model",
+              "ColumnRemarks": "Model name of the laptop. Used to differentiate pricing by model."
+            },
+            {
+              "ColumnName": "gp_processor",
+              "ColumnRemarks": "Processor configuration used for GP calculation. Example: CORE i5 - 8th, M1."
+            },
+            {
+              "ColumnName": "gp_new_hardisk",
+              "ColumnRemarks": "New hard disk type used in forecast. Example: SSD, HDD."
+            },
+            {
+              "ColumnName": "gp_new_hardisk_size",
+              "ColumnRemarks": "New hard disk storage size used in forecast. Example: 256, 512, 1024."
+            },
+            {
+              "ColumnName": "gp_new_ram_type",
+              "ColumnRemarks": "New RAM type used in forecast. Example: DDR3, DDR4."
+            },
+            {
+              "ColumnName": "gp_new_ram_size",
+              "ColumnRemarks": "New RAM size used in forecast. Example: 8, 16, 32."
+            },
+            {
+              "ColumnName": "gp_old_hardisk",
+              "ColumnRemarks": "Original hard disk type before change. Used for comparison with upgraded configuration."
+            },
+            {
+              "ColumnName": "gp_old_hardisk_size",
+              "ColumnRemarks": "Original hard disk size before change. Used to calculate incremental cost and GP."
+            },
+            {
+              "ColumnName": "gp_old_ram_type",
+              "ColumnRemarks": "Original RAM type before change."
+            },
+            {
+              "ColumnName": "gp_old_ram_size",
+              "ColumnRemarks": "Original RAM size before change."
+            },
+            {
+              "ColumnName": "gp_price",
+              "ColumnRemarks": "Forecasted selling price based on configuration and GP logic. Used for planning and pricing analysis."
+            },
+            {
+              "ColumnName": "gp_user",
+              "ColumnRemarks": "User who created the GP forecast entry. Used for audit and ownership tracking."
+            },
+            {
+              "ColumnName": "gp_cre_date",
+              "ColumnRemarks": "Creation timestamp of the GP forecast record. Indicates when the forecast price was generated."
+            }
+          ]
+        },
+        {
+          "TableName": "initalupload",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "serialNo",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "MakeName",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ModelName",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ProcessorType",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ProcessorGen",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "RAM",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "Storage",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "Status",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "Purchase",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "Location",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "Estimation",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "MakeId",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ModelId",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ProcessorId",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "new_ram",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "new_hdd",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "shopid",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "LocationStocks",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "ls_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ls_shop",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ls_serial_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ls_active_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ls_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ls_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "Make",
+          "TableRemarks": "Stores laptop manufacturer (brand) master information.\nEach record represents one laptop make.\nUsed for product classification, sales analysis, inventory tracking, and forecasting.\nReferenced by models, serial numbers, sales, and purchase forecast tables.",
+          "Columns": [
+            {
+              "ColumnName": "ma_id",
+              "ColumnRemarks": "Primary key of Make. Uniquely identifies each laptop manufacturer."
+            },
+            {
+              "ColumnName": "ma_name",
+              "ColumnRemarks": "Manufacturer or brand name. Example: Apple, Dell, HP, Lenovo. Used for display, filtering, and reporting."
+            },
+            {
+              "ColumnName": "ma_active_yn",
+              "ColumnRemarks": "Indicates whether the make is active. Y = Active, N = Inactive. If NULL, treat as 'Y'."
+            },
+            {
+              "ColumnName": "ma_cre_by",
+              "ColumnRemarks": "User ID who created the make record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "ma_cre_date",
+              "ColumnRemarks": "Date and time when the make record was created. Used for audit and maintenance history."
+            }
+          ]
+        },
+        {
+          "TableName": "MasterData",
+          "TableRemarks": "Stores configurable master reference values used across the ERP.\nEach record represents one selectable value grouped by master type.\nUsed for dropdowns, classification, validation, and reporting.\nReferenced by transactional tables through master name or ID.",
+          "Columns": [
+            {
+              "ColumnName": "md_id",
+              "ColumnRemarks": "Primary key of the master record. Uniquely identifies each master data value."
+            },
+            {
+              "ColumnName": "md_name",
+              "ColumnRemarks": "Display name of the master value. Used in UI dropdowns and business filtering."
+            },
+            {
+              "ColumnName": "md_active_yn",
+              "ColumnRemarks": "Indicates whether the master value is active. Y = Active, N = Inactive. If NULL, treat as 'Y'."
+            },
+            {
+              "ColumnName": "md_type",
+              "ColumnRemarks": "Master category of the value. Defines where and how this master value is used in the ERP. Examples: Category, RamSize, Processor, SalesCategory."
+            },
+            {
+              "ColumnName": "md_cre_by",
+              "ColumnRemarks": "User ID who created the master record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "md_cre_date",
+              "ColumnRemarks": "Date and time when the master record was created. Used for audit and maintenance history."
+            }
+          ]
+        },
+        {
+          "TableName": "Menus",
+          "TableRemarks": "Stores application menu definitions used to build the ERP navigation structure, including menu hierarchy, links, icons, and menu type.",
+          "Columns": [
+            {
+              "ColumnName": "m_id",
+              "ColumnRemarks": "Unique identifier for each menu item. Primary key of the Menus table."
+            },
+            {
+              "ColumnName": "m_name",
+              "ColumnRemarks": "Display name of the menu shown in the ERP UI."
+            },
+            {
+              "ColumnName": "m_link",
+              "ColumnRemarks": "Navigation URL or route associated with the menu item."
+            },
+            {
+              "ColumnName": "m_fa_icon",
+              "ColumnRemarks": "Font Awesome icon class used to display the menu icon."
+            },
+            {
+              "ColumnName": "m_parrent",
+              "ColumnRemarks": "Parent menu ID for hierarchical menus. References Menus.m_id. NULL or 0 indicates a top-level menu."
+            },
+            {
+              "ColumnName": "m_type",
+              "ColumnRemarks": "{   \"column\": \"m_type\",   \"description\": \"Defines the behavior of the menu item.\",   \"allowed_values\": {     \"Menu\": \"Non-clickable parent menu used for grouping.\",     \"MenuItem\": \"Clickable menu that navigates to a page.\",     \"Option\": \"Action or permission-level item under a menu.\"   } }"
+            },
+            {
+              "ColumnName": "m_cre_by",
+              "ColumnRemarks": "User ID of the user who created this menu entry."
+            },
+            {
+              "ColumnName": "m_cre_date",
+              "ColumnRemarks": "Date and time when the menu record was created."
+            }
+          ]
+        },
+        {
+          "TableName": "Models",
+          "TableRemarks": "Stores laptop model master information.\nEach record represents one model under a specific laptop make.\nUsed for product identification, sales analysis, inventory tracking, and forecasting.\nLinked with Make, SerialNumbers, SalesOrderDetails, and forecast tables.",
+          "Columns": [
+            {
+              "ColumnName": "mo_id",
+              "ColumnRemarks": "Primary key of Models. Uniquely identifies each laptop model."
+            },
+            {
+              "ColumnName": "mo_name",
+              "ColumnRemarks": "Model name or code. Example: MacBook Air A2337, Aspire A515-55. Used for display, filtering, and reporting."
+            },
+            {
+              "ColumnName": "mo_make",
+              "ColumnRemarks": "Laptop make associated with the model. Stores Make.ma_id. Join with Make to get manufacturer name."
+            },
+            {
+              "ColumnName": "mo_active_yn",
+              "ColumnRemarks": "Indicates whether the model is active. Y = Active, N = Inactive. If NULL, treat as 'Y'."
+            },
+            {
+              "ColumnName": "mo_cre_by",
+              "ColumnRemarks": "User ID who created the model record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "mo_cre_date",
+              "ColumnRemarks": "Date and time when the model record was created. Used for audit and maintenance history."
+            }
+          ]
+        },
+        {
+          "TableName": "ModelWisePurchaseForecastUserInput",
+          "TableRemarks": "Stores user-defined parameters for model-wise purchase forecasting.\nEach record represents forecast settings for a specific category, make, model, and processor.\nUsed to control forecast duration and in-transit stock assumptions.\nActs as an override for system-calculated defaults.",
+          "Columns": [
+            {
+              "ColumnName": "mpi_id",
+              "ColumnRemarks": "Primary key of ModelWisePurchaseForecastUserInput. Uniquely identifies each forecast configuration."
+            },
+            {
+              "ColumnName": "mpi_category",
+              "ColumnRemarks": "Product category used for forecasting. Stores MasterData.md_id where md_type = 'Category'."
+            },
+            {
+              "ColumnName": "mpi_make",
+              "ColumnRemarks": "Laptop make used for forecasting. Stores Make.ma_id."
+            },
+            {
+              "ColumnName": "mpi_model_name",
+              "ColumnRemarks": "Laptop model used for forecasting. Stores Models.mo_id."
+            },
+            {
+              "ColumnName": "mpi_processor",
+              "ColumnRemarks": "Processor used for forecasting. Stores MasterData.md_id where md_type = 'Processor'."
+            },
+            {
+              "ColumnName": "mpi_no_of_days",
+              "ColumnRemarks": "Forecast duration in number of days. Used to calculate required purchase quantity from sales average."
+            },
+            {
+              "ColumnName": "mpi_intransit",
+              "ColumnRemarks": "Quantity of stock currently in transit. Manually maintained to adjust available stock calculation."
+            },
+            {
+              "ColumnName": "mpi_upd_by",
+              "ColumnRemarks": "User ID who last updated the forecast configuration. References Users.u_id."
+            },
+            {
+              "ColumnName": "mpi_upd_date",
+              "ColumnRemarks": "Date and time when the forecast configuration was last updated. Used to track forecast freshness."
+            }
+          ]
+        },
+        {
+          "TableName": "MovementHistory",
+          "TableRemarks": "Stores movement and status change history of serial numbers.\nEach record represents one status transition for a specific serial number.\nUsed for audit trail, lifecycle tracking, and stock movement analysis.\nActs as the historical log for SerialNumber status changes.",
+          "Columns": [
+            {
+              "ColumnName": "mh_id",
+              "ColumnRemarks": "Primary key of MovementHistory. Uniquely identifies each movement history record."
+            },
+            {
+              "ColumnName": "mh_serial_no",
+              "ColumnRemarks": "Serial number of the laptop whose status has changed. References SerialNumbers.sn_serial_no. Used to track lifecycle of a physical laptop."
+            },
+            {
+              "ColumnName": "mh_status",
+              "ColumnRemarks": "Status ID after the movement or transition. References status.s_id where s_type = 'SerialNumber'. Represents the new state of the serial number."
+            },
+            {
+              "ColumnName": "mh_cre_by",
+              "ColumnRemarks": "User ID who performed the status change. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "mh_cre_date",
+              "ColumnRemarks": "Date and time when the status change occurred. Used to order and analyze lifecycle events."
+            }
+          ]
+        },
+        {
+          "TableName": "NoonCreditNotes",
+          "TableRemarks": "Stores credit notes received from Noon marketplace.\nEach record represents a credit note issued for returned or adjusted sales.\nUsed for financial reconciliation, revenue adjustment, and marketplace settlement tracking.\nLinked with SalesReturns, SerialNumbers, and accounting reports.",
+          "Columns": [
+            {
+              "ColumnName": "nc_id",
+              "ColumnRemarks": "Primary key of NoonCreditNotes. Uniquely identifies each credit note record."
+            },
+            {
+              "ColumnName": "nc_credit_note_nr",
+              "ColumnRemarks": "Credit note number issued by Noon. Unique identifier of the credit document. Used for financial reconciliation."
+            },
+            {
+              "ColumnName": "nc_line_nr",
+              "ColumnRemarks": "Line number within the credit note. Used when a single credit note contains multiple items."
+            },
+            {
+              "ColumnName": "nc_credit_note_date",
+              "ColumnRemarks": "Date when the credit note was issued by Noon. Used for accounting period and VAT reporting."
+            },
+            {
+              "ColumnName": "nc_country_code",
+              "ColumnRemarks": "Country code related to the transaction. References CountryCodes.cc_code. Used for tax and regulatory reporting."
+            },
+            {
+              "ColumnName": "nc_trn",
+              "ColumnRemarks": "Tax Registration Number (TRN) used by Noon. Used for VAT compliance and audit."
+            },
+            {
+              "ColumnName": "nc_invoice_nr",
+              "ColumnRemarks": "Original invoice number against which the credit note is issued. Used to link credit with the original Noon invoice."
+            },
+            {
+              "ColumnName": "nc_invoice_line_nr",
+              "ColumnRemarks": "Invoice line number related to the credited item. Used for line-level reconciliation."
+            },
+            {
+              "ColumnName": "nc_invoice_date",
+              "ColumnRemarks": "Date of the original Noon invoice. Used for invoice-to-credit matching."
+            },
+            {
+              "ColumnName": "nc_invoice_type",
+              "ColumnRemarks": "Type of invoice issued by Noon. Example: Tax Invoice. Used for VAT classification."
+            },
+            {
+              "ColumnName": "nc_document_type",
+              "ColumnRemarks": "Type of document issued by Noon. Example: Credit Note. Used for document classification."
+            },
+            {
+              "ColumnName": "nc_source_document",
+              "ColumnRemarks": "Source document reference provided by Noon. Used to trace the origin of the credit note."
+            },
+            {
+              "ColumnName": "nc_vat_rate",
+              "ColumnRemarks": "VAT rate applied on the credited amount. Used for tax calculation and validation."
+            },
+            {
+              "ColumnName": "nc_vat_supply",
+              "ColumnRemarks": "VAT supply category for the transaction. Used for tax reporting and compliance."
+            },
+            {
+              "ColumnName": "nc_vat_amount",
+              "ColumnRemarks": "VAT amount included in the credit note. Used for VAT reversal and reconciliation."
+            },
+            {
+              "ColumnName": "nc_price_inc_tax",
+              "ColumnRemarks": "Total credited amount including VAT. Represents the gross credit value."
+            },
+            {
+              "ColumnName": "nc_market_place",
+              "ColumnRemarks": "Marketplace source of the credit note. Example: Noon. Used for marketplace-wise reporting."
+            },
+            {
+              "ColumnName": "nc_item_nr",
+              "ColumnRemarks": "Item number as per Noon order or invoice. Used to identify the credited product line."
+            },
+            {
+              "ColumnName": "nc_sku",
+              "ColumnRemarks": "Product SKU as provided by Noon. Used to identify the credited product on the marketplace."
+            },
+            {
+              "ColumnName": "nc_partner_sku",
+              "ColumnRemarks": "Partner or seller SKU mapped to Noon SKU. Used to link marketplace item with internal product reference."
+            },
+            {
+              "ColumnName": "nc_description",
+              "ColumnRemarks": "Product description as mentioned in the Noon credit note. Used for reference and audit purposes."
+            },
+            {
+              "ColumnName": "nc_customer_trn",
+              "ColumnRemarks": "Customer Tax Registration Number (TRN) provided by Noon. Used for VAT and tax compliance reporting."
+            },
+            {
+              "ColumnName": "nc_customer_id",
+              "ColumnRemarks": "Customer identifier as provided by Noon marketplace. Used for customer-level reconciliation."
+            },
+            {
+              "ColumnName": "nc_customer_name",
+              "ColumnRemarks": "Customer name as per Noon records. Used for display and audit reference."
+            },
+            {
+              "ColumnName": "nc_customer_city",
+              "ColumnRemarks": "Customer city as recorded by Noon. Used for geographic and tax analysis."
+            },
+            {
+              "ColumnName": "nc_customer_country",
+              "ColumnRemarks": "Customer country as recorded by Noon. Used for regulatory and VAT reporting."
+            },
+            {
+              "ColumnName": "nc_serial_no",
+              "ColumnRemarks": "Serial number of the laptop associated with the credit note. References SerialNumbers.sn_serial_no. Used for serial-level financial reconciliation."
+            },
+            {
+              "ColumnName": "nc_cre_by",
+              "ColumnRemarks": "User ID who recorded the credit note in ERP. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "nc_cre_date",
+              "ColumnRemarks": "Date and time when the credit note record was created in ERP. Used for audit and reporting."
+            },
+            {
+              "ColumnName": "nc_received_yn",
+              "ColumnRemarks": "Indicates whether the credit note has been received and verified. Y = Received, N = Not received. If NULL, treat as 'N'."
+            },
+            {
+              "ColumnName": "nc_received_by",
+              "ColumnRemarks": "User ID who marked the credit note as received. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "nc_received_date",
+              "ColumnRemarks": "Date and time when the credit note was received. Used for settlement and reconciliation timing."
+            },
+            {
+              "ColumnName": "nc_doc_type",
+              "ColumnRemarks": "Document type provided by Noon. Example: Credit Note. Used for document classification."
+            }
+          ]
+        },
+        {
+          "TableName": "NoonInvoices",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "ni_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_partner_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_statement_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_statement_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_market_place",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_order_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_item_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_brand_en",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_product_title_en",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_brand_ar",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_product_title_ar",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_awb_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_reference_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_sku",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_partner_sku",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_fee_name",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_item_status",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_ordered_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_shipped_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_delivered_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_return_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_currency_code",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_net_proceeds",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_refferal_fee",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_fbn_outbound_fee",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_noon_markup",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_noon_promo",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_shipping_fee",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_other_amounts",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_total_payment",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ni_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "NoonPromotions",
+          "TableRemarks": "Stores monthly promotion or marketing expense data for Noon platform.\nEach record represents one promotion amount for a specific year and month.\nUsed for sales adjustment, expense tracking, and profitability analysis.\nApplied at month level, not per order or per item.",
+          "Columns": [
+            {
+              "ColumnName": "np_id",
+              "ColumnRemarks": "Primary key of NoonPromotions. Uniquely identifies each promotion record."
+            },
+            {
+              "ColumnName": "np_year_month",
+              "ColumnRemarks": "Year and month for which the promotion amount applies. Stored in YYYY-MM format (e.g., 2025-06). Used for month-wise promotion and expense analysis."
+            },
+            {
+              "ColumnName": "np_amount",
+              "ColumnRemarks": "Promotion or marketing expense amount for the given month. Represents total promotional cost for Noon platform. Used to adjust revenue and calculate net profit."
+            },
+            {
+              "ColumnName": "np_cre_by",
+              "ColumnRemarks": "User ID who created the promotion record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "np_cre_date",
+              "ColumnRemarks": "Date and time when the promotion record was created. Used for audit and history tracking."
+            }
+          ]
+        },
+        {
+          "TableName": "NoonReconciliations",
+          "TableRemarks": "Stores reconciliation data between ERP records and Noon marketplace settlements.\nEach record represents a reconciled transaction line for a specific period.\nUsed to compare sales, returns, credit notes, VAT, fees, and payouts from Noon.\nActs as the final settlement and verification layer for marketplace accounting.",
+          "Columns": [
+            {
+              "ColumnName": "nr_id",
+              "ColumnRemarks": "Primary key of NoonReconciliations. Uniquely identifies each reconciliation record."
+            },
+            {
+              "ColumnName": "nr_partner_id",
+              "ColumnRemarks": "Partner or seller identifier assigned by Noon. Used to identify the selling account in reconciliation reports."
+            },
+            {
+              "ColumnName": "nr_statement_date",
+              "ColumnRemarks": "Statement date of the Noon payout. Used to determine financial posting period."
+            },
+            {
+              "ColumnName": "nr_statement_nr",
+              "ColumnRemarks": "Statement or settlement number provided by Noon. Used to group reconciliation records by payout statement."
+            },
+            {
+              "ColumnName": "nr_market_place",
+              "ColumnRemarks": "Marketplace source of the transaction. Example: Noon. Used for marketplace-level reconciliation."
+            },
+            {
+              "ColumnName": "nr_order_nr",
+              "ColumnRemarks": "Noon marketplace order number. Used to reconcile ERP sales and returns with Noon orders."
+            },
+            {
+              "ColumnName": "nr_item_nr",
+              "ColumnRemarks": "Item number within the Noon order. Used for line-level reconciliation."
+            },
+            {
+              "ColumnName": "nr_brand_en",
+              "ColumnRemarks": "Product brand name in English as provided by Noon. Used for reporting and audit reference."
+            },
+            {
+              "ColumnName": "nr_product_title_en",
+              "ColumnRemarks": "Product title in English as provided by Noon. Used for product identification in reconciliation."
+            },
+            {
+              "ColumnName": "nr_brand_ar",
+              "ColumnRemarks": "Product brand name in Arabic as provided by Noon. Used for bilingual reporting."
+            },
+            {
+              "ColumnName": "nr_product_title_ar",
+              "ColumnRemarks": "Product title in Arabic as provided by Noon. Used for bilingual audit reference."
+            },
+            {
+              "ColumnName": "nr_awb_nr",
+              "ColumnRemarks": "Air Waybill (shipment tracking) number. Used to track logistics and delivery reconciliation."
+            },
+            {
+              "ColumnName": "nr_reference_nr",
+              "ColumnRemarks": "Reference number provided by Noon. Used to link transaction to related documents such as returns or credits."
+            },
+            {
+              "ColumnName": "nr_sku",
+              "ColumnRemarks": "Product SKU as provided by Noon. Used to identify the marketplace item."
+            },
+            {
+              "ColumnName": "nr_partner_sku",
+              "ColumnRemarks": "Seller or partner SKU mapped to Noon SKU. Used to link marketplace item with internal product reference."
+            },
+            {
+              "ColumnName": "nr_fee_name",
+              "ColumnRemarks": "Type of fee charged by Noon. Example: Commission, Shipping Fee, Payment Fee."
+            },
+            {
+              "ColumnName": "nr_item_status",
+              "ColumnRemarks": "Transaction or item status as provided by Noon. Examples: Delivered, Returned, Cancelled. Used to determine revenue recognition and reconciliation logic."
+            },
+            {
+              "ColumnName": "nr_ordered_date",
+              "ColumnRemarks": "Date when the order was placed on Noon. Used for order lifecycle tracking and timeline analysis."
+            },
+            {
+              "ColumnName": "nr_shipped_date",
+              "ColumnRemarks": "Date when the item was shipped by Noon logistics. Used to track fulfillment progress."
+            },
+            {
+              "ColumnName": "nr_delivered_date",
+              "ColumnRemarks": "Date when the item was successfully delivered to the customer. Used for revenue recognition and delivery confirmation."
+            },
+            {
+              "ColumnName": "nr_return_date",
+              "ColumnRemarks": "Date when the item was returned by the customer. Used to trigger return, refund, or credit reconciliation."
+            },
+            {
+              "ColumnName": "nr_currency_code",
+              "ColumnRemarks": "Currency code used in the Noon transaction. Example: AED, SAR. Used for multi-currency reconciliation."
+            },
+            {
+              "ColumnName": "nr_net_proceeds",
+              "ColumnRemarks": "Net amount payable by Noon for this transaction line. Calculated after deducting fees, commissions, VAT, and adjustments. Primary value used for payout reconciliation."
+            },
+            {
+              "ColumnName": "nr_refferal_fee",
+              "ColumnRemarks": "Referral or commission fee charged by Noon. Deducted from gross sales amount."
+            },
+            {
+              "ColumnName": "nr_fbn_outbound_fee",
+              "ColumnRemarks": "Fulfilled by Noon (FBN) outbound logistics fee. Charged for warehouse handling and shipment."
+            },
+            {
+              "ColumnName": "nr_noon_markup",
+              "ColumnRemarks": "Markup amount applied by Noon. Represents pricing or service markup charged by the marketplace."
+            },
+            {
+              "ColumnName": "nr_noon_promo",
+              "ColumnRemarks": "Promotion or discount amount funded by Noon. Used to adjust net proceeds during reconciliation."
+            },
+            {
+              "ColumnName": "nr_shipping_fee",
+              "ColumnRemarks": "Shipping fee charged or adjusted by Noon. May represent customer-paid or Noon-adjusted shipping costs."
+            },
+            {
+              "ColumnName": "nr_other_amounts",
+              "ColumnRemarks": "Other financial adjustments applied by Noon. Includes miscellaneous charges, rounding differences, or corrections."
+            },
+            {
+              "ColumnName": "nr_total_payment",
+              "ColumnRemarks": "Final total amount paid or settled by Noon for this transaction line. Represents the final reconciled payout value."
+            },
+            {
+              "ColumnName": "nr_cre_by",
+              "ColumnRemarks": "User or system that created the reconciliation record. Used for audit tracking."
+            },
+            {
+              "ColumnName": "nr_cre_date",
+              "ColumnRemarks": "Date and time when the reconciliation record was created. Used for audit and historical tracking."
+            }
+          ]
+        },
+        {
+          "TableName": "NoonReturnReplacements",
+          "TableRemarks": "Stores replacement details for returned items on Noon marketplace.\nEach record represents a replacement action linked to a returned serial number.\nUsed to track replacement serials, price adjustments, and audit replacement flow.\nLinked with NoonCreditNotes, SalesReturns, and SerialNumbers.\n",
+          "Columns": [
+            {
+              "ColumnName": "nr_id",
+              "ColumnRemarks": "Primary key of NoonReturnReplacements. Uniquely identifies each replacement record."
+            },
+            {
+              "ColumnName": "nr_serial_no",
+              "ColumnRemarks": "Original serial number that was returned. References SerialNumbers.sn_serial_no. Represents the item being replaced."
+            },
+            {
+              "ColumnName": "nr_is_replacement",
+              "ColumnRemarks": "Indicates whether a replacement was issued. Y = Replacement issued, N = No replacement. If NULL, treat as 'N'."
+            },
+            {
+              "ColumnName": "nr_replacement_serial",
+              "ColumnRemarks": "Serial number of the replacement laptop sent to customer. References SerialNumbers.sn_serial_no. Used to track replacement unit lifecycle."
+            },
+            {
+              "ColumnName": "nr_replacement_price",
+              "ColumnRemarks": "Price value associated with the replacement. Used when replacement involves price difference or valuation. Does NOT represent new sale revenue."
+            },
+            {
+              "ColumnName": "nr_cre_by",
+              "ColumnRemarks": "User ID who recorded the replacement entry. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "nr_cre_date",
+              "ColumnRemarks": "Date and time when the replacement record was created. Used for audit and marketplace reconciliation."
+            }
+          ]
+        },
+        {
+          "TableName": "NoonSales",
+          "TableRemarks": "Stores sales invoice data received from the Noon marketplace.\nEach record represents a single invoice line item from Noon.\nUsed for sales tracking, VAT reporting, reconciliation, and marketplace settlement. NoonSales does not contain order number ",
+          "Columns": [
+            {
+              "ColumnName": "ns_id",
+              "ColumnRemarks": "Primary key of NoonSales. Uniquely identifies each Noon sales record."
+            },
+            {
+              "ColumnName": "ns_invoice_nr",
+              "ColumnRemarks": "Invoice number generated by Noon marketplace. Used to group multiple line items under the same invoice."
+            },
+            {
+              "ColumnName": "ns_line_nr",
+              "ColumnRemarks": "Line number within the Noon invoice. Used to uniquely identify each item in an invoice."
+            },
+            {
+              "ColumnName": "ns_invoice_date",
+              "ColumnRemarks": "Invoice date as provided by Noon. Used for accounting period and VAT reporting."
+            },
+            {
+              "ColumnName": "ns_country_code",
+              "ColumnRemarks": "Country code related to the sale. References CountryCodes.cc_code (e.g., AE, SA). Used for tax and regional reporting."
+            },
+            {
+              "ColumnName": "ns_trn",
+              "ColumnRemarks": "Tax Registration Number (TRN) associated with the sale. Provided by Noon for VAT compliance."
+            },
+            {
+              "ColumnName": "ns_invoice_type",
+              "ColumnRemarks": "Type of invoice issued by Noon. Examples: Sale, Adjustment, Correction."
+            },
+            {
+              "ColumnName": "ns_document_type",
+              "ColumnRemarks": "Document classification from Noon. Used to differentiate invoice, credit, or adjustment documents."
+            },
+            {
+              "ColumnName": "ns_source_document",
+              "ColumnRemarks": "Source reference document from Noon. Used for traceability during reconciliation."
+            },
+            {
+              "ColumnName": "ns_vat_rate",
+              "ColumnRemarks": "VAT percentage applied to the invoice line. Used for VAT calculation and validation."
+            },
+            {
+              "ColumnName": "ns_vat_supply",
+              "ColumnRemarks": "VAT supply type as defined by Noon. Used for tax classification and compliance."
+            },
+            {
+              "ColumnName": "ns_vat_amount",
+              "ColumnRemarks": "VAT amount calculated for the invoice line. Derived from taxable amount and VAT rate."
+            },
+            {
+              "ColumnName": "ns_price_inc_tax",
+              "ColumnRemarks": "Total price including VAT for the invoice line. Used for revenue and reconciliation reporting."
+            },
+            {
+              "ColumnName": "ns_market_place",
+              "ColumnRemarks": "Marketplace source of the sale. Example: NOON. Used to support multi-marketplace integrations."
+            },
+            {
+              "ColumnName": "ns_item_nr",
+              "ColumnRemarks": "Marketplace source of the sale. Example: NOON. Used to support multi-marketplace integrations."
+            },
+            {
+              "ColumnName": "ns_sku",
+              "ColumnRemarks": "SKU code provided by Noon. Used to identify the product sold on the marketplace."
+            },
+            {
+              "ColumnName": "ns_partner_sku",
+              "ColumnRemarks": "Seller / partner SKU mapped in Noon. Typically corresponds to internal SKU or seller-defined product code."
+            },
+            {
+              "ColumnName": "ns_description",
+              "ColumnRemarks": "Product description as provided by Noon. Used for reporting and reconciliation reference."
+            },
+            {
+              "ColumnName": "ns_customer_trn",
+              "ColumnRemarks": "Customer Tax Registration Number (if provided by Noon). Used for VAT and compliance purposes."
+            },
+            {
+              "ColumnName": "ns_customer_id",
+              "ColumnRemarks": "Customer identifier provided by Noon. Marketplace-specific customer reference."
+            },
+            {
+              "ColumnName": "ns_customer_name",
+              "ColumnRemarks": "Customer name from Noon invoice. Used for reporting and reconciliation only."
+            },
+            {
+              "ColumnName": "ns_customer_city",
+              "ColumnRemarks": "Customer city as provided by Noon. Used for regional analysis and reporting."
+            },
+            {
+              "ColumnName": "ns_customer_country",
+              "ColumnRemarks": "Customer country name or code from Noon. Used for cross-border sales and tax reporting."
+            },
+            {
+              "ColumnName": "ns_type",
+              "ColumnRemarks": "Transaction type from Noon. Examples: Sale, Return, Adjustment. Used to classify marketplace transactions."
+            },
+            {
+              "ColumnName": "ns_serial_no",
+              "ColumnRemarks": "Serial number of the laptop sold. References SerialNumbers.sn_serial_no. Used for serial-level sales and reconciliation."
+            },
+            {
+              "ColumnName": "ns_cre_by",
+              "ColumnRemarks": "User or system that inserted the record. Typically system-generated during import."
+            },
+            {
+              "ColumnName": "ns_cre_date",
+              "ColumnRemarks": "Record creation timestamp. Indicates when the Noon sales data was imported."
+            },
+            {
+              "ColumnName": "ns_cost",
+              "ColumnRemarks": " Internal cost value associated with the sold item. Used for profitability and margin analysis."
+            },
+            {
+              "ColumnName": "ns_cost_upd_yn",
+              "ColumnRemarks": "Indicates whether cost has been updated. Y = Cost updated, N = Not updated."
+            },
+            {
+              "ColumnName": "ns_cost_upd_by",
+              "ColumnRemarks": "User who updated the cost value. Used for audit tracking."
+            },
+            {
+              "ColumnName": "ns_cost_upd_date",
+              "ColumnRemarks": "Timestamp when cost was last updated. Used for audit and reconciliation purposes."
+            }
+          ]
+        },
+        {
+          "TableName": "PartCost",
+          "TableRemarks": "Stores cost information for laptop parts based on type and size.\nEach record represents the cost of a specific part configuration for a given period.\nUsed for cost calculation, margin analysis, and pricing decisions.\nSupports time-based cost validity using start and end dates.",
+          "Columns": [
+            {
+              "ColumnName": "pc_id",
+              "ColumnRemarks": "Primary key of PartCost. Uniquely identifies each part cost record."
+            },
+            {
+              "ColumnName": "pc_part",
+              "ColumnRemarks": "pc_part Reference to Parts.p_id. Identifies which part the cost belongs to (e.g., Hard Disk, RAM)."
+            },
+            {
+              "ColumnName": "pc_type",
+              "ColumnRemarks": "pc_type Reference to MasterData.md_id representing the part type. Examples:  HardDiskType ? HDD, SSD  RamType ? DDR4, DDR5 Used to store cost specific to a part type."
+            },
+            {
+              "ColumnName": "pc_size",
+              "ColumnRemarks": "Stores the part size (sub-size) value directly."
+            },
+            {
+              "ColumnName": "pc_cost",
+              "ColumnRemarks": "Cost amount of the part for the given configuration. Used for cost calculation and margin analysis."
+            },
+            {
+              "ColumnName": "pc_cre_by",
+              "ColumnRemarks": "User ID who created the part cost record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "pc_cre_date",
+              "ColumnRemarks": "Date and time when the part cost record was created. Used for audit and history tracking."
+            },
+            {
+              "ColumnName": "pc_start_date",
+              "ColumnRemarks": "Start date from which this cost is applicable. Used to determine valid cost during a given period."
+            },
+            {
+              "ColumnName": "pc_end_date",
+              "ColumnRemarks": "End date until which this cost is applicable. If NULL, cost is considered currently active."
+            }
+          ]
+        },
+        {
+          "TableName": "PartialDeliveries",
+          "TableRemarks": "Stores records of partially delivered items against a Purchase Order.\nUsed when a supplier delivers items in multiple batches for the same PO.\nEach record represents one serial number delivered in a partial delivery.\nSupports purchase tracking, GRN validation, and inventory reconciliation.",
+          "Columns": [
+            {
+              "ColumnName": "pd_id",
+              "ColumnRemarks": "Primary key of PartialDeliveries. Uniquely identifies each partial delivery record."
+            },
+            {
+              "ColumnName": "pd_po_id",
+              "ColumnRemarks": "Purchase Order reference ID. Links to PurchaseOrders.po_id. Indicates which purchase order the partial delivery belongs to."
+            },
+            {
+              "ColumnName": "pd_serial_no",
+              "ColumnRemarks": "Serial number of the item delivered in this partial delivery. Links to SerialNumbers.sn_serial_no. Used to track delivered units at serial level."
+            },
+            {
+              "ColumnName": "pd_cre_by",
+              "ColumnRemarks": "User who recorded the partial delivery. Used for audit and operational traceability."
+            },
+            {
+              "ColumnName": "pd_cre_date",
+              "ColumnRemarks": "Date and time when the partial delivery record was created. Represents the delivery entry timestamp."
+            }
+          ]
+        },
+        {
+          "TableName": "Parts",
+          "TableRemarks": "Stores master list of laptop parts used across purchasing, costing, and inventory.\nActs as a reference for configurable components such as hard disks, RAM, batteries, etc.",
+          "Columns": [
+            {
+              "ColumnName": "p_id",
+              "ColumnRemarks": "Primary key of Parts. Uniquely identifies each part record."
+            },
+            {
+              "ColumnName": "p_name",
+              "ColumnRemarks": "Name of the part. Examples: Hard Disk, RAM, Battery, Charger. Displayed in UI and used in costing and inventory modules."
+            },
+            {
+              "ColumnName": "p_part_cost",
+              "ColumnRemarks": "Default or base cost of the part. Used as a reference value when detailed part cost records are not available. Actual costing may be overridden by PartCost table."
+            },
+            {
+              "ColumnName": "p_active_yn",
+              "ColumnRemarks": "Indicates whether the part is active. Y = Active, N = Inactive. Inactive parts are not selectable for new transactions."
+            },
+            {
+              "ColumnName": "p_cre_by",
+              "ColumnRemarks": "User who created the part record. Used for audit and traceability."
+            },
+            {
+              "ColumnName": "p_cre_date",
+              "ColumnRemarks": "Date and time when the part record was created."
+            },
+            {
+              "ColumnName": "p_type_md_link",
+              "ColumnRemarks": "p_type_md_link Reference to MasterData.md_id representing the part type. Joined with MasterData where md_type matches the part’s type category. Examples:  HardDiskType ? HDD, SSD  RamType ? DDR4, DDR5 Used to classify the part by its technology or variant."
+            },
+            {
+              "ColumnName": "p_size_md_link",
+              "ColumnRemarks": "Reference to MasterData.md_id representing the part size (sub-size). Joined with MasterData where md_type matches the part’s size category. Examples:  HardDiskSize ? 256GB, 512GB, 1TB  RamSize ? 8GB, 16GB Applicable only for parts where size is relevant. If NULL, size is considered Not Applicable."
+            }
+          ]
+        },
+        {
+          "TableName": "PartSales",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "ps_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_customer",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_sold_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_part",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_qty",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_unit_cost",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_total_cost",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_unit_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_total_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "ps_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "PurchaseOrders",
+          "TableRemarks": "Stores purchase order transactions created for suppliers, tracking receipt status and serial generation details.",
+          "Columns": [
+            {
+              "ColumnName": "po_id",
+              "ColumnRemarks": "Unique identifier for the purchase order."
+            },
+            {
+              "ColumnName": "po_supplier",
+              "ColumnRemarks": "References the supplier from whom the items are purchased."
+            },
+            {
+              "ColumnName": "po_received_yn",
+              "ColumnRemarks": "Indicates whether the purchase order items have been received."
+            },
+            {
+              "ColumnName": "po_received_by",
+              "ColumnRemarks": "User who confirmed receipt of the purchase order.'"
+            },
+            {
+              "ColumnName": "po_received_date",
+              "ColumnRemarks": "Date when the purchase order was received."
+            },
+            {
+              "ColumnName": "po_cre_by",
+              "ColumnRemarks": "User who created the purchase order."
+            },
+            {
+              "ColumnName": "po_cre_date",
+              "ColumnRemarks": "Date when the purchase order was created."
+            },
+            {
+              "ColumnName": "po_gen_serial_yn",
+              "ColumnRemarks": "Indicates whether serial numbers were generated for this purchase order."
+            },
+            {
+              "ColumnName": "po_serial_gen_by",
+              "ColumnRemarks": "User who generated serial numbers for the purchase order."
+            },
+            {
+              "ColumnName": "po_serial_gen_date",
+              "ColumnRemarks": "Date when serial numbers were generated."
+            },
+            {
+              "ColumnName": "po_qty",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "po_vat_amt_type",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "po_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "po_vat_amt",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "po_net_amt",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "PurchaseOrderSummery",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "pos_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "pos_po_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "pos_qty",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "pos_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "pos_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "pos_cre_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "pos_net_amt",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "PurchaseReturns",
+          "TableRemarks": "Stores purchase return transactions for laptops returned to suppliers.\nEach record represents one serial number returned against a purchase order.\nUsed for procurement reversal, supplier accountability, and inventory adjustment.\nLinked with PurchaseOrders, Suppliers, SerialNumbers, and status lifecycle.",
+          "Columns": [
+            {
+              "ColumnName": "pr_id",
+              "ColumnRemarks": "Primary key of PurchaseReturns. Uniquely identifies each purchase return record."
+            },
+            {
+              "ColumnName": "pr_po_id",
+              "ColumnRemarks": "Purchase order ID against which the return is made. References PurchaseOrders.po_id. Used to link return with original procurement transaction."
+            },
+            {
+              "ColumnName": "pr_supplier",
+              "ColumnRemarks": "Supplier to whom the laptop is returned. References Suppliers.s_id. Used for supplier-wise return tracking."
+            },
+            {
+              "ColumnName": "pr_serial_no",
+              "ColumnRemarks": "Serial number of the laptop being returned. References SerialNumbers.sn_serial_no. Used to track physical unit returned to supplier."
+            },
+            {
+              "ColumnName": "pr_original_no",
+              "ColumnRemarks": "Original serial number if the device was reworked or relabeled. Used for traceability during supplier return."
+            },
+            {
+              "ColumnName": "pr_category",
+              "ColumnRemarks": "Product category of the returned laptop. Stores MasterData.md_id where md_type = 'Category'."
+            },
+            {
+              "ColumnName": "pr_make",
+              "ColumnRemarks": "Laptop make (brand). Stores Make.ma_id."
+            },
+            {
+              "ColumnName": "pr_model",
+              "ColumnRemarks": "Laptop model. Stores Models.mo_id."
+            },
+            {
+              "ColumnName": "pr_processor",
+              "ColumnRemarks": "Processor of the returned laptop. Stores MasterData.md_id where md_type = 'Processor'."
+            },
+            {
+              "ColumnName": "pr_hard_disk",
+              "ColumnRemarks": "Hard disk type of the returned laptop. Stores MasterData.md_id where md_type = 'HardDiskType'."
+            },
+            {
+              "ColumnName": "pr_hard_disk_size",
+              "ColumnRemarks": "Hard disk storage size of the returned laptop. Stores actual value (e.g., 256GB, 512GB). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "pr_ram_type",
+              "ColumnRemarks": "RAM type of the returned laptop. Stores MasterData.md_id where md_type = 'RamType'."
+            },
+            {
+              "ColumnName": "pr_ram_size",
+              "ColumnRemarks": "RAM size of the returned laptop. Stores actual value (e.g., 8GB, 16GB). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "pr_price",
+              "ColumnRemarks": "Purchase price of the laptop being returned. Used for supplier credit and procurement reversal."
+            },
+            {
+              "ColumnName": "pr_cre_by",
+              "ColumnRemarks": "User ID who created the purchase return record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "pr_cre_date",
+              "ColumnRemarks": "Date and time when the purchase return was created. Used for audit and procurement analysis."
+            }
+          ]
+        },
+        {
+          "TableName": "ReferenceNumberHistory",
+          "TableRemarks": "Stores reference number history linked to serial numbers.\nEach record represents one reference assignment event.\nUsed to track internal, purchase, or external references\nassociated with a serial during its lifecycle.\nPrimarily used for audit, traceability, and reconciliation.\n - Append-only history table (no updates).\n- One serial number can have multiple reference entries.\n- Used mainly for purchase-side and operational tracking.\n- Supports backward traceability during audits and returns.\n",
+          "Columns": [
+            {
+              "ColumnName": "rh_id",
+              "ColumnRemarks": "Primary key of ReferenceNumberHistory. Uniquely identifies each reference history record."
+            },
+            {
+              "ColumnName": "rh_serial_no",
+              "ColumnRemarks": "Serial number to which the reference is linked. References SerialNumbers.sn_serial_no. Used to trace reference numbers at serial level."
+            },
+            {
+              "ColumnName": "rh_ref_no",
+              "ColumnRemarks": "Reference number associated with the serial. Typically represents a Purchase Order number, Internal reference, GRN reference, or external document number. NOT related to Sales Order."
+            },
+            {
+              "ColumnName": "rh_type",
+              "ColumnRemarks": "Reference type or source. Identifies the context of the reference number (e.g., PurchaseOrder, GRN, SupplierRef, InternalRef). Used to differentiate reference domains."
+            },
+            {
+              "ColumnName": "rh_cre_by",
+              "ColumnRemarks": "User who created or assigned the reference entry. Used for audit and accountability."
+            },
+            {
+              "ColumnName": "rh_cre_date",
+              "ColumnRemarks": "Date and time when the reference number was recorded. Represents the moment the reference was linked to the serial."
+            }
+          ]
+        },
+        {
+          "TableName": "RepairServices",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "rs_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_customer",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_service_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_part",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_qty",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_unit_cost",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_total_cost",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_unit_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_total_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "rs_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "RoleMenu",
+          "TableRemarks": "Maps roles to menus, menu items, and options to control user access within the ERP system.",
+          "Columns": [
+            {
+              "ColumnName": "rm_id",
+              "ColumnRemarks": "Primary key. Unique role-menu mapping identifier."
+            },
+            {
+              "ColumnName": "rm_role",
+              "ColumnRemarks": "Role ID that is granted access."
+            },
+            {
+              "ColumnName": "rm_menu",
+              "ColumnRemarks": "Menu or option ID that the role can access."
+            },
+            {
+              "ColumnName": "rm_cre_by",
+              "ColumnRemarks": "User ID who assigned the permission."
+            },
+            {
+              "ColumnName": "rm_cre_date",
+              "ColumnRemarks": "Timestamp when the permission was assigned."
+            }
+          ]
+        },
+        {
+          "TableName": "roles",
+          "TableRemarks": "Stores master data for user roles used to control access, permissions, and authorization within the ERP system.",
+          "Columns": [
+            {
+              "ColumnName": "r_id",
+              "ColumnRemarks": "Unique identifier for each role. Primary key of the roles table."
+            },
+            {
+              "ColumnName": "r_name",
+              "ColumnRemarks": "Name of the role (e.g., Admin, Manager, Sales)."
+            },
+            {
+              "ColumnName": "r_active_yn",
+              "ColumnRemarks": "Indicates whether the role is active. Values: Y = Active, N = Inactive. If NULL, treat as N."
+            },
+            {
+              "ColumnName": "r_cre_by",
+              "ColumnRemarks": "User ID of the user who created this role."
+            },
+            {
+              "ColumnName": "r_cre_date",
+              "ColumnRemarks": "Date and time when the role record was created."
+            }
+          ]
+        },
+        {
+          "TableName": "SalesCategoryHistory",
+          "TableRemarks": "Stores the history of sales category assignments for each serial number.\nUsed to track category changes over time for reporting, audit, and analysis. \nMultiple records may exist per serial number.\nLatest record represents the current sales category.\nHistorical records must not be updated or deleted.",
+          "Columns": [
+            {
+              "ColumnName": "sch_id",
+              "ColumnRemarks": "Primary key of SalesCategoryHistory. Uniquely identifies each sales category history record."
+            },
+            {
+              "ColumnName": "sch_serial_no",
+              "ColumnRemarks": "Serial number of the item whose sales category is recorded. References SerialNumbers.sn_serial_no."
+            },
+            {
+              "ColumnName": "sch_sales_category",
+              "ColumnRemarks": "Sales category assigned to the serial number. Examples: Used Premium, Used Standard, New, Refurbished. Represents the business classification used for sales reporting."
+            },
+            {
+              "ColumnName": "sch_created_by",
+              "ColumnRemarks": "User or system that created the sales category history record. Used for audit tracking."
+            },
+            {
+              "ColumnName": "sch_created_date",
+              "ColumnRemarks": "Date and time when the sales category was assigned. Used to track category changes chronologically."
+            }
+          ]
+        },
+        {
+          "TableName": "SalesOrderDetails",
+          "TableRemarks": "Stores individual line items of a sales order.\nEach record represents one sold laptop (serial-level).\nUsed for pricing, VAT, returns, invoicing, and sales analysis.\nLinked with SalesOrders bySalesOrders.so_id=sd_order_no s and SerialNumbers by sd_serial_no. \nSome columns in SalesOrderDetails store MasterData.md_id values.\nTo get display names, join MasterData on md_id.\nUse md_type to identify the correct master category.\n",
+          "Columns": [
+            {
+              "ColumnName": "sd_id",
+              "ColumnRemarks": "Primary key of SalesOrderDetails. Uniquely identifies each sales order line item."
+            },
+            {
+              "ColumnName": "sd_order_no",
+              "ColumnRemarks": "Sales order number. References SalesOrders.so_id. Used to group multiple items under one sales order."
+            },
+            {
+              "ColumnName": "sd_serial_no",
+              "ColumnRemarks": "Laptop serial number sold. References SerialNumbers.sn_serial_no. Each serial represents one physical laptop."
+            },
+            {
+              "ColumnName": "sd_price",
+              "ColumnRemarks": "Selling price of the laptop line item. Base price before VAT unless VAT inclusive is specified."
+            },
+            {
+              "ColumnName": "sd_cre_by",
+              "ColumnRemarks": "User ID who created the sales order detail. References Users.u_id."
+            },
+            {
+              "ColumnName": "sd_cre_date",
+              "ColumnRemarks": "Date and time when the sales order detail was created. Used for item-level sales and audit reporting."
+            },
+            {
+              "ColumnName": "sd_returned_yn",
+              "ColumnRemarks": "Indicates whether this sold item is returned. Y = Returned, N = Not returned. If NULL, treat as 'N'."
+            },
+            {
+              "ColumnName": "sd_return_id",
+              "ColumnRemarks": "Return transaction ID for the item. Populated only when sd_returned_yn = 'Y'. References SalesReturn.sr_id."
+            },
+            {
+              "ColumnName": "sd_ref_order",
+              "ColumnRemarks": "Reference order number for this item. Used for exchanges or replacement sales."
+            },
+            {
+              "ColumnName": "sd_invoice_no",
+              "ColumnRemarks": "Invoice number associated with this sales line item. Used for invoice-wise sales analysis."
+            },
+            {
+              "ColumnName": "sd_s_ram_size",
+              "ColumnRemarks": "RAM size of the laptop at the time of sale. Stores the actual RAM size value . Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "sd_s_harddisk",
+              "ColumnRemarks": "Hard disk type of the laptop sold. Stores MasterData.md_id where md_type = 'HardDiskType'. Join with MasterData to get hard disk type name."
+            },
+            {
+              "ColumnName": "sd_s_harddisk_size",
+              "ColumnRemarks": "Hard disk storage size of the laptop. Stores the actual storage size value (e.g., 256GB, 512GB). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "sd_is_vat_inclusive",
+              "ColumnRemarks": "Indicates whether the item price includes VAT. Y = VAT included, N = VAT excluded. If NULL, treat as 'N'. Used to decide VAT calculation logic."
+            },
+            {
+              "ColumnName": "sd_vat_amt",
+              "ColumnRemarks": "VAT amount calculated for this sales item. Derived based on sd_price and VAT rules. Used for tax and invoice calculations."
+            },
+            {
+              "ColumnName": "sd_net_amt",
+              "ColumnRemarks": "Net amount for this sales item excluding VAT. Represents actual revenue value. Used for margin and sales analysis."
+            },
+            {
+              "ColumnName": "sd_sales_category",
+              "ColumnRemarks": "Sales category of the item. Stores MasterData.md_id where md_type = 'SalesCategory'. Used to classify sales (retail, wholesale, corporate, etc.)."
+            }
+          ]
+        },
+        {
+          "TableName": "SalesOrders",
+          "TableRemarks": "Stores sales order header information.\nEach record represents one customer sales transaction.\nUsed to track customer, quantity, pricing, posting status, and VAT.\nLinked with SalesOrderDetails by so_id. SalesOrders is the header table.\nUse it for customer, date, posting status, quantity, and total value.\nJoin SalesOrderDetails for item-level or serial-level analysis.\nIf a column ends with _yn, treat NULL as 'N'.\n",
+          "Columns": [
+            {
+              "ColumnName": "so_id",
+              "ColumnRemarks": "Primary key of SalesOrders. Uniquely identifies each sales order. SalesOrderDetails join with this column "
+            },
+            {
+              "ColumnName": "so_customer",
+              "ColumnRemarks": "Customer ID for the sales order. References Customers.c_id. Identifies who the sale is made to."
+            },
+            {
+              "ColumnName": "so_cre_by",
+              "ColumnRemarks": "User ID who created the sales order. References Users.u_id."
+            },
+            {
+              "ColumnName": "so_cre_date",
+              "ColumnRemarks": "Date and time when the sales order was created. Used for order date and sales period filtering."
+            },
+            {
+              "ColumnName": "so_posted_yn",
+              "ColumnRemarks": "Indicates whether the sales order is posted. Y = Posted (finalized), N = Not posted. If NULL, treat as 'N'."
+            },
+            {
+              "ColumnName": "so_posted_by",
+              "ColumnRemarks": "User ID who posted the sales order. Filled only when so_posted_yn = 'Y'. References Users.u_id."
+            },
+            {
+              "ColumnName": "so_posted_date",
+              "ColumnRemarks": "Date and time when the sales order was posted. Used for accounting and finalized sales reports."
+            },
+            {
+              "ColumnName": "so_vat_amt_type",
+              "ColumnRemarks": "VAT calculation type for the sales order. Defines how VAT is applied (inclusive / exclusive / none). Used for tax calculations."
+            },
+            {
+              "ColumnName": "so_qty",
+              "ColumnRemarks": "Total quantity of items in the sales order. Usually equals total number of serial numbers sold."
+            },
+            {
+              "ColumnName": "so_sales_price",
+              "ColumnRemarks": "Total sales amount of the order. Sum of all item prices before or after VAT as per VAT type."
+            },
+            {
+              "ColumnName": "so_vat_amt",
+              "ColumnRemarks": "VAT amount calculated for the sales order. Derived based on so_vat_amt_type and sales price. Used for tax reporting and invoice totals."
+            },
+            {
+              "ColumnName": "so_total_price",
+              "ColumnRemarks": "Final payable amount of the sales order. Includes sales price plus VAT amount. Used for billing, revenue, and financial reports."
+            },
+            {
+              "ColumnName": "so_invoice_date",
+              "ColumnRemarks": "Invoice generation date for the sales order. Populated when the order is invoiced. Used for invoice-wise and accounting period reports."
+            }
+          ]
+        },
+        {
+          "TableName": "SalesReturnDetails",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "srd_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "srd_order_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "srd_serial_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "srd_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "srd_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "srd_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "SalesReturns",
+          "TableRemarks": "Stores sales return transactions.\nEach record represents a returned laptop (serial-level).\nUsed to reverse sales, track refunds, and analyze returns.\nLinked with SalesOrders by sr_so_id and SalesOrderDetails by sr_serial_no.\n",
+          "Columns": [
+            {
+              "ColumnName": "sr_id",
+              "ColumnRemarks": "Primary key of SalesReturns. Uniquely identifies each sales return transaction."
+            },
+            {
+              "ColumnName": "sr_customer",
+              "ColumnRemarks": "Customer ID who returned the item. References Customers.c_id. Used for customer-wise return analysis."
+            },
+            {
+              "ColumnName": "sr_cre_by",
+              "ColumnRemarks": "User ID who created the sales return. References Users.u_id."
+            },
+            {
+              "ColumnName": "sr_cre_date",
+              "ColumnRemarks": "Date and time when the sales return was created. Used for return period and audit reports."
+            },
+            {
+              "ColumnName": "sr_so_id",
+              "ColumnRemarks": "Sales order ID related to this return. References SalesOrders.so_id. Links the return to the original sales order."
+            },
+            {
+              "ColumnName": "sr_serial_no",
+              "ColumnRemarks": "Serial number of the returned laptop. References SerialNumbers.sn_serial_no. Each return is serial-based."
+            },
+            {
+              "ColumnName": "sr_price",
+              "ColumnRemarks": "Return price of the laptop. Original selling price at the time of sale."
+            },
+            {
+              "ColumnName": "sr_posted_yn",
+              "ColumnRemarks": "Indicates whether the return is posted. Y = Posted (finalized), N = Not posted. If NULL, treat as 'N'."
+            },
+            {
+              "ColumnName": "sr_posted_by",
+              "ColumnRemarks": "User ID who posted the sales return. Populated only when sr_posted_yn = 'Y'. References Users.u_id."
+            },
+            {
+              "ColumnName": "sr_posted_date",
+              "ColumnRemarks": "Date and time when the sales return was posted. Used for finalized return and accounting reports."
+            },
+            {
+              "ColumnName": "sr_vat_amt",
+              "ColumnRemarks": "VAT amount reversed for this return. Used for tax and accounting adjustments."
+            },
+            {
+              "ColumnName": "sr_net_amt",
+              "ColumnRemarks": "Net amount reversed excluding VAT. Used to calculate actual revenue reduction."
+            }
+          ]
+        },
+        {
+          "TableName": "serialnumberBackup",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "sn_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_order_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_serial_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_make",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_model",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_processor",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_hard_disk",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_hard_disk_size",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_ram_type",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_ram_size",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_custom_duty",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_transport_cost",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_received_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_received_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_received_on",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_sold_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_so_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_sold_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_sold_on",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_cre_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_shop",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_original_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_est_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_vat_amt",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_prod_status",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_invoice_status",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_invoice_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_category",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_remarks",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "SerialNumbers",
+          "TableRemarks": "Stores individual laptop records identified by serial number.\nEach record represents one physical laptop unit.\nUsed to track inventory lifecycle, availability, sales, returns, and stock status.\nLinked with SalesOrderDetails, SalesReturns, status, and MovementHistory using serial number.",
+          "Columns": [
+            {
+              "ColumnName": "sn_id",
+              "ColumnRemarks": "Primary key of SerialNumbers. Uniquely identifies each laptop record."
+            },
+            {
+              "ColumnName": "sn_order_no",
+              "ColumnRemarks": "Purchase order reference linked to the serial number. References PurchaseOrders.po_id. Used for traceability during procurement and receiving process. Not related to sales orders."
+            },
+            {
+              "ColumnName": "sn_serial_no",
+              "ColumnRemarks": "Unique serial number of the laptop. Acts as the main identifier across inventory, sales, and returns."
+            },
+            {
+              "ColumnName": "sn_make",
+              "ColumnRemarks": "Laptop make (brand). Stores Make.ma_id."
+            },
+            {
+              "ColumnName": "sn_model",
+              "ColumnRemarks": "Laptop model. Stores Models.mo_id."
+            },
+            {
+              "ColumnName": "sn_processor",
+              "ColumnRemarks": "Processor of the laptop. Stores MasterData.md_id where md_type = 'Processor'."
+            },
+            {
+              "ColumnName": "sn_hard_disk",
+              "ColumnRemarks": "Hard disk type of the laptop. Stores MasterData.md_id where md_type = 'HardDiskType'."
+            },
+            {
+              "ColumnName": "sn_hard_disk_size",
+              "ColumnRemarks": "Hard disk storage size. Stores actual value (e.g., 256GB, 512GB). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "sn_ram_type",
+              "ColumnRemarks": "RAM technology type. Stores MasterData.md_id where md_type = 'RamType'."
+            },
+            {
+              "ColumnName": "sn_ram_size",
+              "ColumnRemarks": "RAM size of the laptop. Stores actual value (e.g., 8GB, 16GB). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "sn_purchase_price",
+              "ColumnRemarks": "Purchase price of the laptop from supplier. Represents base acquisition cost. Used for cost, margin, and profitability calculations."
+            },
+            {
+              "ColumnName": "sn_custom_duty",
+              "ColumnRemarks": "Custom duty or import tax applied to the laptop. Added to total acquisition cost. Used for landed cost calculation. currently not in use"
+            },
+            {
+              "ColumnName": "sn_transport_cost",
+              "ColumnRemarks": "Transportation or logistics cost for the laptop. Includes shipping or handling charges. Used to calculate total landed cost. currently not in use"
+            },
+            {
+              "ColumnName": "sn_price",
+              "ColumnRemarks": "Selling price of the laptop. Final price charged to the customer. Used for revenue calculation. currently not in use"
+            },
+            {
+              "ColumnName": "sn_received_yn",
+              "ColumnRemarks": "Indicates whether the laptop is physically received. Y = Received, N = Not received. If NULL, treat as 'N'. Used for stock availability checks."
+            },
+            {
+              "ColumnName": "sn_received_by",
+              "ColumnRemarks": "User ID who marked the laptop as received. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "sn_received_on",
+              "ColumnRemarks": "Date and time when the laptop was received. Used for inventory aging and lifecycle tracking."
+            },
+            {
+              "ColumnName": "sn_sold_yn",
+              "ColumnRemarks": "Indicates whether the laptop is sold. Y = Sold, N = Not sold. If NULL, treat as 'N'."
+            },
+            {
+              "ColumnName": "sn_so_id",
+              "ColumnRemarks": "Sales order ID linked to this serial number. References SalesOrders.so_id. Used to connect serial with sales transaction."
+            },
+            {
+              "ColumnName": "sn_sold_by",
+              "ColumnRemarks": "User ID who sold the laptop. References Users.u_id. Populated only when sn_sold_yn = 'Y'."
+            },
+            {
+              "ColumnName": "sn_sold_on",
+              "ColumnRemarks": "Date and time when the laptop was sold. Used for sales reporting and stock movement analysis."
+            },
+            {
+              "ColumnName": "sn_cre_by",
+              "ColumnRemarks": "User ID who created the serial record. References Users.u_id."
+            },
+            {
+              "ColumnName": "sn_cre_date",
+              "ColumnRemarks": "Date and time when the serial record was created. Used for audit and inventory aging."
+            },
+            {
+              "ColumnName": "sn_shop",
+              "ColumnRemarks": "Shop or physical location where the laptop is stored. Used for location-wise inventory tracking."
+            },
+            {
+              "ColumnName": "sn_original_no",
+              "ColumnRemarks": "Original serial number if the device was reworked or relabeled. Used for traceability."
+            },
+            {
+              "ColumnName": "sn_est_purchase_price",
+              "ColumnRemarks": "Estimated purchase price of the laptop. Used before final purchase cost is confirmed. Replaced by sn_purchase_price when available."
+            },
+            {
+              "ColumnName": "sn_vat_amt",
+              "ColumnRemarks": "VAT amount applied to the laptop sale. Used for tax calculation and invoicing."
+            },
+            {
+              "ColumnName": "sn_prod_status",
+              "ColumnRemarks": "Production or refurbishment status of the laptop. Stores MasterData.md_id where md_type = 'ProductionStatus'."
+            },
+            {
+              "ColumnName": "sn_invoice_status",
+              "ColumnRemarks": "Invoice processing status of the laptop. Stores MasterData.md_id where md_type = 'InvoiceStatus'."
+            },
+            {
+              "ColumnName": "sn_invoice_no",
+              "ColumnRemarks": "Invoice number associated with the laptop sale. Generated once the laptop is sold and invoiced."
+            },
+            {
+              "ColumnName": "sn_category",
+              "ColumnRemarks": "Product category of the laptop. Stores MasterData.md_id where md_type = 'Category'."
+            },
+            {
+              "ColumnName": "sn_remarks",
+              "ColumnRemarks": "Short remarks or notes about the laptop. Used for operational reference."
+            },
+            {
+              "ColumnName": "sn_sales_category",
+              "ColumnRemarks": "Sales category of the laptop. Stores MasterData.md_id where md_type = 'SalesCategory'. Used for sales classification and reporting. currently not in use"
+            },
+            {
+              "ColumnName": "sn_send_to_edniff",
+              "ColumnRemarks": "Indicates whether the laptop is sent to external system (Endiff). Y = Sent, N = Not sent. Used for system integration tracking."
+            },
+            {
+              "ColumnName": "sn_comments",
+              "ColumnRemarks": "Detailed comments or internal notes related to the laptop. Used for extended operational or audit notes."
+            }
+          ]
+        },
+        {
+          "TableName": "serialnumbersbackup",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "sn_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_order_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_serial_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_make",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_model",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_processor",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_hard_disk",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_hard_disk_size",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_ram_type",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_ram_size",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_custom_duty",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_transport_cost",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_received_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_received_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_received_on",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_sold_yn",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_so_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_sold_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_sold_on",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_cre_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_shop",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_original_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_est_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_vat_amt",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_prod_status",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_invoice_status",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_invoice_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_category",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "sn_remarks",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "serialNo",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "price",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "Shops",
+          "TableRemarks": "Stores master list of shops / locations used within the ERP.\nRepresents physical stores, warehouses, or sales locations.\nUsed for inventory tracking, serial allocation, and transaction mapping.\n- Shops table is a master reference table.\n- Used across SerialNumbers, Sales, Purchases, and Inventory movement.\n- No transactional data is stored in this table.\n",
+          "Columns": [
+            {
+              "ColumnName": "s_id",
+              "ColumnRemarks": "Primary key of Shops. Uniquely identifies each shop or location."
+            },
+            {
+              "ColumnName": "s_name",
+              "ColumnRemarks": "Name of the shop or location. Example: Dubai Store, Warehouse 1, Online Store. Displayed in UI and reports."
+            },
+            {
+              "ColumnName": "s_active_yn",
+              "ColumnRemarks": "Indicates whether the shop is active. Y = Active, N = Inactive. Inactive shops are not selectable for new transactions."
+            },
+            {
+              "ColumnName": "s_cre_by",
+              "ColumnRemarks": "User who created the shop record. Used for audit and traceability."
+            },
+            {
+              "ColumnName": "s_cre_date",
+              "ColumnRemarks": "Date and time when the shop record was created."
+            }
+          ]
+        },
+        {
+          "TableName": "SkuDetails",
+          "TableRemarks": "Stores SKU-level product configuration details.\nEach record represents one unique sellable SKU based on category, grade, make, model, and specifications.\nUsed for pricing, marketplace integration (Noon), reporting, and SKU-to-serial mapping.\nActs as a logical product definition layer above SerialNumbers.",
+          "Columns": [
+            {
+              "ColumnName": "sk_id",
+              "ColumnRemarks": "Primary key of SkuDetails. Uniquely identifies each SKU definition."
+            },
+            {
+              "ColumnName": "sk_sku",
+              "ColumnRemarks": "Stock Keeping Unit (SKU) code. Unique identifier used in sales channels and marketplace integrations."
+            },
+            {
+              "ColumnName": "sk_category",
+              "ColumnRemarks": "SKU category as uploaded from external or bulk data sources. Stores category text/value directly (e.g., Main Stream, Used Premium). Does NOT reference MasterData. Used mainly for marketplace uploads, reporting, and filtering."
+            },
+            {
+              "ColumnName": "sk_grade",
+              "ColumnRemarks": "Product grade or condition. References MasterData.md_id where md_type = 'Grade'. Used for quality classification (e.g., A, B, C)."
+            },
+            {
+              "ColumnName": "sk_make",
+              "ColumnRemarks": "Product make / brand. References Make.ma_id."
+            },
+            {
+              "ColumnName": "sk_model",
+              "ColumnRemarks": "Product model. References Models.mo_id."
+            },
+            {
+              "ColumnName": "sk_processor",
+              "ColumnRemarks": "Processor specification of the SKU. References MasterData.md_id where md_type = 'Processor'."
+            },
+            {
+              "ColumnName": "sk_harddisk",
+              "ColumnRemarks": "Hard disk type of the SKU. References MasterData.md_id where md_type = 'HardDiskType'."
+            },
+            {
+              "ColumnName": "sk_harddisk_size",
+              "ColumnRemarks": "Hard disk storage size. Stores actual size value (e.g., 256, 512, 1000). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "sk_ram",
+              "ColumnRemarks": "RAM type of the SKU. References MasterData.md_id where md_type = 'RamType'."
+            },
+            {
+              "ColumnName": "sk_ram_size",
+              "ColumnRemarks": "RAM size of the SKU. Stores actual RAM size value (e.g., 8, 16). Does NOT reference MasterData."
+            },
+            {
+              "ColumnName": "sk_cre_by",
+              "ColumnRemarks": "User who created the SKU record. Used for audit and control."
+            },
+            {
+              "ColumnName": "sk_cre_date",
+              "ColumnRemarks": "Date and time when the SKU record was created."
+            },
+            {
+              "ColumnName": "sk_price",
+              "ColumnRemarks": "Default selling price of the SKU. Used as base price for sales, marketplace listings, and reports."
+            }
+          ]
+        },
+        {
+          "TableName": "skuReportUserInput",
+          "TableRemarks": "Stores user-defined input parameters for SKU-based reports.\nEach record represents a reporting preference set by a user.\nPrimarily used to control report range, aging, or analysis window\nfor SKU-level analytics and dashboards.\n- Stores user-driven, non-master configuration data.\n- Typically one active record per SKU per user.\n- Used only for reporting and analytics logic.\n- Does not affect transactional or financial data.",
+          "Columns": [
+            {
+              "ColumnName": "sri_id",
+              "ColumnRemarks": "Primary key of skuReportUserInput. Uniquely identifies each user input record."
+            },
+            {
+              "ColumnName": "sri_sku",
+              "ColumnRemarks": "SKU code for which the report input is defined. References SKUDetails.sk_sku. Used to apply report parameters at SKU level."
+            },
+            {
+              "ColumnName": "sri_no_of_days",
+              "ColumnRemarks": "Number of days specified by the user for report calculation. Used to define time range such as aging, sales window, or performance period for the selected SKU."
+            },
+            {
+              "ColumnName": "sri_upd_by",
+              "ColumnRemarks": "User who created or last updated the report input. Used for audit and tracking user-specific preferences."
+            },
+            {
+              "ColumnName": "sri_upd_date",
+              "ColumnRemarks": "Date and time when the report input was last updated. Indicates the latest effective configuration for the SKU report."
+            }
+          ]
+        },
+        {
+          "TableName": "status",
+          "TableRemarks": "Stores status master values used to represent lifecycle stages of records.\nEach record represents one status under a specific status type.\nStatus meaning is determined by s_type and must not be shared across modules.\nUsed to control workflow, availability, and state transitions.",
+          "Columns": [
+            {
+              "ColumnName": "s_id",
+              "ColumnRemarks": "Primary key of status. Uniquely identifies each status value. Used as a foreign key in transactional tables."
+            },
+            {
+              "ColumnName": "s_name",
+              "ColumnRemarks": "Human-readable status name. Meaning depends on the status type (s_type). Example: Received, Sold, Returned."
+            },
+            {
+              "ColumnName": "s_type",
+              "ColumnRemarks": "Status context or lifecycle category. Defines which module the status applies to. Example: SerialNumber. Status values must be interpreted only within the same s_type."
+            },
+            {
+              "ColumnName": "s_cre_by",
+              "ColumnRemarks": "User ID who created the status record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "s_cre_date",
+              "ColumnRemarks": "Date and time when the status record was created. Used for audit and maintenance history."
+            }
+          ]
+        },
+        {
+          "TableName": "StatusChangeHistory",
+          "TableRemarks": "Stores the complete history of status changes for entities such as Serial Numbers.\nEach record represents one status transition event.\nUsed for audit tracking, workflow tracing, and lifecycle analysis.\nLinked with status master data and serial-level operations.",
+          "Columns": [
+            {
+              "ColumnName": "sh_id",
+              "ColumnRemarks": "Primary key of StatusChangeHistory. Uniquely identifies each status change event."
+            },
+            {
+              "ColumnName": "sh_serial_no",
+              "ColumnRemarks": "Serial number to which the status change applies. References SerialNumbers.sn_serial_no. Used to track lifecycle changes of a specific unit."
+            },
+            {
+              "ColumnName": "sh_status",
+              "ColumnRemarks": "Status value applied to the serial at this point in time. References status.s_id based on sh_type. Example values: Received, Sold, Returned, Credit Note Received."
+            },
+            {
+              "ColumnName": "sh_type",
+              "ColumnRemarks": "Status type category. Used to distinguish status domains (e.g., SerialNumber, Invoice, Production). Maps to status.s_type."
+            },
+            {
+              "ColumnName": "sh_cre_by",
+              "ColumnRemarks": "User who performed or triggered the status change. Used for audit and accountability."
+            },
+            {
+              "ColumnName": "sh_cre_date",
+              "ColumnRemarks": "Timestamp when the status change occurred. Represents the exact time of status transition."
+            },
+            {
+              "ColumnName": "sh_remarks",
+              "ColumnRemarks": "Optional remarks or reason for the status change. Used to capture contextual information such as manual adjustments, corrections, or process notes."
+            }
+          ]
+        },
+        {
+          "TableName": "SuggestedTemplates",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "st_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_serial_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_category",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_invoice_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_invoice_date",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_invoice_type",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_order_no",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_vat_rate",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_vat_supply",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_vat_amount",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_price_inc_tax",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_market_place",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_item_nr",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_sku",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_customer_name",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_customer_city",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_vat",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_net_purchase_price",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_gp1",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_referral_fee",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_fbn_outbound_fee",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_noon_markup",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_noon_promo",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_shipping_fee",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_other_amounts",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_total_payment",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_gp2",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_cre_by",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "st_cre_date",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "Suppliers",
+          "TableRemarks": "Stores supplier or vendor master information.\nEach record represents one supplier providing laptops or related items.\nUsed in purchase, lot creation, serial generation, and supplier-wise analysis.\nReferenced by inventory and purchase-related tables.",
+          "Columns": [
+            {
+              "ColumnName": "s_id",
+              "ColumnRemarks": "Primary key of Suppliers. Uniquely identifies each supplier."
+            },
+            {
+              "ColumnName": "s_name",
+              "ColumnRemarks": "Supplier name. Used for display, filtering, and supplier-wise reporting."
+            },
+            {
+              "ColumnName": "s_active_yn",
+              "ColumnRemarks": "Indicates whether the supplier is active. Y = Active, N = Inactive. If NULL, treat as 'Y'."
+            },
+            {
+              "ColumnName": "s_cre_by",
+              "ColumnRemarks": "User ID who created the supplier record. References Users.u_id. Used for audit tracking."
+            },
+            {
+              "ColumnName": "s_cre_date",
+              "ColumnRemarks": "Date and time when the supplier record was created. Used for audit and supplier maintenance history."
+            },
+            {
+              "ColumnName": "s_gen_serial_yn",
+              "ColumnRemarks": "Indicates whether serial numbers are generated by this supplier. N = Supplier provides serial numbers. Y = Serial numbers are generated internally. If NULL, treat as 'N'."
+            }
+          ]
+        },
+        {
+          "TableName": "sysdiagrams",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "name",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "principal_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "diagram_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "version",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "definition",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "TableDetails",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "td_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "td_table_name",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "td_column_name",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "td_remarks",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "TableRemarks",
+          "TableRemarks": null,
+          "Columns": [
+            {
+              "ColumnName": "tr_id",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "tr_table_name",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "tr_remarks",
+              "ColumnRemarks": null
+            },
+            {
+              "ColumnName": "tr_active_yn",
+              "ColumnRemarks": null
+            }
+          ]
+        },
+        {
+          "TableName": "Users",
+          "TableRemarks": "Stores master information of system users who can log in to the ERP. Each user is associated with a role and system-level permissions.",
+          "Columns": [
+            {
+              "ColumnName": "u_id",
+              "ColumnRemarks": "Unique identifier for the user. Primary key of the Users table."
+            },
+            {
+              "ColumnName": "u_name",
+              "ColumnRemarks": "Full name of the user."
+            },
+            {
+              "ColumnName": "u_username",
+              "ColumnRemarks": "Login username used to authenticate the user. Must be unique."
+            },
+            {
+              "ColumnName": "u_password",
+              "ColumnRemarks": "Encrypted or hashed password for user authentication."
+            },
+            {
+              "ColumnName": "u_email",
+              "ColumnRemarks": "Email address of the user."
+            },
+            {
+              "ColumnName": "u_role_id",
+              "ColumnRemarks": "Role assigned to the user. Foreign key referencing roles.r_id."
+            },
+            {
+              "ColumnName": "u_is_admin",
+              "ColumnRemarks": "Indicates whether the user has administrator privileges. Values: Y or N. if null consider as N"
+            },
+            {
+              "ColumnName": "u_active_yn",
+              "ColumnRemarks": "Indicates whether the user account is active. Values: Y = Active, N = Inactive. If NULL, treat as N."
+            },
+            {
+              "ColumnName": "u_cre_by",
+              "ColumnRemarks": "User ID of the user who created this account."
+            },
+            {
+              "ColumnName": "u_cre_date",
+              "ColumnRemarks": "Date and time when the user account was created."
+            }
+          ]
+        }
+      ],
+      "previous_messages": []
+    },
+    "user_question": " need profitablity of laptops  of this month ",
+    "output_contract": {
+      "sql": ""
+    }
+  }
+}
