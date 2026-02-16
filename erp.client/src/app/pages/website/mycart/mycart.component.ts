@@ -94,6 +94,7 @@ export class MycartComponent implements OnInit {
 
     this.requestParms = new RequestParms()
     this.requestParms.country = this.country.md_id;
+    this.requestParms.user = this.currentUser.u_id;
     this.icartService.getCarts(this.requestParms).subscribe(
       (data: Cart[]) => {
         this.carts = data;
@@ -153,12 +154,15 @@ export class MycartComponent implements OnInit {
 
   }
 
-  getCartTotal() {
+ getCartTotal() {
+  const total = this.carts.reduce((sum, cart) => 
+    sum + (cart.p_price * cart.c_qty), 0
+  );
 
-    this.totalPrice = this.carts.reduce((sum, cart) => sum + (cart.p_price * cart.c_qty), 0);
-    this.discount = this.totalPrice * 0.1;
-    this.netAmount = (this.totalPrice + this.deliveryCharge) - this.discount;
-  }
+  this.totalPrice = total;
+  this.discount = total * 0.1;
+  this.netAmount = total + this.deliveryCharge - this.discount;
+}
 
   placeOrder() {
     this.requestParms.user = this.currentUser.u_id;

@@ -1,7 +1,7 @@
 <footer class="footer_area fix" style="margin-top: 20px;">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="company__info  wow fadeInUp " data-wow-duration=".s" data-wow-delay=".3s">
                     <h3 class="f-title">contact info</h3>
                     <ul>
@@ -32,12 +32,13 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-xl-2 col-lg-6 col-md-6 col-sm-12">
-                <div class="company__info wow fadeInUp " data-wow-duration=".8s" data-wow-delay=".5s">
-                    <h3 class="f-title">Popular categories</h3>
-                    <ul>
-                        <li *ngFor="let category of categories">
-                            <a href="category">{{category.ct_name}}</a>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="company__info wow fadeInUp" data-wow-duration=".8s" data-wow-delay=".5s">
+                    <h3 class="f-title">Popular Categories</h3>
+
+                    <ul class="row list-unstyled">
+                        <li class="col-6" *ngFor="let category of categories">
+                            <a href="category">{{ category.ct_name }}</a>
                         </li>
                     </ul>
                 </div>
@@ -45,7 +46,8 @@
             <div class="col-xl-3 offset-xl-1 col-lg-6 col-md-6 col-sm-12">
                 <div class="company__info wow fadeInUp " data-wow-duration=".9s" data-wow-delay=".6s">
                     <h3 class="f-title">get in touch</h3>
-                    <p>Sign up for all the news about our latest arrivals and<br> get an exclusive early access shopping. Join Us<br>
+                    <p>Sign up for all the news about our latest arrivals and<br> get an exclusive early access
+                        shopping. Join Us<br>
                     </p>
                     <div class="subscribe pt-20">
                         <form action="#">

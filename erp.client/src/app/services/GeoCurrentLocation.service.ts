@@ -9,10 +9,10 @@ import { MasterData } from '../models/master.data.model';
   providedIn: 'root',
 })
 export class GeolocationService {
-  requestParms :RequestParms=new   RequestParms();
-  masterData :MasterData=new MasterData();
+  requestParms: RequestParms = new RequestParms();
+  masterData: MasterData = new MasterData();
   private apiUrl = `${environment.serverHostAddress}/api/MasterData`;
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Get current geolocation coordinates
   private getCurrentLocation(): Promise<{ latitude: number; longitude: number }> {
@@ -46,22 +46,24 @@ export class GeolocationService {
 
   // Combined method to fetch the user's country
   public async getUserCountry(): Promise<string> {
-   
     try {
       const location = await this.getCurrentLocation();
-      const country_name = await this.getCountryFromCoordinates(location.latitude, location.longitude);
-   
-      return country_name;
+      const country = await this.getCountryFromCoordinates(
+        location.latitude,
+        location.longitude
+      );
+
+      return country || 'India';
     } catch (error) {
-      throw error;
+      return 'India';
     }
   }
 
   getCountry(requestParms: RequestParms): Observable<MasterData> {
-    return this.http.post<MasterData>(this.apiUrl + "/getCountry", requestParms);  
+    return this.http.post<MasterData>(this.apiUrl + "/getCountry", requestParms);
   }
 
-  getCurrentCountry(): MasterData  {
+  getCurrentCountry(): MasterData {
     const currentCountryJson = sessionStorage.getItem('country');
     if (currentCountryJson) {
       try {

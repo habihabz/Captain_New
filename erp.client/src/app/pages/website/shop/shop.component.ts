@@ -56,13 +56,13 @@ export class ShopComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
-    this.getProducts();
+    this.getProductsByCountry();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
     this.getMasterDatasByType("ProductSize", (data) => { this.sizes = data; });
 
   }
-  getProducts() {
-    this.iproductService.getProducts().subscribe(
+  getProductsByCountry() {
+    this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
       (data: Product[]) => {
         this.products = data;
       },

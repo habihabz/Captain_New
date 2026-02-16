@@ -28,28 +28,39 @@ namespace Erp.Server.Controllers
         [HttpPost("create-order")]
         public IActionResult CreateOrder([FromBody] PaymentRequest request)
         {
-            RazorpayClient client = new RazorpayClient(key, secret);
+            try
+            {
+                RazorpayClient client = new RazorpayClient(key, secret);
 
-            Dictionary<string, object> options = new Dictionary<string, object>
+                int amountInPaise = Convert.ToInt32(request.Amount * 100);
+
+                Dictionary<string, object> options = new Dictionary<string, object>
         {
-            { "amount", request.Amount * 100 }, // amount in paise
+            { "amount", amountInPaise },   // MUST be int
             { "currency", "INR" },
+            { "receipt", $"ERP_{DateTime.Now.Ticks}" },
             { "payment_capture", 1 }
         };
 
-            Order order = client.Order.Create(options);
+                Order order = client.Order.Create(options);
 
-            return Ok(new
+                return Ok(new
+                {
+                    orderId = order["id"].ToString(),
+                    amount = request.Amount,
+                    currency = "INR",
+                    key = key
+                });
+            }
+            catch (Exception ex)
             {
-                orderId = order["id"],
-                amount = request.Amount,
-                currency = "INR",
-                key = key
-            });
+                return BadRequest(ex.Message);
+            }
         }
+
         public class PaymentRequest
         {
-            public int Amount { get; set; }
+            public decimal Amount { get; set; }
         }
     }
 }

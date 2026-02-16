@@ -109,7 +109,7 @@ export class WebHomeComponent implements OnInit {
   }
 
   getProductsByCategory(c_id: number) {
-    this.tempProducts = this.products.filter(x => x.p_category == c_id);
+    this.tempProducts = this.products.filter(x => x.p_category == c_id ||c_id==0 ).slice(0,8);
     return this.tempProducts;
   }
   getAttachementOfaProduct(p_attachements: string) {

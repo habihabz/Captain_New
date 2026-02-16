@@ -46,7 +46,8 @@ namespace Erp.Server.Repository
         public List<Cart> getCarts(RequestParams requestParams)
         {
             var country = new SqlParameter("country", requestParams.country + "");
-            var carts = db.Set<Cart>().FromSqlRaw("EXEC dbo.getCarts @country;", country).ToList();
+            var user = new SqlParameter("user", requestParams.user + "");
+            var carts = db.Set<Cart>().FromSqlRaw("EXEC dbo.getCarts @country,@user;", country, user).ToList();
             return carts;
         }
     }

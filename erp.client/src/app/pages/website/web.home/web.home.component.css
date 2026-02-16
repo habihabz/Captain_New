@@ -1,36 +1,36 @@
-/* Make carousel full & consistent height */
 #myCarousel,
-#myCarousel .carousel-item,
+#myCarousel .carousel-item {
+  height: 240px;
+}
+
 #myCarousel img {
-    height: 300px;        /* default mobile height */
-    object-fit: fit;    /* crop instead of shrinking */
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fill nicely without distortion */
 }
 
 /* Tablet */
 @media (min-width: 768px) {
-    #myCarousel,
-    #myCarousel .carousel-item,
-    #myCarousel img {
-        height: 380px;
-    }
+  #myCarousel,
+  #myCarousel .carousel-item {
+    height: 360px;
+  }
 }
 
 /* Desktop */
 @media (min-width: 992px) {
-    #myCarousel,
-    #myCarousel .carousel-item,
-    #myCarousel img {
-        height: 480px;
-    }
+  #myCarousel,
+  #myCarousel .carousel-item {
+    height: 450px;
+  }
 }
 
 /* Large Desktop */
 @media (min-width: 1200px) {
-    #myCarousel,
-    #myCarousel .carousel-item,
-    #myCarousel img {
-        height: 700px;
-    }
+  #myCarousel,
+  #myCarousel .carousel-item {
+    height: 700px;
+  }
 }
 
 a {
@@ -49,4 +49,37 @@ a {
   .card-img-top {
     height: 260px !important;
   }
+}
+
+
+.divider {
+  display: flex;
+  
+  &:before,
+  &:after {
+    content: "";
+    flex: 1;
+  }
+}
+
+.gradient {
+  align-items: stretch;
+  margin:  0;
+  height: 4em;
+  line-height: 4em;
+  color: white;
+  background: black;
+  
+  &:before {
+    background: linear-gradient(to right, white, black);
+  }
+  
+  &:after {
+    background: linear-gradient(to left, white, black);
+	}
+}
+
+
+.mat-mdc-tab-header {
+    --mdc-secondary-navigation-tab-container-height: 25px;
 }

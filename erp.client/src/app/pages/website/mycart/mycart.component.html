@@ -110,18 +110,18 @@
                 </div>
                 <div class="row justify-content-between">
                     <div class="col">Discount</div>
-                    <div class="col-auto text-danger">₹{{this.discount}}</div>
+                    <div class="col-auto text-danger">₹{{this.discount  | number:'1.2-2' }}</div>
                 </div>
                 <div class="row justify-content-between">
                     <div class="col">Delivery Charges</div>
-                    <div class="col-auto text-green">₹{{this.deliveryCharge}}</div>
+                    <div class="col-auto text-green">₹{{this.deliveryCharge  | number:'1.2-2'}}</div>
                 </div>
                 <div class="row justify-content-between total">
                     <div class="col">Total Amount</div>
-                    <div class="col-auto">₹{{this.netAmount}}</div>
+                    <div class="col-auto">₹{{this.netAmount  | number:'1.2-2'}}</div>
                 </div>
                 <div class="row mt-2">
-                    <div class="col text-green">You will save ₹{{this.discount}} on this order</div>
+                    <div class="col text-green">You will save ₹{{this.discount  | number:'1.2-2'}} on this order</div>
                 </div>
                 <div class="row mt-4">
                     <div class="col-md-12">

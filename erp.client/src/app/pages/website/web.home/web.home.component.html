@@ -1,4 +1,4 @@
-<div id="myCarousel" class="carousel slide carousel-fade" data-ride="carousel">
+<div id="myCarousel" class="carousel slide carousel-fade mt-3" data-ride="carousel">
 
     <!-- Indicators -->
     <ol class="carousel-indicators">
@@ -11,7 +11,7 @@
     <div class="carousel-inner">
         <div *ngFor="let s of sliders; let i = index" class="carousel-item" [class.active]="i === 0">
 
-            <img class="d-block w-80" [src]="this.attachmentUrl+s.s_image_url" alt="Slide {{ i + 1 }}">
+            <img class="d-block w-100" [src]="this.attachmentUrl+s.s_image_url" alt="Slide {{ i + 1 }}">
         </div>
     </div>
 
@@ -96,10 +96,11 @@
                 </div>
             </mat-tab> -->
                     <mat-tab *ngFor="let category of categories" [label]="category.ct_name">
+                        <hr/>
                         <div class="container-fluid">
                             <div class="row">
                                 <div *ngFor="let product of getProductsByCategory(category.ct_id)"
-                                    class="col-lg-4 col-md-4 col-sm-12">
+                                    class="col-lg-3 col-md-6 col-sm-12">
                                     <div class="product">
                                         <div class="product__thumb">
                                             <a>
@@ -152,7 +153,9 @@
                             </div>
                         </div>
                     </mat-tab>
+
                 </mat-tab-group>
+                <br/>
             </div>
         </div>
 
@@ -161,13 +164,16 @@
 
 <!-- product show case area start  -->
 <div class="show-case lightblue pt-125">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div class="section-wrapper text-center mb-35">
                     <h4 class="sub-title">Bestseller products</h4>
                     <h2 class="section-title text-white">Stride Sports And Casual Shoes Sneakers For Men</h2>
-                    <p class="d-none d-lg-block">Experience comfort and performance with the Captain Stride Sports Shoes. Designed with breathable mesh fabric, cushioned EVA midsole, and durable rubber outsole, these shoes deliver excellent grip, flexibility, and long-lasting comfort. Ideal for running, walking, gym training, and casual daily wear.
+                    <p class="d-none d-lg-block">Experience comfort and performance with the Captain Stride Sports
+                        Shoes. Designed with breathable mesh fabric, cushioned EVA midsole, and durable rubber outsole,
+                        these shoes deliver excellent grip, flexibility, and long-lasting comfort. Ideal for running,
+                        walking, gym training, and casual daily wear.
                         <br> eget maecenas sed urna malesuada.
                     </p>
                 </div>
@@ -181,150 +187,71 @@
         </div>
     </div>
 </div>
-<!-- product show case area end  -->
-
-<!-- blog area start -->
+<h2 class="  divider gradient" contenteditable>Blogs</h2>
 <div class="blog-area mb-5">
-  <div class="container">
-
-    <!-- HEADER -->
-    <div class="text-center mb-5">
-      <h2 class="font-weight-bold">From Our Blog</h2>
-      <p class="text-muted">Latest articles and updates from our blog</p>
-    </div>
-
-    <div class="row" *ngIf="blogs.length">
-
-      <!-- FEATURED BLOG -->
-      <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow h-100">
-
-          <img
-            [src]="attachmentUrl + latestBlog.b_image_url"
-            class="card-img-top"
-            style="height:420px; object-fit:cover;"
-            alt="blog">
-
-          <div class="card-body">
-            <span class="badge badge-secondary mb-2">Blog</span>
-
-            <h4 class="font-weight-bold">
-              <a (click)="navigateToBlog(latestBlog.b_id)">
-                {{ latestBlog.b_title }}
-              </a>
-            </h4>
-
-            <p class="text-muted small mb-2">
-              By Admin · {{ latestBlog.b_cre_date | date:'MMMM dd, yyyy' }}
-            </p>
-
-            <a class="font-weight-bold" (click)="navigateToBlog(latestBlog.b_id)">
-              Continue reading →
-            </a>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- OTHER BLOGS -->
-      <div class="col-lg-6">
-
-        <div class="media mb-4 align-items-start"
-             *ngFor="let blog of blogs.slice(1,4)">
-
-          <img
-            [src]="attachmentUrl + blog.b_image_url"
-            class="mr-3 rounded"
-            width="120"
-            height="90"
-            style="object-fit:cover;"
-            alt="blog">
-
-          <div class="media-body">
-            <span class="badge badge-light mb-1">Blog</span>
-
-            <h5 class="mt-0 font-weight-bold">
-              <a (click)="navigateToBlog(blog.b_id)">
-                {{ blog.b_title }}
-              </a>
-            </h5>
-
-            <p class="text-muted small mb-1">
-              By Admin · {{ blog.b_cre_date | date:'MMMM dd, yyyy' }}
-            </p>
-
-            <p class="mb-0 text-truncate">
-              {{ blog.b_description }}
-            </p>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-
-
-<!-- popup area start -->
-<div class="overlay"></div>
-<div class="product-popup">
-    <div class="view-background">
+    <div class="container mt-3">
         <div class="row">
-            <div class="col-xl-5 col-lg-5 col-md-5">
-                <div class="quickview">
-                    <div class="quickview__thumb">
-                        <img src="./assets/img/quick_view/25.jpg" alt="">
+
+
+            <!-- FEATURED BLOG -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="card border-0 shadow h-100">
+
+                    <img [src]="attachmentUrl + latestBlog.b_image_url" class="card-img-top"
+                        style="height:420px; object-fit:cover;" alt="blog">
+
+                    <div class="card-body">
+                        <span class="badge badge-secondary mb-2">Blog</span>
+
+                        <h4 class="font-weight-bold">
+                            <a (click)="navigateToBlog(latestBlog.b_id)">
+                                {{ latestBlog.b_title }}
+                            </a>
+                        </h4>
+
+                        <p class="text-muted small mb-2">
+                            By Admin · {{ latestBlog.b_cre_date | date:'MMMM dd, yyyy' }}
+                        </p>
+
+                        <a class="font-weight-bold" (click)="navigateToBlog(latestBlog.b_id)">
+                            Continue reading →
+                        </a>
                     </div>
+
                 </div>
             </div>
-            <div class="col-xl-7 col-lg-7 col-md-7">
-                <div class="viewcontent">
-                    <div class="viewcontent__header">
-                        <h2>Brown Leather Bags</h2>
-                        <a class="view_close product-p-close" href="javascript:void(0)"><i
-                                class="fal fa-times-circle"></i></a>
+
+            <!-- OTHER BLOGS -->
+            <div class="col-lg-6">
+
+                <div class="media mb-4 align-items-start" *ngFor="let blog of blogs.slice(1,4)">
+
+                    <img [src]="attachmentUrl + blog.b_image_url" class="mr-3 rounded" width="120" height="90"
+                        style="object-fit:cover;" alt="blog">
+
+                    <div class="media-body">
+                        <span class="badge badge-light mb-1">Blog</span>
+
+                        <h5 class="mt-0 font-weight-bold">
+                            <a (click)="navigateToBlog(blog.b_id)">
+                                {{ blog.b_title }}
+                            </a>
+                        </h5>
+
+                        <p class="text-muted small mb-1">
+                            By Admin · {{ blog.b_cre_date | date:'MMMM dd, yyyy' }}
+                        </p>
+
+                        <p class="mb-0 text-truncate" *ngIf="blog.b_description as desc">
+                            {{ desc | slice:0:50 }}<span *ngIf="desc.length > 50">...</span>
+                        </p>
                     </div>
-                    <div class="viewcontent__rating">
-                        <i class="fal fa-star ratingcolor"></i>
-                        <i class="fal fa-star ratingcolor"></i>
-                        <i class="fal fa-star ratingcolor"></i>
-                        <i class="fal fa-star"></i>
-                    </div>
-                    <div class="viewcontent__price">
-                        <h4><span>$</span>99.00</h4>
-                    </div>
-                    <div class="viewcontent__stock">
-                        <h4>Available :<span> In stock</span></h4>
-                    </div>
-                    <div class="viewcontent__details">
-                        <p>Anlor sit amet, consectetur adipiscing elit. Fusce condimentum est lacus, non pretium risus
-                            lacinia vel. Fusce eget turpis orci.</p>
-                    </div>
-                    <div class="viewcontent__action">
-                        <span>Qty</span>
-                        <span><input type="number" placeholder="1"></span>
-                        <span><a href="#">add to cart</a></span>
-                        <span><i class="fal fa-heart"></i></span>
-                        <span><i class="fal fa-info-circle"></i></span>
-                    </div>
-                    <div class="viewcontent__footer">
-                        <ul>
-                            <li>Category:</li>
-                            <li>SKU:</li>
-                            <li>Brand:</li>
-                        </ul>
-                        <ul>
-                            <li>Watches</li>
-                            <li>2584-MK63</li>
-                            <li>Brenda</li>
-                        </ul>
-                    </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 </div>
