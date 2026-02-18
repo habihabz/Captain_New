@@ -12,3 +12,37 @@
   .pagination {
     justify-content: center;
   }
+
+
+  .order-card {
+  font-size: 15px;
+  background: #ffffff;
+}
+
+.product-img {
+  max-height: 140px;
+  object-fit: contain;
+}
+
+.label {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-title {
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .product-img {
+    max-height: 110px;
+  }
+  .value {
+    font-size: 16px;
+  }
+}

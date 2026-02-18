@@ -1,49 +1,67 @@
 <div class="container my-4 mt-4">
+  <br />
   <div class="row">
-    <div class="col-md-12" *ngFor="let order of pagedOrders" >
-      <br/>
-      <div class="card order-card shadow-lg border-0 rounded-3 mb-3">
-        <div class="card-body shade">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="card-title mb-0">Order #{{ order.co_id }}</h5>
-            <span class="badge bg-info text-dark">{{ order.co_status_name }}</span>
+    <div class="col-md-12" *ngFor="let order of pagedOrders">
+      <div class="card order-card shadow-sm border-0 rounded-3 mb-4 p-2">
+
+        <div class="row g-3 align-items-center">
+
+          <!-- IMAGE -->
+          <div class="col-md-3 text-center">
+            <img *ngFor="let p_attachement of getAttachementOfaProduct(order.p_attachements).slice(0,1); let i=index"
+              [src]="apiUrl + '/' + p_attachement.pa_image_path" class="product-img img-fluid rounded"
+              alt="product_image">
           </div>
 
-          <p class="text-muted mb-2">
-            <i class="bi bi-geo-alt"></i> {{ order.co_c_address_details }}
-          </p>
+          <!-- TEXT -->
+          <div class="col-md-9 p-3">
 
-          <div class="row">
-            <div class="col-sm-4">
-              <p class="mb-1"><strong>Quantity:</strong> {{ order.co_qty }}</p>
+            <div class="d-flex justify-content-between flex-wrap mb-2">
+              <h5 class="fw-bold mb-1">Order #{{ order.co_id }}</h5>
+              <span class="badge bg-dark fs-6 px-3 py-2">
+                {{ order.co_status_name }}
+              </span>
             </div>
-            <div class="col-sm-4">
-              <p class="mb-1">
-                <strong>Amount:</strong> <span>&#x20B9;</span>{{ order.co_amount }}
-              </p>
+
+            <p class="text-muted fs-6 mb-2">
+              <i class="bi bi-geo-alt"></i>
+              {{ order.co_c_address_details }}
+            </p>
+
+            <div class="row text-center text-md-start">
+              <div class="col-md-4 mb-2">
+                <span class="label">Quantity  <div class="value"> {{ order.co_qty }}</div></span>
+               
+              </div>
+
+              <div class="col-md-4 mb-2">
+                <span class="label">Amount <div class="value text-success">   ₹ {{ order.co_amount }}  </div></span>
+
+              </div>
+
+              <div class="col-md-4 mb-2 text-md-end">
+                <span class="label">Date</span>
+                <div class="value">
+                  {{ order.co_cre_date | date:'mediumDate' }}
+                </div>
+              </div>
             </div>
-            <div class="col-sm-4 text-sm-end">
-              <p class="mb-1">
-                <strong>Date:</strong> {{ order.co_cre_date | date: 'mediumDate' }}
-              </p>
-            </div>
+
           </div>
         </div>
+
       </div>
     </div>
 
     <!-- Pagination -->
-    <nav *ngIf="totalPages > 1">
+    <nav>
       <ul class="pagination">
         <li class="page-item" [class.disabled]="currentPage === 1">
           <a class="page-link" (click)="changePage(currentPage - 1)">Previous</a>
         </li>
 
-        <li
-          class="page-item"
-          *ngFor="let page of [].constructor(totalPages); let i = index"
-          [class.active]="currentPage === i + 1"
-        >
+        <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === i + 1">
           <a class="page-link" (click)="changePage(i + 1)">{{ i + 1 }}</a>
         </li>
 

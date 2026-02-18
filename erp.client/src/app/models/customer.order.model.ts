@@ -1,4 +1,6 @@
-export class CustomerOrder {
+import { ProductForExtend } from "./product.for.extend.model";
+
+export class CustomerOrder extends ProductForExtend{
     co_id: number;
     co_customer_id: number;
     co_customer_name: string;
@@ -13,7 +15,7 @@ export class CustomerOrder {
     co_cre_date: string;
 
     constructor() {
-
+        super();
         this.co_id = 0;
         this.co_customer_id = 0;
         this.co_customer_name='';

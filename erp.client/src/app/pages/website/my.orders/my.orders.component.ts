@@ -8,6 +8,7 @@ import { IuserService } from '../../../services/iuser.service';
 import { ICustomerOrder } from '../../../services/icustomer.order.service';
 import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
 import { User } from '../../../models/user.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-my-orders',
@@ -15,6 +16,7 @@ import { User } from '../../../models/user.model';
   styleUrls: ['./my.orders.component.css']
 })
 export class MyOrdersComponent implements OnInit {
+  apiUrl = `${environment.serverHostAddress}`;
   currentUser: User = new User();
   myorders: CustomerOrder[] = [];
   pagedOrders: CustomerOrder[] = [];
@@ -60,6 +62,13 @@ export class MyOrdersComponent implements OnInit {
     this.updatePagedOrders();
   }
 
+  getAttachementOfaProduct(p_attachements: string) {
+    var att: any;
+    if (p_attachements) {
+      att = JSON.parse(p_attachements);
+    }
+    return att;
+  }
   updatePagedOrders(): void {
     const start = (this.currentPage - 1) * this.ordersPerPage;
     const end = start + this.ordersPerPage;

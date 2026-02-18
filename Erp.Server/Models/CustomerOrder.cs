@@ -6,7 +6,7 @@ namespace Erp.Server.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.ComponentModel.DataAnnotations;
 
-    public class CustomerOrder
+    public class CustomerOrder : ProductForExtend
     {
         [Key]
         [Display(Name = "Id")]
