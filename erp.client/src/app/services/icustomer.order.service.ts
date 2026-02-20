@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, tap } from 'rxjs';
 import { DbResult } from '../models/dbresult.model';
 import { environment } from '../../environments/environment';
-import { CustomerOrder } from '../models/customer.order.model';
+import { CustomerOrder as any } from '../models/customer.order.model';
 import { RequestParms } from '../models/requestParms';
 import { CustomerOrderDetail } from '../models/customer.order.detail.model';
 
@@ -13,35 +13,39 @@ import { CustomerOrderDetail } from '../models/customer.order.detail.model';
 export class ICustomerOrder {
   private apiUrl = `${environment.serverHostAddress}/api/CustomerOrder`;
   private refreshSubject = new Subject<void>();
-  
+
   constructor(private http: HttpClient) { }
 
-  getCustomerOrders(requestParms:RequestParms): Observable<CustomerOrder[]> {
-    return this.http.post<CustomerOrder[]>(this.apiUrl + "/getCustomerOrders", requestParms);  
+  getCustomerOrders(requestParms: RequestParms): Observable<any[]> {
+    return this.http.post<any[]>(this.apiUrl + "/getCustomerOrders", requestParms);
   }
 
-  getCustomerOrder(id: number): Observable<CustomerOrder> {
-    return this.http.post<CustomerOrder>(this.apiUrl + "/getCustomerOrder", id);  
+  getCustomerOrder(id: number): Observable<any> {
+    return this.http.post<any>(this.apiUrl + "/getCustomerOrder", id);
   }
 
   deleteCustomerOrder(id: number): Observable<DbResult> {
-    return this.http.post<DbResult>(this.apiUrl + "/deleteCustomerOrder", id); 
+    return this.http.post<DbResult>(this.apiUrl + "/deleteCustomerOrder", id);
   }
 
   createOrUpdateCustomerOrder(requestParms: RequestParms): Observable<DbResult> {
-    return this.http.post<DbResult>(this.apiUrl + "/createOrUpdateCustomerOrder", requestParms); 
-  }
-  
-  getCustomerOrderDetails(id:number): Observable<CustomerOrderDetail[]> {
-    return this.http.post<CustomerOrderDetail[]>(this.apiUrl + "/getCustomerOrderDetails", id);  
+    return this.http.post<DbResult>(this.apiUrl + "/createOrUpdateCustomerOrder", requestParms);
   }
 
-  getMyOrders(requestParms: RequestParms): Observable<CustomerOrder[]> {
-    return this.http.post<CustomerOrder[]>(this.apiUrl + "/getMyOrders", requestParms); 
+  getCustomerOrderDetails(id: number): Observable<CustomerOrderDetail[]> {
+    return this.http.post<CustomerOrderDetail[]>(this.apiUrl + "/getCustomerOrderDetails", id);
+  }
+
+  getMyOrders(requestParms: RequestParms): Observable<any[]> {
+    return this.http.post<any[]>(this.apiUrl + "/getMyOrders", requestParms);
   }
 
   updateStatusForCustomerOrder(requestParms: RequestParms): Observable<DbResult> {
-    return this.http.post<DbResult>(this.apiUrl + "/updateStatusForCustomerOrder", requestParms); 
+    return this.http.post<DbResult>(this.apiUrl + "/updateStatusForCustomerOrder", requestParms);
+  }
+
+  downloadTaxInvoice(id: number): Observable<any> {
+    return this.http.post<any>(this.apiUrl + "/downloadTaxInvoice", id);
   }
 
   get refresh$() {

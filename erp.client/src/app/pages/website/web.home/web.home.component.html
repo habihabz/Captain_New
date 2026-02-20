@@ -132,7 +132,7 @@
                                                 <div class="pro-price" *ngIf="product.p_price>=0">
                                                     <p class="p-absoulute pr-1"><span>&#x20B9;</span> {{
                                                         product.p_price}}</p>
-                                                    <a class="p-absoulute pr-2" href="#">add to cart</a>
+                                                    <a class="p-absoulute pr-2" (click)="navigateToProduct(product.p_id)">View</a>
                                                 </div>
                                             </div>
                                             <div class="product__action">

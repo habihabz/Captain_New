@@ -1,9 +1,18 @@
-<div class="blog-area mb-5">
-
+<div class="blog-area mb-5" style="min-height: 80vh;">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb bg-light px-3 py-2 rounded">
+      <li class="breadcrumb-item">
+        <a routerLink="/home">Home</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Blogs
+      </li>
+    </ol>
+  </nav>
   <!-- BLOG LIST -->
-  <div class="container" *ngIf="blogId === 0">
+  <div class="container p-4" *ngIf="blogId === 0">
 
-    <div class="text-center mb-5">
+    <div class="text-center mb-5 ">
       <h2 class="font-weight-bold">From Our Blog</h2>
       <p class="text-muted">Latest articles and updates</p>
     </div>
@@ -63,8 +72,8 @@
   </div>
 
   <div class="container my-5" *ngIf="blogId !== 0 && blog">
-    <br/>
-    <br/>
+    <br />
+    <br />
     <div class="row">
 
       <!-- BLOG CONTENT -->
@@ -73,7 +82,7 @@
         <h1 class="font-weight-bold mb-2">
           {{ blog.b_title }}
         </h1>
-        <hr/>
+        <hr />
         <p class="text-muted mb-4">
           By Admin · {{ blog.b_cre_date | date:'MMMM dd, yyyy' }}
         </p>
@@ -81,7 +90,7 @@
         <img [src]="attachmentUrl + blog.b_image_url" class="img-fluid rounded mb-4 w-100"
           style="max-height:500px; object-fit:cover;" alt="blog">
 
-       <div class="blog-content" [innerHTML]="safeBlogContent"></div>
+        <div class="blog-content" [innerHTML]="safeBlogContent"></div>
 
 
       </div>
@@ -97,7 +106,7 @@
             </h5>
 
             <div class="media mb-3" *ngFor="let b of suggestedBlogs" (click)="navigateTo(b.b_id)"
-              style="cursor:pointer;"  >
+              style="cursor:pointer;">
 
               <img [src]="attachmentUrl + b.b_image_url" class="mr-3 rounded" width="70" height="55"
                 style="object-fit:cover;" alt="blog">

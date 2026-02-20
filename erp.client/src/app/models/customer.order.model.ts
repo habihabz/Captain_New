@@ -4,6 +4,7 @@ export class CustomerOrder extends ProductForExtend{
     co_id: number;
     co_customer_id: number;
     co_customer_name: string;
+    co_customer_phone: string;
     co_c_address_id:number;
     co_c_address_details:string;
     co_qty:number;
@@ -19,6 +20,7 @@ export class CustomerOrder extends ProductForExtend{
         this.co_id = 0;
         this.co_customer_id = 0;
         this.co_customer_name='';
+        this.co_customer_phone='';
         this.co_c_address_id=0;
         this.co_c_address_details='';
         this.co_qty=0;

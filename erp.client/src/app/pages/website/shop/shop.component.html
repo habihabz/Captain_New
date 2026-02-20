@@ -92,7 +92,7 @@
                   <h4><a href="shop.html">{{product.p_name}}</a></h4>
                   <div class="pro-price">
                     <p class="p-absoulute pr-1"><span>&#x20B9;</span>{{product.p_price}}</p>
-                    <a class="p-absoulute pr-2" href="#">add to cart</a>
+                    <a class="p-absoulute pr-2"(click)="navigateToProduct(product.p_id)">View</a>
                   </div>
                 </div>
                 <div class="product__action">

@@ -118,18 +118,20 @@ export class MycartComponent implements OnInit {
     const cartItem = this.carts.find(c => c.c_id === c_id);
     if (cartItem) {
       cartItem.c_qty++;
-      cartItem.c_price = cartItem.c_qty * cartItem.p_price;
+      cartItem.c_price = Math.round(cartItem.c_qty * cartItem.p_price * 100) / 100;
     }
-    this.getCartTotal();
+    this.updateCart(cartItem!);
   }
 
   decreaseQuantity(c_id: number): void {
     const cartItem = this.carts.find(c => c.c_id === c_id);
     if (cartItem && cartItem.c_qty > 1) {
       cartItem.c_qty--;
-      cartItem.c_price = cartItem.c_qty * cartItem.p_price;
+      cartItem.c_price = Math.round(cartItem.c_qty * cartItem.p_price * 100) / 100;
     }
-    this.getCartTotal();
+
+    this.updateCart(cartItem!);
+
   }
 
   saveForLater(c_id: number): void {
@@ -154,19 +156,32 @@ export class MycartComponent implements OnInit {
 
   }
 
- getCartTotal() {
-  const total = this.carts.reduce((sum, cart) => 
-    sum + (cart.p_price * cart.c_qty), 0
-  );
+  getCartTotal() {
+    const total = this.carts.reduce(
+      (sum, cart) => sum + (cart.p_price * cart.c_qty),
+      0
+    );
 
-  this.totalPrice = total;
-  this.discount = total * 0.1;
-  this.netAmount = total + this.deliveryCharge - this.discount;
-}
+    this.totalPrice = Math.round(total * 100) / 100;
+    this.discount = Math.round(this.totalPrice * 0.1 * 100) / 100;
+    this.netAmount = Math.round(
+      (this.totalPrice + this.deliveryCharge - this.discount) * 100
+    ) / 100;
+  }
 
   placeOrder() {
+    const cartOnly = this.carts.map((c: any) => ({
+      c_id: c.c_id,
+      c_product: c.c_product,
+      c_size: c.c_size,
+      c_size_name: c.c_size_name,
+      c_color: c.c_color,
+      c_qty: c.c_qty,
+      c_price: Math.round(c.c_price * 100) / 100
+    }));
+
+    this.requestParms.details = JSON.stringify(cartOnly);
     this.requestParms.user = this.currentUser.u_id;
-    this.requestParms.details = JSON.stringify(this.carts);
     this.icustomerOrder.createOrUpdateCustomerOrder(this.requestParms).subscribe(
       (data: DbResult) => {
         if (data.message === 'Success') {
@@ -197,7 +212,7 @@ export class MycartComponent implements OnInit {
   CreateOrUpdateAddress() {
 
     this.address.ad_cre_by = this.currentUser.u_id;
-    if (this.address.ad_name!='' && this.address.ad_address != '' && this.address.ad_phone != '') {
+    if (this.address.ad_name != '' && this.address.ad_address != '' && this.address.ad_phone != '') {
       this.iaddress.createOrUpdateAddress(this.address).subscribe(
         (dbResult: DbResult) => {
           if (dbResult.message == 'Success') {
@@ -215,36 +230,50 @@ export class MycartComponent implements OnInit {
         }
       );
     }
-    else
-    {
+    else {
       this.snackbarService.showError("Please Enter All Data");
     }
 
   }
 
-  onShowAddressForm(){
+  onShowAddressForm() {
     this.showAddressForm = !this.showAddressForm
-    this.address=new Address();
+    this.address = new Address();
   }
 
   deleteAddress(ad_id: number) {
-      this.iaddress.deleteAddress(ad_id).subscribe(
-        (dbResult: DbResult) => {
-          if (dbResult.message == 'Success') {
-            this.snackbarService.showSuccess("Deleted");
-            this.getMyAddress();
+    this.iaddress.deleteAddress(ad_id).subscribe(
+      (dbResult: DbResult) => {
+        if (dbResult.message == 'Success') {
+          this.snackbarService.showSuccess("Deleted");
+          this.getMyAddress();
 
-          }
-          else {
-            this.snackbarService.showError(dbResult.message);
-          }
-        },
-        (error: any) => {
         }
-      );
-   
+        else {
+          this.snackbarService.showError(dbResult.message);
+        }
+      },
+      (error: any) => {
+      }
+    );
+
   }
 
+  updateCart(cart: Cart) {
+    this.icartService.createOrUpdateCart(cart).subscribe(
+      (data: DbResult) => {
+        if (data.message === 'Success') {
+          this.snackbarService.showSuccess("Cart Updated");
+
+        } else {
+          this.snackbarService.showError("Failed to update cart");
+        }
+        this.getCartTotal();
+      },
+      (error: any) => {
+      }
+    );
+  }
 
   loadRazorpay() {
     return new Promise((resolve, reject) => {
@@ -269,7 +298,7 @@ export class MycartComponent implements OnInit {
 
     const Razorpay = (window as any).Razorpay;
 
-    this.http.post<any>(this.paymentUrl, { amount: this.netAmount})
+    this.http.post<any>(this.paymentUrl, { amount: this.netAmount })
       .subscribe(order => {
         const options = {
           key: order.key,
@@ -282,7 +311,7 @@ export class MycartComponent implements OnInit {
             upi: true
           },
           handler: (response: any) => {
-            this.placeOrder() ;
+            this.placeOrder();
           },
           prefill: {
             email: 'abimanjeri@gmail.com',

@@ -1,0 +1,74 @@
+.order-box{
+  padding:15px;
+  font-family:Arial;
+}
+
+.tracker{
+  list-style:none;
+  padding-left:35px;
+  margin:0;
+}
+
+.tracker li{
+  position:relative;
+  margin-bottom:5px;
+}
+
+/* circle */
+.tracker li::before{
+  content:"";
+  position:absolute;
+  left:-25px;
+  top:3px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:2px solid #ccc;
+  background:white;
+}
+
+/* line only between items */
+.tracker li::after{
+  content:"";
+  position:absolute;
+  left:-16px;
+  top:22px;
+  width:2px;
+  height:25px;
+  background:#ccc;
+}
+
+/* remove last line */
+.tracker li:last-child::after{
+  display:none;
+}
+
+/* done step */
+.tracker li.done::before{
+  background:#16a34a;
+  border-color:#16a34a;
+}
+
+.tracker li.done::after{
+  background:#16a34a;
+}
+
+/* check mark */
+.tracker li.done span::before{
+  content:"✓";
+  position:absolute;
+  left:-21px;
+  top:1px;
+  color:white;
+  font-size:12px;
+}
+
+.tracker b{
+  display:block;
+  color:#333;
+}
+
+.tracker span{
+  font-size:12px;
+  color:#777;
+}

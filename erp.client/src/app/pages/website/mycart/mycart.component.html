@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" style="min-height: 80vh;">
     <div class="row" *ngIf="this.carts.length>0">
         <h2>Delivery Address</h2>
         <div class="col-md-8">
@@ -133,12 +133,12 @@
         </div>
     </div>
     <div class="row" *ngIf="this.carts.length===0">
-        <div class="col-md-12">
+        <div class="col-md-12 mt-4">
             <div class="empty-cart-container">
                 <div class="empty-cart-icon">🛒</div>
                 <div class="empty-cart-text">Your Cart is Empty</div>
                 <div class="empty-cart-subtext">Looks like you haven’t added anything yet.</div>
-                <a (click)="navigateTo('shop')" class="btn btn-danger">Start Shopping</a>
+                <a (click)="navigateTo('shop')" class="btn btn-danger text-white">Start Shopping</a>
             </div>
         </div>
     </div>

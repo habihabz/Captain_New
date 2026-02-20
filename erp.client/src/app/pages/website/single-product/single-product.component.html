@@ -55,7 +55,7 @@
                         </button>
                     </div>
                 </div>
-                <button class="btn btn-primary" (click)="addToCart()"><i class="fa fa-shopping-bag"> </i> Add to
+                <button class="btn btn-success" (click)="addToCart()"><i class="fa fa-shopping-bag"> </i> Add to
                     Bag</button>
                 <button class="btn btn-default"> Favourite <i class="fa fa-heart"></i></button>
                 <h5>
@@ -79,7 +79,7 @@
                 <div class="product">
                     <div class="product__thumb">
                         <a>
-                            <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"
+                            <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 4); let i = index"
                                 [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
                                 [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
                                 style="height: 300px; width: auto;">
@@ -99,7 +99,7 @@
                         <div class="product__name">
                             <h4><a href="shop.html">{{product.p_name}}</a></h4>
                             <div class="pro-price">
-                                <p class="p-absoulute pr-1"><span>&#x20B9;</span> 80.00</p>
+                                <p class="p-absoulute pr-1"><span>&#x20B9;</span>{{ product.p_price }}</p>
                                 <a class="p-absoulute pr-2" href="#">add to cart</a>
                             </div>
                         </div>

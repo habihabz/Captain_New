@@ -36,6 +36,7 @@ import { MyOrdersComponent } from './pages/website/my.orders/my.orders.component
 import { SliderComponent } from './pages/slider/slider.component';
 import { AboutUsComponent } from './pages/website/about.us/about.us.component';
 import { BlogComponent } from './pages/blog/blog.component';
+import { OrderDetailsComponent } from './pages/website/order.details/order.details.component';
 
 
 
@@ -80,7 +81,8 @@ const routes: Routes = [
         path: 'myorders',
         component: MyOrdersComponent
 
-      }
+      },
+      { path: 'order-details/:id', component: OrderDetailsComponent },
     ]
   },
   {
@@ -97,7 +99,7 @@ const routes: Routes = [
     component: LoginComponent
   },
   { path: 'logout', component: LoginComponent },
-  
+
   {
     path: 'access-denied',
     component: AccessDeniedComponent

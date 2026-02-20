@@ -29,4 +29,17 @@ export class Cart extends Product {
   private calculatePrice(): number {
     return this.c_qty > 0 && this.p_price ? this.c_qty * this.p_price : 0;
   }
+
+  toCartOnly() {
+  return {
+    c_id: this.c_id,
+    c_product: this.c_product,
+    c_size: this.c_size,
+    c_size_name: this.c_size_name,
+    c_color: this.c_color,
+    c_qty: this.c_qty,
+    c_price: this.c_price,
+    c_cre_by: this.c_cre_by
+  };
+}
 }

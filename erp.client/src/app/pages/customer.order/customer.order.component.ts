@@ -65,6 +65,7 @@ export class CustomerOrderComponent {
     { headerName: "Id", field: "co_id" },
     { headerName: "Customer", field: "co_customer_name" },
     { headerName: "Address", field: "co_d_address_details" },
+    { headerName: "Product", field: "p_name" },
     { headerName: "Quanitity", field: "co_qty" },
     { headerName: "Amount", field: "co_amount" },
     { headerName: "Status", field: "co_status_name" },
@@ -72,12 +73,6 @@ export class CustomerOrderComponent {
       headerName: 'Status Change', cellRenderer: 'actionRenderer', cellRendererParams:
       {
         name: 'Status Change', action: 'onStatusChange', cssClass: 'btn btn-primary', icon: 'fa fa-exchange', onStatusChange: (data: any) => this.onAction('statusChange', data)
-      }
-    },
-    {
-      headerName: 'Details', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Details', action: 'onDetails', cssClass: 'btn btn-info', icon: 'fa fa-list', onDetails: (data: any) => this.onAction('details', data)
       }
     }
   ];
@@ -150,8 +145,8 @@ export class CustomerOrderComponent {
     );
   }
 
-  onStatusChange(data:any){
-    this.customerOrder=data;
+  onStatusChange(data: any) {
+    this.customerOrder = data;
     $("#StatusChangeModal").modal("show");
   }
 
@@ -178,21 +173,20 @@ export class CustomerOrderComponent {
     this.requestParms.id = cos_id;
     this.getCustomerOrders();
   }
-  onNewStatusChange (s_id :number){
-    this.requestParms.status=s_id;
+  onNewStatusChange(s_id: number) {
+    this.requestParms.status = s_id;
   }
-  updateStatusForCustomerOrder(){
-    this.requestParms.user=this.currentUser.u_id;
-    this.requestParms.id=this.customerOrder.co_id;
+  updateStatusForCustomerOrder() {
+    this.requestParms.user = this.currentUser.u_id;
+    this.requestParms.id = this.customerOrder.co_id;
     this.icustomerOrder.updateStatusForCustomerOrder(this.requestParms).subscribe(
       (data: DbResult) => {
-        if(data.message=="Success"){
-           this.getCustomerOrders();
-           this.customerOrder=new CustomerOrder();
-           this.requestParms=new RequestParms();
-            $("#StatusChangeModal").modal("show");
-        }else
-        {
+        if (data.message == "Success") {
+          this.getCustomerOrders();
+          this.customerOrder = new CustomerOrder();
+          this.requestParms = new RequestParms();
+          $("#StatusChangeModal").modal("show");
+        } else {
           this.snackBarService.showError(data.message);;
         }
 

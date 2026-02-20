@@ -18,9 +18,9 @@ namespace Erp.Server.Models
         public string? co_customer_name { get; set; } = string.Empty;
 
         [Display(Name = "Delivery Address")]
-        public int? co_d_address { get; set; } = 0;
+        public int? co_c_address { get; set; } = 0;
 
-        public string? co_d_address_details { get; set; } = string.Empty;
+        public string? co_c_address_details { get; set; } = string.Empty;
 
         [Display(Name = "Quantity")]
         public int? co_qty { get; set; } = 0;

@@ -80,4 +80,8 @@ export class MyOrdersComponent implements OnInit {
     this.currentPage = page;
     this.updatePagedOrders();
   }
+  orderDetails(orderId: number): void {
+    
+    this.router.navigate(['/order-details', orderId]);
+  }
 }

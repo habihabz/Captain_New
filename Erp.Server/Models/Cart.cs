@@ -10,6 +10,9 @@ namespace Erp.Server.Models
         [Display(Name = "Id")]
         public int c_id { get; set; }
 
+        [Display(Name = "Country")]
+        public int? c_country { get; set; } = 0;
+
         [Display(Name = "Product")]
         public int? c_product { get; set; } = 0;
 

@@ -1,0 +1,106 @@
+<div class="container-fluid my-4 mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-light px-3 py-2 rounded">
+            <li class="breadcrumb-item">
+                <a routerLink="/home">Home</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Order Details
+            </li>
+        </ol>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3 ">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-9 p-3">
+                            
+                            <h5 class="fw-bold mb -1">Order Number : {{ customerOrder.co_id }}</h5>
+                            <h1 class="fw-bold mb -1"> {{ customerOrder.p_name}} </h1>
+                            <h1 class="fw-bold mb -1"><span>&#x20B9;</span> {{ customerOrder.co_amount }}</h1>
+
+
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <img *ngFor="let p_attachement of getAttachementOfaProduct(customerOrder.p_attachements).slice(0,1); let i=index"
+                                [src]="apiUrl + '/' + p_attachement.pa_image_path" class="product-img img-fluid rounded"
+                                style="height:250px;" alt="product_image">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 p-3">
+                            <h4 class="fw-bold mb -1">Quantity : {{ customerOrder.co_qty }}</h4>
+                        </div>
+                    </div>
+
+                    <div class="g-3 align-items-center">
+                        <div class="col-md-12">
+                            <div class="position-relative ps-4">
+                                <div class="order-box">
+                                    <h2 class="fw-bold text-center">Order Status</h2>
+                                    <hr />
+                                    <ul class="tracker">
+                                        <li class="done">
+                                            <b>Order Confirmed</b>
+                                            <span>Dec 24, 2025</span>
+                                        </li>
+                                        <li class="done">
+                                            <b>Shipped</b>
+                                            <span>Dec 25, 2025</span>
+                                        </li>
+                                        <li class="done">
+                                            <b>Out of Delivery</b>
+                                            <span>Dec 25, 2025</span>
+                                        </li>
+                                        <li>
+                                            <b>Delivered</b>
+                                            <span>Pending</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 ">
+                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h2 class="fw-bold mb -1 text-center">Delivery Details</h2>
+                            <hr />
+                            <h4 class="mb -1"><i class="fa fa-home"></i> {{ customerOrder.co_c_address_details }}</h4>
+                            <h4 class="mb -1"><i class="fa fa-user"></i> {{ customerOrder.co_customer_name }} </h4>
+                            <h4 class="mb -1"><i class="fa fa-phone"></i> {{ customerOrder.co_customer_phone }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3">
+                    <div class="row ">
+                        <div class="col-md-12">
+                            <h2 class="fw-bold mb -1 text-center">Payment Details</h2>
+                            <hr />
+                            <h4 class="mb -1"><i class="fa fa-address-book"></i> Total Amount :<span>&#x20B9;</span> {{
+                                customerOrder.co_amount }}</h4>
+                            <h4 class="mb -1"><i class="fa fa-address-book"></i> Total Amount :<span>&#x20B9;</span> {{
+                                customerOrder.co_amount }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3">
+                    <div class="row ">
+                        <div class="col-md-12">
+                            <button class="btn btn-warning text-gray w-100" (click)="downloadTaxInvoice()">Download Tax
+                                Invoice </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            Return policy ended on Jan 01, 2024. For more details, please contact our support team.
+            <div class="col-md-12">
+            </div>
+        </div>
+
+    </div>
+</div>
