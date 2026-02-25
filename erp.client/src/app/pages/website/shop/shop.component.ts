@@ -13,6 +13,12 @@ import { ICategoryService } from '../../../services/icategory.service';
 import { ProdSize } from '../../../models/prod.size.model';
 import { ProductSearchParms } from '../../../models/product.search.parms.model';
 import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
+import { User } from '../../../models/user.model';
+import { Favourite } from '../../../models/favourite.model';
+import { IFavouriteService } from '../../../services/ifavourite.service';
+import { IuserService } from '../../../services/iuser.service';
+import { SnackBarService } from '../../../services/isnackbar.service';
+import { DbResult } from '../../../models/dbresult.model';
 
 @Component({
   selector: 'app-shop',
@@ -38,18 +44,23 @@ export class ShopComponent implements OnInit {
   selectedSize: MasterData = new MasterData();
   openSection: string | null = null;
   sortBy: number = 0;
-  productSearchParms:ProductSearchParms=new ProductSearchParms();
-  country:MasterData=new  MasterData();
-  
+  productSearchParms: ProductSearchParms = new ProductSearchParms();
+  country: MasterData = new MasterData();
+  favourite: Favourite = new Favourite();
+  currentUser: User = new User();
+
   constructor(
     private elRef: ElementRef,
     private router: Router,
     private iproductService: IProductService,
     private imasterDataService: IMasterDataService,
+    private ifavouriteService: IFavouriteService,
     private icategoryService: ICategoryService,
     private geolocationService: GeolocationService,
+    private iuser: IuserService,
+    private snackbarService: SnackBarService,
   ) {
-
+    this.currentUser = iuser.getCurrentUser();
     this.country = this.geolocationService.getCurrentCountry();
 
   }
@@ -118,7 +129,7 @@ export class ShopComponent implements OnInit {
     } else {
       this.selectedCategoryIds = this.selectedCategoryIds.filter(id => id !== categoryId);
     }
-    this. getProductsByFilters();
+    this.getProductsByFilters();
 
   }
 
@@ -130,7 +141,7 @@ export class ShopComponent implements OnInit {
     } else {
       this.selectedSubCategoryIds = this.selectedSubCategoryIds.filter(id => id !== subCategoryId);
     }
-    this. getProductsByFilters();
+    this.getProductsByFilters();
 
   }
 
@@ -143,7 +154,7 @@ export class ShopComponent implements OnInit {
     } else {
       this.selectedSizeIds = this.selectedSizeIds.filter(id => id !== sizeId);
     }
-    this. getProductsByFilters();
+    this.getProductsByFilters();
 
   }
   toggleSection(section: string) {
@@ -153,11 +164,11 @@ export class ShopComponent implements OnInit {
   }
 
   getProductsByFilters(): void {
-    
-    this.productSearchParms.sizes=this.selectedSizeIds+'';
-    this.productSearchParms.categories=this.selectedCategoryIds+'';
-    this.productSearchParms.subcategories=this.selectedSubCategoryIds+'';
-    this.productSearchParms.country=this.country.md_id;
+
+    this.productSearchParms.sizes = this.selectedSizeIds + '';
+    this.productSearchParms.categories = this.selectedCategoryIds + '';
+    this.productSearchParms.subcategories = this.selectedSubCategoryIds + '';
+    this.productSearchParms.country = this.country.md_id;
     this.iproductService.getProductsByFilters(this.productSearchParms).subscribe(
       (data: Product[]) => {
         this.products = data;
@@ -165,6 +176,31 @@ export class ShopComponent implements OnInit {
       (error: any) => {
       }
     );
+
+  }
+  addToFavourites(productId: number) {
+
+    if (productId && this.currentUser && this.currentUser.u_id) {
+      this.favourite.f_cre_by = this.currentUser.u_id;
+      this.favourite.f_product = productId;
+
+      this.ifavouriteService.createOrUpdateFavourite(this.favourite).subscribe(
+        (data: DbResult) => {
+          if (data.message == "Success") {
+            this.snackbarService.showSuccess("Added to favourites");
+            this.router.navigate(['/favourites']);
+          }
+          else {
+            this.snackbarService.showError(data.message);
+          }
+        },
+        (error: any) => {
+        }
+      );
+
+    } else {
+      this.router.navigate(['/login']);
+    }
 
   }
 }

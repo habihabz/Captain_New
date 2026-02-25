@@ -10,6 +10,8 @@ import { GeolocationService } from '../../../services/GeoCurrentLocation.service
 import { User } from '../../../models/user.model';
 import { environment } from '../../../../environments/environment';
 import { MasterData } from '../../../models/master.data.model';
+import { OrderMovementHistory } from '../../../models/order.movement.history.model';
+import { IOrderMovementHistoryService } from '../../../services/iorder.movement.history.service';
 
 @Component({
   selector: 'app-order.details',
@@ -23,11 +25,7 @@ export class OrderDetailsComponent {
   orderId!: number;
   requestParms: RequestParms = new RequestParms();
   country: MasterData = new MasterData();
-  steps = [
-    { text: 'Order Confirmed, Dec 24, 2025', done: true },
-    { text: 'Delivered, Dec 25, 2025', done: true },
-    { text: 'Out for Delivery', done: false }
-  ];
+  orderMovementHistories: OrderMovementHistory[] = [];
   constructor(
     private router: Router,
     private elRef: ElementRef,
@@ -36,7 +34,8 @@ export class OrderDetailsComponent {
     private snackBarService: SnackBarService,
     private iuser: IuserService,
     private icustomerOrder: ICustomerOrder,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private iOrderMovementHistoryService: IOrderMovementHistoryService
   ) {
     this.currentUser = this.iuser.getCurrentUser();
   }
@@ -44,9 +43,10 @@ export class OrderDetailsComponent {
     this.country = this.geolocationService.getCurrentCountry();
     this.orderId = +this.route.snapshot.paramMap.get('id')!;
     this.getOrderDetails();
+
   }
   getOrderDetails(): void {
-
+    this.getOrderMovementHistory(this.orderId);
     this.icustomerOrder.getCustomerOrder(this.orderId).subscribe(
       (data: CustomerOrder) => {
         this.customerOrder = data;
@@ -67,20 +67,29 @@ export class OrderDetailsComponent {
   downloadTaxInvoice() {
     this.icustomerOrder.downloadTaxInvoice(this.orderId).subscribe(
       (data: any) => {
-        const blob = new Blob([data], { type: 'application/pdf' });   
+        const blob = new Blob([data], { type: 'application/pdf' });
 
-        const url = window.URL.createObjectURL(blob); 
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Tax_Invoice_Order_${this.orderId}.pdf`; 
+        a.download = `Tax_Invoice_Order_${this.orderId}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        window.URL.revokeObjectURL(url); 
+        window.URL.revokeObjectURL(url);
       },
       (error) => {
         this.snackBarService.showError('Error downloading tax invoice.');
       }
-    );  
-  }              
+    );
+  }
+   getOrderMovementHistory(co_id: number) {
+    this.iOrderMovementHistoryService.getOrderMovementHistoriesByOrder(co_id).subscribe(
+      (data: OrderMovementHistory[]) => {
+        this.orderMovementHistories = data;
+      },
+      (error: any) => {
+      }
+    );
+  }
 }

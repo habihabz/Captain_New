@@ -57,7 +57,7 @@
                 </div>
                 <button class="btn btn-success" (click)="addToCart()"><i class="fa fa-shopping-bag"> </i> Add to
                     Bag</button>
-                <button class="btn btn-default"> Favourite <i class="fa fa-heart"></i></button>
+                <button class="btn btn-default" (click)="addToFavourites(product.p_id)"> Favourite <i class="fa fa-heart"></i></button>
                 <h5>
                     {{ product.p_description }}
                 </h5>
@@ -106,7 +106,7 @@
                         <div class="product__action">
                             <div class="inner__action">
                                 <div class="wishlist">
-                                    <a href="#"><i class="fa fa-heart"></i></a>
+                                    <a (click)="addToFavourites(product.p_id)"><i class="fa fa-heart"></i></a>
                                 </div>
                                 <div class="view">
                                     <a (click)="navigateToProduct(product.p_id)"><i class="fa fa-eye"></i></a>

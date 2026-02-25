@@ -1,34 +1,66 @@
-<div class="container" style="min-height: 80vh;">
-    <div class="row">
-        <div class="col-md-12">
-            <div *ngFor="let cart of this.carts">
-                <div class="card  mt-2">
-                    <div class="card-body">
-                        <div class="row g-0">
-                            <div class="col-md-4">
-                                <img *ngFor="let p_attachement of getAttachementOfaProduct(cart.p_attachements).slice(0, 1); let i = index"
-                                    [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
-                                    [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                                    style="height: 150px; width: auto;">
-                            </div>
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-10">{{cart.p_name}}</h4>
-                                    <p class="card-text">{{ cart.p_sub_category_name + ', ' + cart.p_division_name }}</p>
-                                    <h4 class="card-text"><span>&#x20B9;</span>{{cart.p_price}}</h4>
-                                    
-                                    <div class="action-row d-flex align-items-center gap-3">
-                                        <a (click)="removeCart(cart.c_id)" class="text-dark fw-normal ms-3" style="cursor: pointer;"><b>REMOVE</b></a>
-                                      </div>
+<div class="container-fluid" style="min-height: 80vh;">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-light px-3 py-2 rounded">
+            <li class="breadcrumb-item">
+                <a routerLink="/home">Home</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Favourites
+            </li>
+        </ol>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
 
+                <div *ngFor="let fav of favourites">
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            <div class="row g-0">
+
+                                <div class="col-md-3">
+                                    <img *ngFor="let att of getAttachementOfaProduct(fav.p_attachements)?.slice(0,1)"
+                                        [src]="apiUrl + '/' + att.pa_image_path" alt="product_image"
+                                        style="height:150px;width:auto;">
                                 </div>
+
+                                <div class="col-md-8">
+                                    <div class="card-body">
+
+                                        <h4 class="card-title mb-2">
+                                            {{ fav.p_name }}
+                                        </h4>
+
+                                        <p class="card-text">
+                                            {{ fav.p_sub_category_name + ', ' + fav.p_division_name }}
+                                        </p>
+
+                                        <h4 class="card-text">
+                                            ₹ {{ fav.p_price }}
+                                        </h4>
+
+                                        <div class="action-row d-flex align-items-center gap-4">
+                                            <button class="btn btn-outline-success " (click)="navigateToProduct(fav.p_id)">  <i class="fa fa-eye me-2"> </i>View Product</button>
+                                           
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-start justify-content-end">
+                                    <span (click)="removeFavourite(fav.f_id)"
+                                        class="text-danger fw-normal btn-sm d-flex align-items-center"
+                                        style="cursor:pointer;">
+                                        <i class="fa fa-trash"></i>
+                                    </span>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-           
         </div>
-      
     </div>
 </div>

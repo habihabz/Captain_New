@@ -188,6 +188,7 @@ export class MycartComponent implements OnInit {
           this.carts = [];
           this.getCartTotal();
           this.snackbarService.showSuccess("Success");
+           this.router.navigate(['/myorders']);
 
         } else {
           alert(data.message);

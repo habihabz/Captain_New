@@ -35,6 +35,8 @@ namespace Erp.Server.Models
         public DbSet<Address> Address { get; set; }
         public DbSet<Slider> Sliders { get; set; }
         public DbSet<Blog> Blogs { get; set; }
+        public DbSet<OrderMovementHistory> OrderMovementHistories { get; set; }
+        public DbSet<Favourite> Favourites { get; set; }
 
 
     }

@@ -16,6 +16,8 @@ import { Customer } from '../../../models/customer.model';
 import { ICustomerService } from '../../../services/icustomer.service';
 import { IuserService } from '../../../services/iuser.service';
 import { User } from '../../../models/user.model';
+import { Favourite } from '../../../models/favourite.model';
+import { IFavouriteService } from '../../../services/ifavourite.service';
 declare var $: any;
 
 @Component({
@@ -40,6 +42,8 @@ export class SingleProductComponent implements OnInit {
   requestParms: RequestParms = new RequestParms();
   cart: Cart = new Cart();
   currentUser: User = new User();
+  favourite: Favourite = new Favourite();
+
   constructor(
     private router: Router,
     private elRef: ElementRef,
@@ -47,6 +51,7 @@ export class SingleProductComponent implements OnInit {
     private iproductService: IProductService,
     private snackbarService: SnackBarService,
     private icartService: ICartService,
+    private ifavouriteService: IFavouriteService,
     private iproductReviewService: IProductReviewService,
     private geolocationService: GeolocationService,
     private iuser: IuserService
@@ -101,7 +106,7 @@ export class SingleProductComponent implements OnInit {
   getProductsMayLike(productId: number) {
     this.iproductService.getProducts().subscribe(
       (data: Product[]) => {
-        this.productsMayLike = data.filter(x => x.p_id != productId).slice(0,4);
+        this.productsMayLike = data.filter(x => x.p_id != productId).slice(0, 4);
       },
       (error: any) => {
       }
@@ -174,9 +179,35 @@ export class SingleProductComponent implements OnInit {
         }
       );
     }
-    else
-    {
-        this.snackbarService.showSuccess("Please Choose Size");
+    else {
+      this.snackbarService.showSuccess("Please Choose Size");
     }
   }
+
+  addToFavourites(productId: number) {
+
+    if (productId && this.currentUser && this.currentUser.u_id) {
+      this.favourite.f_cre_by = this.currentUser.u_id;
+      this.favourite.f_product = productId;
+
+      this.ifavouriteService.createOrUpdateFavourite(this.favourite).subscribe(
+        (data: DbResult) => {
+          if (data.message == "Success") {
+            this.snackbarService.showSuccess("Added to favourites");
+            this.router.navigate(['/favourites']);
+          }
+          else {
+            this.snackbarService.showError(data.message);
+          }
+        },
+        (error: any) => {
+        }
+      );
+
+    } else {
+      this.router.navigate(['/login']);
+    }
+
+  }
+
 }

@@ -74,5 +74,4 @@ namespace Erp.Server.Models
         public decimal? cd_net_amount { get; set; } = 0;
     }
 
-
 }

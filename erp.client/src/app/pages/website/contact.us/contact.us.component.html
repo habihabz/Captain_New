@@ -1,105 +1,109 @@
-<div class="container py-5">
+<div class="container-fluid ">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb bg-light px-3 py-2 rounded">
+      <li class="breadcrumb-item">
+        <a routerLink="/home">Home</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Shop
+      </li>
+    </ol>
+  </nav>
 
-  <h1 class="mb-4 fw-bold text-center">Contact Us</h1>
+  <div class="container">
+    <div class="row g-4 justify-content-center">
 
-  <div class="row g-4 justify-content-center">
-
-    <!-- Facebook -->
-    <div class="col-6 col-md-3">
-      <div class="contact-card shadow-sm text-center p-4 rounded-4">
-        <img src="./assets/img/logo/facebook.png" class="contact-icon" alt="Facebook">
-        <h5 class="mt-3 mb-1 fw-semibold">Facebook</h5>
-        <a href="https://www.facebook.com/yourprofile" class="text-primary small">
-          Follow Us
-        </a>
+      <!-- Facebook -->
+      <div class="col-6 col-md-3">
+        <div class="contact-card shadow-sm text-center p-4 rounded-4">
+          <img src="./assets/img/logo/facebook.png" class="contact-icon" alt="Facebook">
+          <h5 class="mt-3 mb-1 fw-semibold">Facebook</h5>
+          <a href="https://www.facebook.com/yourprofile" class="text-primary small">
+            Follow Us
+          </a>
+        </div>
       </div>
+
+      <!-- Instagram -->
+      <div class="col-6 col-md-3">
+        <div class="contact-card shadow-sm text-center p-4 rounded-4">
+          <img src="./assets/img/logo/instagram.png" class="contact-icon" alt="Instagram">
+          <h5 class="mt-3 mb-1 fw-semibold">Instagram</h5>
+          <a href="https://www.instagram.com/captain.since_2012" class="text-danger small">
+            Follow Us
+          </a>
+        </div>
+      </div>
+
+      <!-- Twitter / X -->
+      <div class="col-6 col-md-3">
+        <div class="contact-card shadow-sm text-center p-4 rounded-4">
+          <img src="./assets/img/logo/twitterx.png" class="contact-icon" alt="Twitter X">
+          <h5 class="mt-3 mb-1 fw-semibold">X (Twitter)</h5>
+          <a href="https://twitter.com/yourprofile" class="text-dark small">
+            Follow Us
+          </a>
+        </div>
+      </div>
+
+      <!-- Gmail -->
+      <div class="col-6 col-md-3">
+        <div class="contact-card shadow-sm text-center p-4 rounded-4">
+          <img src="./assets/img/logo/gmail.png" class="contact-icon" alt="Gmail">
+          <h5 class="mt-3 mb-1 fw-semibold">Email</h5>
+          <a href="mailto:info&#64;captain.com" class="text-dark small">
+            info&#64;captain.com
+          </a>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Instagram -->
-    <div class="col-6 col-md-3">
-      <div class="contact-card shadow-sm text-center p-4 rounded-4">
-        <img src="./assets/img/logo/instagram.png" class="contact-icon" alt="Instagram">
-        <h5 class="mt-3 mb-1 fw-semibold">Instagram</h5>
-        <a href="https://www.instagram.com/captain.since_2012" class="text-danger small">
-          Follow Us
-        </a>
-      </div>
-    </div>
+    <!-- Feedback Form -->
+    <h1 class="mt-5 mb-4 fw-bold text-center">Send Us Your Feedback</h1>
 
-    <!-- Twitter / X -->
-    <div class="col-6 col-md-3">
-      <div class="contact-card shadow-sm text-center p-4 rounded-4">
-        <img src="./assets/img/logo/twitterx.png" class="contact-icon" alt="Twitter X">
-        <h5 class="mt-3 mb-1 fw-semibold">X (Twitter)</h5>
-        <a href="https://twitter.com/yourprofile" class="text-dark small">
-          Follow Us
-        </a>
-      </div>
-    </div>
+    <form (ngSubmit)="createOrUpdateFeedback()" id="feedback" name="feedback">
 
-    <!-- Gmail -->
-    <div class="col-6 col-md-3">
-      <div class="contact-card shadow-sm text-center p-4 rounded-4">
-        <img src="./assets/img/logo/gmail.png" class="contact-icon" alt="Gmail">
-        <h5 class="mt-3 mb-1 fw-semibold">Email</h5>
-        <a href="mailto:info&#64;captain.com" class="text-dark small">
-          info&#64;captain.com
-        </a>
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control form-control-lg" required [(ngModel)]="feedback.f_first_name"
+            name="f_first_name">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control form-control-lg" required [(ngModel)]="feedback.f_last_name"
+            name="f_last_name">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control form-control-lg" required [(ngModel)]="feedback.f_email"
+            name="f_email">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Phone</label>
+          <input type="tel" class="form-control form-control-lg" required [(ngModel)]="feedback.f_phone" name="f_phone">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Message</label>
+          <textarea rows="5" class="form-control form-control-lg" required [(ngModel)]="feedback.f_message"
+            name="f_message"></textarea>
+        </div>
+
+        <div class="col-12 text-end mt-2">
+          <button type="submit" class="btn btn-primary btn-lg px-4">
+            <i class="fa fa-paper-plane"></i> Send
+          </button>
+        </div>
+
       </div>
-    </div>
+
+    </form>
 
   </div>
-
-  <!-- Feedback Form -->
-  <h1 class="mt-5 mb-4 fw-bold text-center">Send Us Your Feedback</h1>
-
-  <form (ngSubmit)="createOrUpdateFeedback()" id="feedback" name="feedback">
-
-    <div class="row g-3">
-
-      <div class="col-md-6">
-        <label class="form-label">First Name</label>
-        <input type="text" class="form-control form-control-lg" required
-               [(ngModel)]="feedback.f_first_name"
-               name="f_first_name">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Last Name</label>
-        <input type="text" class="form-control form-control-lg" required
-               [(ngModel)]="feedback.f_last_name"
-               name="f_last_name">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control form-control-lg" required
-               [(ngModel)]="feedback.f_email"
-               name="f_email">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Phone</label>
-        <input type="tel" class="form-control form-control-lg" required
-               [(ngModel)]="feedback.f_phone"
-               name="f_phone">
-      </div>
-
-      <div class="col-12">
-        <label class="form-label">Message</label>
-        <textarea rows="5" class="form-control form-control-lg" required
-                  [(ngModel)]="feedback.f_message"
-                  name="f_message"></textarea>
-      </div>
-
-      <div class="col-12 text-end mt-2">
-        <button type="submit" class="btn btn-primary btn-lg px-4">
-          <i class="fa fa-paper-plane"></i> Send
-        </button>
-      </div>
-
-    </div>
-
-  </form>
-
 </div>

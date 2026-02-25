@@ -12,20 +12,17 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3 ">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-9 p-3">
-                            
+                <div class="card shadow  border-0 rounded-3 p-3 ">
+                    <div class="row align-items-center">
+                        <div class="col-md-9 ">
                             <h5 class="fw-bold mb -1">Order Number : {{ customerOrder.co_id }}</h5>
                             <h1 class="fw-bold mb -1"> {{ customerOrder.p_name}} </h1>
                             <h1 class="fw-bold mb -1"><span>&#x20B9;</span> {{ customerOrder.co_amount }}</h1>
-
-
                         </div>
                         <div class="col-md-3 text-center">
                             <img *ngFor="let p_attachement of getAttachementOfaProduct(customerOrder.p_attachements).slice(0,1); let i=index"
                                 [src]="apiUrl + '/' + p_attachement.pa_image_path" class="product-img img-fluid rounded"
-                                style="height:250px;" alt="product_image">
+                                style="height: 150px;" alt="product_image">
                         </div>
                     </div>
                     <div class="row">
@@ -41,21 +38,15 @@
                                     <h2 class="fw-bold text-center">Order Status</h2>
                                     <hr />
                                     <ul class="tracker">
-                                        <li class="done">
-                                            <b>Order Confirmed</b>
-                                            <span>Dec 24, 2025</span>
-                                        </li>
-                                        <li class="done">
-                                            <b>Shipped</b>
-                                            <span>Dec 25, 2025</span>
-                                        </li>
-                                        <li class="done">
-                                            <b>Out of Delivery</b>
-                                            <span>Dec 25, 2025</span>
-                                        </li>
-                                        <li>
-                                            <b>Delivered</b>
-                                            <span>Pending</span>
+                                        <li *ngFor="let omh of orderMovementHistories"
+                                            [ngClass]="{'done': omh.omh_cre_date}">
+
+                                            <b>{{ omh.omh_status_name }}</b>
+                                            <span>
+                                                {{ omh.omh_cre_date
+                                                ? (omh.omh_cre_date | date:'dd:MM:yyyy hh:mm:ss a')
+                                                : 'Pending' }}
+                                            </span>
                                         </li>
                                     </ul>
                                 </div>
@@ -97,8 +88,9 @@
                     </div>
                 </div>
             </div>
-            Return policy ended on Jan 01, 2024. For more details, please contact our support team.
-            <div class="col-md-12">
+
+            <div class="col-md-12 p-3">
+                Return policy ended on Jan 01, 2024. For more details, please contact our support team.
             </div>
         </div>
 

@@ -105,6 +105,9 @@ builder.Services.AddTransient<ICustomerOrderStatus, CustomerOrderStatusRepositor
 builder.Services.AddTransient<IAddress, AddressRepository>();
 builder.Services.AddTransient<ISlider, SliderRepository>();
 builder.Services.AddTransient<IBlog, BlogRepository>();
+builder.Services.AddTransient<IOrderMovementHistory, OrderMovementHistoryRepository>();
+builder.Services.AddTransient<IFavourite, FavouriteRepository>();
+
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
 var app = builder.Build();

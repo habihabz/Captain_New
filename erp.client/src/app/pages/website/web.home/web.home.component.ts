@@ -15,6 +15,12 @@ import { ISliderService } from '../../../services/islider.service';
 import { Slider } from '../../../models/slider.model';
 import { Blog } from '../../../models/blog.model';
 import { IBlogService } from '../../../services/iblog.service';
+import { Favourite } from '../../../models/favourite.model';
+import { IFavouriteService } from '../../../services/ifavourite.service';
+import { User } from '../../../models/user.model';
+import { DbResult } from '../../../models/dbresult.model';
+import { SnackBarService } from '../../../services/isnackbar.service';
+import { IuserService } from '../../../services/iuser.service';
 
 @Component({
   selector: 'app-web.home',
@@ -36,7 +42,9 @@ export class WebHomeComponent implements OnInit {
   attachment: ProdAttachement = new ProdAttachement();
   sliders: Slider[] = [];
   blogs: Blog[] = [];
-  latestBlog:Blog=new Blog();
+  latestBlog: Blog = new Blog();
+  favourite: Favourite = new Favourite();
+  currentUser: User = new User();
 
   constructor(
     private elRef: ElementRef,
@@ -45,10 +53,14 @@ export class WebHomeComponent implements OnInit {
     private imasterDataService: IMasterDataService,
     private icategoryService: ICategoryService,
     private geolocationService: GeolocationService,
+    private ifavouriteService: IFavouriteService,
     private isliderService: ISliderService,
+    private snackbarService: SnackBarService,
     private iblogService: IBlogService,
+    private iuser: IuserService
 
   ) {
+    this.currentUser = iuser.getCurrentUser();
     this.country = this.geolocationService.getCurrentCountry();
   }
 
@@ -71,7 +83,7 @@ export class WebHomeComponent implements OnInit {
   getBlogsForHomePage(): void {
     this.iblogService.getBlogsForHomePage().subscribe(res => {
       this.blogs = res;
-      this.latestBlog=this.blogs[0];
+      this.latestBlog = this.blogs[0];
     });
   }
   getProductsByCountry() {
@@ -109,7 +121,7 @@ export class WebHomeComponent implements OnInit {
   }
 
   getProductsByCategory(c_id: number) {
-    this.tempProducts = this.products.filter(x => x.p_category == c_id ||c_id==0 ).slice(0,8);
+    this.tempProducts = this.products.filter(x => x.p_category == c_id || c_id == 0).slice(0, 8);
     return this.tempProducts;
   }
   getAttachementOfaProduct(p_attachements: string) {
@@ -129,7 +141,31 @@ export class WebHomeComponent implements OnInit {
 
     }
   }
-  addToCart(product: Product) {
+
+  addToFavourites(productId: number) {
+
+    if (productId && this.currentUser && this.currentUser.u_id) {
+      this.favourite.f_cre_by = this.currentUser.u_id;
+      this.favourite.f_product = productId;
+
+      this.ifavouriteService.createOrUpdateFavourite(this.favourite).subscribe(
+        (data: DbResult) => {
+          if (data.message == "Success") {
+            this.snackbarService.showSuccess("Added to favourites");
+            this.router.navigate(['/favourites']);
+          }
+          else {
+            this.snackbarService.showError(data.message);
+          }
+        },
+        (error: any) => {
+        }
+      );
+
+    } else {
+      this.router.navigate(['/login']);
+    }
+
 
   }
 }

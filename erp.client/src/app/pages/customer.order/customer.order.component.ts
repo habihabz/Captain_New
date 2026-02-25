@@ -19,6 +19,9 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { CustomerOrderDetail } from '../../models/customer.order.detail.model';
 import { ICustomerOrderStatusService } from '../../services/icustomer.order.status.service';
 import { CustomerOrderStatus } from '../../models/customer.order.status.model';
+import { environment } from '../../../environments/environment';
+import { IOrderMovementHistoryService } from '../../services/iorder.movement.history.service';
+import { OrderMovementHistory } from '../../models/order.movement.history.model';
 declare var $: any;
 
 @Component({
@@ -27,6 +30,7 @@ declare var $: any;
   styleUrl: './customer.order.component.css'
 })
 export class CustomerOrderComponent {
+  apiUrl = `${environment.serverHostAddress}`;
   pagination = true;
   paginationPageSize5 = 5;
   paginationPageSizeSelector5 = [5, 10, 20, 50, 100];
@@ -37,12 +41,13 @@ export class CustomerOrderComponent {
   subscription: Subscription = new Subscription();
   customerOrder: CustomerOrder = new CustomerOrder();
   customerOrders: CustomerOrder[] = [];
-  customerOrderDetails: CustomerOrderDetail[] = [];
   customerOrderStatuses: CustomerOrderStatus[] = [];
   dbResult: DbResult = new DbResult();
   requestParms: RequestParms = new RequestParms();
   customerOrderStatus: CustomerOrderStatus = new CustomerOrderStatus();
+  orderMovementHistories: OrderMovementHistory[] = [];
   @ViewChild('customerOrderGrid') customerOrderGrid!: AgGridAngular;
+
 
   constructor(
 
@@ -55,7 +60,8 @@ export class CustomerOrderComponent {
     private iuser: IuserService,
     private icustomerOrder: ICustomerOrder,
     private icustomerOrderStatus: ICustomerOrderStatusService,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private iOrderMovementHistoryService: IOrderMovementHistoryService
 
   ) {
     this.currentUser = iuser.getCurrentUser();
@@ -64,29 +70,26 @@ export class CustomerOrderComponent {
   colDefs: ColDef[] = [
     { headerName: "Id", field: "co_id" },
     { headerName: "Customer", field: "co_customer_name" },
-    { headerName: "Address", field: "co_d_address_details" },
+    { headerName: "Address", field: "co_c_address_details" },
     { headerName: "Product", field: "p_name" },
     { headerName: "Quanitity", field: "co_qty" },
     { headerName: "Amount", field: "co_amount" },
     { headerName: "Status", field: "co_status_name" },
     {
-      headerName: 'Status Change', cellRenderer: 'actionRenderer', cellRendererParams:
+      headerName: 'View ', cellRenderer: 'actionRenderer', cellRendererParams:
       {
-        name: 'Status Change', action: 'onStatusChange', cssClass: 'btn btn-primary', icon: 'fa fa-exchange', onStatusChange: (data: any) => this.onAction('statusChange', data)
+        name: 'Details', action: 'onDetails', cssClass: 'btn btn-info', icon: 'fa fa-eye', onDetails: (data: any) => this.onAction('details', data)
+      }
+    },
+    {
+      headerName: 'Status', cellRenderer: 'actionRenderer', cellRendererParams:
+      {
+        name: 'Change', action: 'onStatusChange', cssClass: 'btn btn-warning', icon: 'fa fa-exchange', onStatusChange: (data: any) => this.onAction('statusChange', data)
       }
     }
   ];
 
-  codColDefs: ColDef[] = [
-    { headerName: "Id", field: "cd_id" },
-    { headerName: "Product", field: "cd_product_name" },
-    { headerName: "Size", field: "cd_size_name" },
-    { headerName: "Quanitity", field: "cd_qty" },
-    { headerName: "Amount", field: "cd_amount" },
-    { headerName: "Discount", field: "cd_discount" },
-    { headerName: "Tax Amount", field: "cd_tax_amount" },
-    { headerName: "Net Amount", field: "cd_net_amount" },
-  ];
+
 
   ngOnInit(): void {
 
@@ -134,9 +137,10 @@ export class CustomerOrderComponent {
   }
 
   onDetails(data: any) {
-    this.icustomerOrder.getCustomerOrderDetails(data.co_id).subscribe(
-      (data: CustomerOrderDetail[]) => {
-        this.customerOrderDetails = data;
+    this.getOrderMovementHistory(data.co_id); 
+    this.icustomerOrder.getCustomerOrder(data.co_id).subscribe(
+      (data: CustomerOrder) => {
+        this.customerOrder = data;
         $("#customerOrderDetailModal").modal("show");
       },
       (error: any) => {
@@ -185,7 +189,7 @@ export class CustomerOrderComponent {
           this.getCustomerOrders();
           this.customerOrder = new CustomerOrder();
           this.requestParms = new RequestParms();
-          $("#StatusChangeModal").modal("show");
+          $("#StatusChangeModal").modal("hide");
         } else {
           this.snackBarService.showError(data.message);;
         }
@@ -193,6 +197,23 @@ export class CustomerOrderComponent {
       },
       (error: any) => {
 
+      }
+    );
+  }
+  getAttachementOfaProduct(p_attachements: string) {
+    var att: any;
+    if (p_attachements) {
+      att = JSON.parse(p_attachements);
+    }
+    return att;
+  }
+
+  getOrderMovementHistory(co_id: number) {
+    this.iOrderMovementHistoryService.getOrderMovementHistoriesByOrder(co_id).subscribe(
+      (data: OrderMovementHistory[]) => {
+        this.orderMovementHistories = data;
+      },
+      (error: any) => {
       }
     );
   }
