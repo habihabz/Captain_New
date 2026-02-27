@@ -15,6 +15,8 @@ import { ICustomerOrder } from '../../../services/icustomer.order.service';
 import { Address } from '../../../models/address.model';
 import { IAddressService } from '../../../services/iaddress.service';
 import { HttpClient } from '@angular/common/http';
+import { ConstantValue } from '../../../models/constant.value.model';
+import { IConstantValueService } from '../../../services/iconstant.values.service';
 declare var Razorpay: any;
 
 
@@ -36,12 +38,18 @@ export class MycartComponent implements OnInit {
   requestParms: RequestParms = new RequestParms();
   totalQty: number = 0;
   totalPrice: number = 0;
-  deliveryCharge: number = 35;
+  deliveryCharge: number = 0;
+  taxAmount: number = 0;
   netAmount: number = 0;
   discount: number = 0
   addresses: Address[] = [];
   address: Address = new Address();
   showAddressForm: boolean = false;
+  constantValueList: ConstantValue[] = [];
+  discountPercentConstant: ConstantValue = new ConstantValue();
+  deliveryChargeConstant: ConstantValue = new ConstantValue();
+  taxPercentConstant: ConstantValue = new ConstantValue();
+
 
   constructor(
 
@@ -54,6 +62,7 @@ export class MycartComponent implements OnInit {
     private icustomerOrder: ICustomerOrder,
     private iaddress: IAddressService,
     private geolocationService: GeolocationService,
+    private iConstantValueService: IConstantValueService,
     private http: HttpClient
 
   ) {
@@ -63,10 +72,34 @@ export class MycartComponent implements OnInit {
 
   }
   ngOnInit(): void {
+    this.getConstantValues();
     this.getCarts();
     this.getMyAddress();
   }
 
+
+
+  getConstantValues(): void {
+    this.iConstantValueService.getConstantValues().subscribe(
+      (data: ConstantValue[]) => {
+        this.constantValueList = data;
+        this.constantValueList.forEach((item) => {
+          if(item.cv_name === 'Total Invoice Discount'){  
+            this.discountPercentConstant = item;
+          } else if(item.cv_name === 'Delivery Charge') {
+            this.deliveryChargeConstant = item;
+            this.deliveryCharge = Number(this.deliveryChargeConstant.cv_value);
+          } else if(item.cv_name === 'Tax Percentage') {
+            this.taxPercentConstant = item;
+          } 
+        });
+      },
+      (error: any) => {
+        console.error('Error fetching constant value', error);
+
+      }
+    );
+  }
 
   getAttachementOfaProduct(p_attachements: string) {
     var att: any;
@@ -157,6 +190,7 @@ export class MycartComponent implements OnInit {
   }
 
   getCartTotal() {
+    this.totalQty = this.carts.reduce((sum, cart) => sum + cart.c_qty, 0);
     const total = this.carts.reduce(
       (sum, cart) => sum + (cart.p_price * cart.c_qty),
       0
@@ -164,9 +198,14 @@ export class MycartComponent implements OnInit {
 
     this.totalPrice = Math.round(total * 100) / 100;
     this.discount = Math.round(this.totalPrice * 0.1 * 100) / 100;
+    this.deliveryCharge = Number(this.deliveryChargeConstant.cv_value);
+    this.discount = Math.round(this.totalPrice * Number(this.discountPercentConstant.cv_value) / 100 * 100) / 100;
+    this.taxPercentConstant.cv_value = this.taxPercentConstant.cv_value ? this.taxPercentConstant.cv_value : '0';
+    this.taxAmount = Math.round((this.totalPrice * Number(this.taxPercentConstant.cv_value) / 100) * 100) / 100;
     this.netAmount = Math.round(
-      (this.totalPrice + this.deliveryCharge - this.discount) * 100
+      (this.totalPrice + this.deliveryCharge - this.discount + (this.totalPrice * Number(this.taxPercentConstant.cv_value) / 100)) * 100
     ) / 100;
+
   }
 
   placeOrder() {
@@ -188,7 +227,7 @@ export class MycartComponent implements OnInit {
           this.carts = [];
           this.getCartTotal();
           this.snackbarService.showSuccess("Success");
-           this.router.navigate(['/myorders']);
+          this.router.navigate(['/myorders']);
 
         } else {
           alert(data.message);

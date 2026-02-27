@@ -32,111 +32,112 @@
 </div>
 
 
-<div class="modal fade" id="customerOrderDetailModal" customer="dialog" aria-labelledby="customerOrderDetailModal"
-    aria-hidden="true">
-    <div class="modal-dialog modal-xl" customer="document">
+<div class="modal fade" id="customerOrderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
+
             <div class="modal-header">
-                <h5 class="modal-title" id="customerFormModalLabel">Customer Order Details</h5>
+                <h5 class="modal-title">Customer Order Details</h5>
             </div>
+
             <div class="modal-body">
+
                 <div class="row">
-                    <div class="col-md-12">
 
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="card  order-card  border-0 rounded-3 mb-4 p-3 ">
-                                    <div class="row g-3 align-items-center">
-                                        <div class="col-md-9 p-3">
+                    <!-- LEFT SIDE -->
+                    <div class="col-md-8">
 
-                                            <h5 class="fw-bold mb -1">Order Number : {{ customerOrder.co_id }}
-                                            </h5>
-                                            <h1 class="fw-bold mb -1"> {{ customerOrder.p_name}} </h1>
-                                            <h1 class="fw-bold mb -1"><span>&#x20B9;</span> {{
-                                                customerOrder.co_amount }}</h1>
+                        <div class="card border-0 rounded-3 mb-4 p-3">
+
+                            <h5 class="fw-bold mb-1">
+                                Order Number : {{ customerOrder.co_id }}
+                            </h5>
+
+                            <h3 class="fw-bold mb-1">
+                                {{ customerOrder.p_name }}
+                            </h3>
+
+                            <h4 class="fw-bold text-success mb-2">
+                                ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}
+                            </h4>
+
+                            <hr />
+
+                            <h5>
+                                Quantity : {{ customerOrder.co_qty }}
+                                {{ customerOrder.co_unit_price ? (' x ₹ ' + customerOrder.co_unit_price.toFixed(2)) : ''    }}
+                            </h5>
+
+                            <h5>
+                                Unit Price : ₹ {{ customerOrder.co_unit_price | number:'1.2-2' }}
+                            </h5>
+
+                            <h5>
+                                Sub Total : ₹ {{ customerOrder.co_amount | number:'1.2-2' }}
+                            </h5>
 
 
-                                        </div>
-                                        <div class="col-md-3 text-center">
-                                            <!--   <img *ngFor="let p_attachement of getAttachementOfaProduct(customerOrder.p_attachements).slice(0,1); let i=index"
-                                                        [src]="apiUrl + '/' + p_attachement.pa_image_path"
-                                                        class="product-img img-fluid rounded" style="height:250px;"
-                                                        alt="product_image"> -->
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12 p-3">
-                                            <h4 class="fw-bold mb -1">Quantity : {{ customerOrder.co_qty }}</h4>
-                                        </div>
-                                    </div>
+                            <hr />
 
-                                    <div class="g-3 align-items-center">
-                                        <div class="col-md-12">
-                                            <div class="position-relative ps-4">
-                                                <div class="order-box">
-                                                    <h2 class="fw-bold text-center">Order Status</h2>
-                                                    <hr />
-                                                    <ul class="tracker">
-                                                        <li *ngFor="let omh of orderMovementHistories"
-                                                            [ngClass]="{'done': omh.omh_cre_date}">
+                            <h5 class="fw-bold">Order Status</h5>
+                            <ul class="tracker">
+                                <li *ngFor="let omh of orderMovementHistories" [ngClass]="{'done': omh.omh_cre_date}">
+                                    <b>{{ omh.omh_status_name }}</b>
+                                    <span>
+                                        {{ omh.omh_cre_date
+                                        ? (omh.omh_cre_date | date:'dd-MM-yyyy hh:mm a')
+                                        : 'Pending' }}
+                                    </span>
+                                </li>
+                            </ul>
 
-                                                            <b>{{ omh.omh_status_name }}</b>
-                                                            <span>
-                                                                {{ omh.omh_cre_date
-                                                                ? (omh.omh_cre_date | date:'dd:MM:yyyy hh:mm:ss a')
-                                                                : 'Pending' }}
-                                                            </span>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 ">
-                                <div class="card  order-card  border-0 rounded-3 mb-4 p-3">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <h2 class="fw-bold mb -1 text-center">Delivery Details</h2>
-                                            <hr />
-                                            <h4 class="mb -1"><i class="fa fa-home"></i> {{
-                                                customerOrder.co_c_address_details }}</h4>
-                                            <h4 class="mb -1"><i class="fa fa-user"></i> {{
-                                                customerOrder.co_customer_name }} </h4>
-                                            <h4 class="mb -1"><i class="fa fa-phone"></i> {{
-                                                customerOrder.co_customer_phone }}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card  order-card  border-0 rounded-3 mb-4 p-3">
-                                    <div class="row ">
-                                        <div class="col-md-12">
-                                            <h2 class="fw-bold mb -1 text-center">Payment Details</h2>
-                                            <hr />
-                                            <h4 class="mb -1"><i class="fa fa-address-book"></i> Total Amount
-                                                :<span>&#x20B9;</span> {{
-                                                customerOrder.co_amount }}</h4>
-                                            <h4 class="mb -1"><i class="fa fa-address-book"></i> Total Amount
-                                                :<span>&#x20B9;</span> {{
-                                                customerOrder.co_amount }}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-md-12">
-                                <p>Return policy ended on Jan 01, 2024. For more details, please contact our support
-                                    team.</p>
-                            </div>
                         </div>
+
                     </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-md-4">
+
+                        <div class="card border-0 rounded-3 mb-4 p-3">
+
+                            <h5 class="fw-bold text-center">Delivery Details</h5>
+                            <hr />
+
+                            <p><i class="fa fa-user"></i> {{ customerOrder.co_customer_name }}</p>
+                            <p><i class="fa fa-phone"></i> {{ customerOrder.co_customer_phone }}</p>
+                            <p><i class="fa fa-envelope"></i> {{ customerOrder.co_customer_email }}</p>
+                            <p><i class="fa fa-home"></i> {{ customerOrder.co_c_address_details }}</p>
+
+                        </div>
+
+                        <div class="card border-0 rounded-3 mb-4 p-3">
+
+                            <h5 class="fw-bold text-center">Payment Summary</h5>
+                            <hr />
+
+                            <p>Sub Total : ₹ {{ customerOrder.co_amount | number:'1.2-2' }}</p>
+                            <p>Discount : ₹ {{ customerOrder.co_discount_amount | number:'1.2-2' }}</p>
+                            <p>GST : ₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</p>
+                            <p>Delivery : ₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</p>
+
+                            <hr />
+
+                            <h5 class="fw-bold text-success">
+                                Grand Total : ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}
+                            </h5>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
-            <div class="modal-footer d-flex justify-content-end">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
+
         </div>
     </div>
 </div>

@@ -37,6 +37,7 @@ namespace Erp.Server.Models
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<OrderMovementHistory> OrderMovementHistories { get; set; }
         public DbSet<Favourite> Favourites { get; set; }
+        public DbSet<ConstantValue> ConstantValues { get; set; }
 
 
     }

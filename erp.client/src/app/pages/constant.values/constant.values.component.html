@@ -1,0 +1,87 @@
+<div class="right_col" style="min-height: 99vh;">
+    <div class="x_panel">
+        <div class="x_content">
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <!-- CREATE CONSTANT -->
+                    <button class="btn btn-warning mb-3" (click)="openCreateModal()">
+                        <i class="fa fa-plus"></i> Create
+                    </button>
+
+                    <!-- CONSTANT LIST -->
+                    <ag-grid-angular #constantGrid class="ag-theme-quartz ag-theme-acmecorp" style="width: 100%;"
+                        [rowData]="constantsValues" [columnDefs]="colDefs" [pagination]="pagination"
+                        [defaultColDef]="defaultColDef" [enableCellTextSelection]="true"
+                        [components]="frameworkComponents" [paginationPageSize]="paginationPageSize10"
+                        [domLayout]="domLayout" [paginationPageSizeSelector]="paginationPageSizeSelector10"
+                        (gridReady)="onGridReady($event)">
+                    </ag-grid-angular>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- CONSTANT MODAL -->
+<div class="modal fade" id="constantModal"  aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{ constantValue.cv_id === 0 ? 'Create Constant Value' : 'Update Constant Value' }}
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- NAME -->
+                <div class="form-group">
+                    <label>Constant Name</label>
+                    <select appSelect2 class="form-control" [(ngModel)]="constantValue.cv_name" id="cv_name" name="cv_name"
+                        (selectionChanged)="onConstantNameChange($event);">
+                        <option value="">Select Constant</option>
+                        <option *ngFor="let c of constantNameList" [value]="c">
+                            {{ c }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- VALUE -->
+                <div class="form-group mt-3">
+                    <label>Constant Value</label>
+                    <input type="text" class="form-control" [(ngModel)]="constantValue.cv_value"
+                        placeholder="Enter constant value">
+                </div>
+
+                <!-- STATUS -->
+                <div class="form-group mt-3" *ngIf="constantValue.cv_id != 0">
+                    <label>Status</label>
+                    <select class="form-control" [(ngModel)]="constantValue.cv_active_yn">
+                        <option value="Y">Active</option>
+                        <option value="N">Inactive</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button class="btn btn-primary" (click)="createOrUpdateConstantValue()">
+                    <i class="fa fa-save"></i> Save
+                </button>
+                <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

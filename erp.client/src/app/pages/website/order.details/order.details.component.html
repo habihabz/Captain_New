@@ -17,7 +17,7 @@
                         <div class="col-md-9 ">
                             <h5 class="fw-bold mb -1">Order Number : {{ customerOrder.co_id }}</h5>
                             <h1 class="fw-bold mb -1"> {{ customerOrder.p_name}} </h1>
-                            <h1 class="fw-bold mb -1"><span>&#x20B9;</span> {{ customerOrder.co_amount }}</h1>
+                            <h1 class="fw-bold mb -1"><span>&#x20B9;</span> {{ customerOrder.co_net_amount }}</h1>
                         </div>
                         <div class="col-md-3 text-center">
                             <img *ngFor="let p_attachement of getAttachementOfaProduct(customerOrder.p_attachements).slice(0,1); let i=index"
@@ -27,7 +27,19 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 p-3">
-                            <h4 class="fw-bold mb -1">Quantity : {{ customerOrder.co_qty }}</h4>
+
+                            <h4 class="fw-bold mb-1">
+                                Quantity : {{ customerOrder.co_qty }}
+                            </h4>
+
+                            <h5 class="mb-1">
+                                Unit Price : ₹ {{ customerOrder.co_unit_price | number:'1.2-2' }}
+                            </h5>
+
+                            <h5 class="fw-bold text-success">
+                                Total : ₹ {{ (customerOrder.co_unit_price * customerOrder.co_qty) | number:'1.2-2' }}
+                            </h5>
+
                         </div>
                     </div>
 
@@ -67,15 +79,44 @@
                         </div>
                     </div>
                 </div>
-                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3">
-                    <div class="row ">
+                <div class="card shadow order-card border-0 rounded-3 mb-4 p-3">
+                    <div class="row">
                         <div class="col-md-12">
-                            <h2 class="fw-bold mb -1 text-center">Payment Details</h2>
+
+                            <h2 class="fw-bold mb-3 text-center">Payment Details</h2>
                             <hr />
-                            <h4 class="mb -1"><i class="fa fa-address-book"></i> Total Amount :<span>&#x20B9;</span> {{
-                                customerOrder.co_amount }}</h4>
-                            <h4 class="mb -1"><i class="fa fa-address-book"></i> Total Amount :<span>&#x20B9;</span> {{
-                                customerOrder.co_amount }}</h4>
+
+                            <h5 class="mb-2">
+                                <i class="fa fa-money"></i>
+                                Sub Total :
+                                <span>₹ {{ customerOrder.co_amount | number:'1.2-2' }}</span>
+                            </h5>
+
+                            <h5 class="mb-2">
+                                <i class="fa fa-percent"></i>
+                                Discount ({{ customerOrder.co_discount_perc }}%) :
+                                <span>- ₹ {{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
+                            </h5>
+
+                            <h5 class="mb-2">
+                                <i class="fa fa-percent"></i>
+                                GST ({{ customerOrder.co_gst_perc }}%) :
+                                <span>₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
+                            </h5>
+
+                            <h5 class="mb-2">
+                                <i class="fa fa-truck"></i>
+                                Delivery Charge :
+                                <span>₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
+                            </h5>
+
+                            <hr />
+
+                            <h4 class="fw-bold text-success">
+                                Grand Total :
+                                ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}
+                            </h4>
+
                         </div>
                     </div>
                 </div>

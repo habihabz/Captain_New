@@ -107,6 +107,7 @@ builder.Services.AddTransient<ISlider, SliderRepository>();
 builder.Services.AddTransient<IBlog, BlogRepository>();
 builder.Services.AddTransient<IOrderMovementHistory, OrderMovementHistoryRepository>();
 builder.Services.AddTransient<IFavourite, FavouriteRepository>();
+builder.Services.AddTransient<IConstantValue, ConstantValueRepository>();
 
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");

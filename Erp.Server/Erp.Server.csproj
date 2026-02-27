@@ -10,6 +10,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="publish\**" />
+	  <Content Remove="publish\**" />
+	  <EmbeddedResource Remove="publish\**" />
+	  <None Remove="publish\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Azure.Identity" Version="1.14.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
 

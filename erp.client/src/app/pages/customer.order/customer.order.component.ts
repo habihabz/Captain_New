@@ -68,23 +68,73 @@ export class CustomerOrderComponent {
   }
 
   colDefs: ColDef[] = [
-    { headerName: "Id", field: "co_id" },
+    { headerName: "Id", field: "co_id", width: 90 },
+
     { headerName: "Customer", field: "co_customer_name" },
+    { headerName: "Phone", field: "co_customer_phone" },
+    { headerName: "Email", field: "co_customer_email" },
+
     { headerName: "Address", field: "co_c_address_details" },
     { headerName: "Product", field: "p_name" },
-    { headerName: "Quanitity", field: "co_qty" },
-    { headerName: "Amount", field: "co_amount" },
-    { headerName: "Status", field: "co_status_name" },
+
+    { headerName: "Qty", field: "co_qty", width: 90 },
+
     {
-      headerName: 'View ', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Details', action: 'onDetails', cssClass: 'btn btn-info', icon: 'fa fa-eye', onDetails: (data: any) => this.onAction('details', data)
+      headerName: "Unit Price",
+      field: "co_unit_price",
+      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    },
+    {
+      headerName: "Total Amount",
+      field: "co_amount",
+      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    },
+    {
+      headerName: "Discount",
+      field: "co_discount_amount",
+      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    },
+
+    {
+      headerName: "GST",
+      field: "co_gst_amount",
+      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    },
+
+    {
+      headerName: "Delivery",
+      field: "co_delivery_charge",
+      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    },
+
+    {
+      headerName: "Total",
+      field: "co_net_amount",
+      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    },
+
+    { headerName: "Status", field: "co_status_name" },
+
+    {
+      headerName: 'View',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        name: 'Details',
+        cssClass: 'btn btn-info',
+        icon: 'fa fa-eye',
+        action: 'onDetails',
+        onDetails: (data: any) => this.onAction('details', data)
       }
     },
     {
-      headerName: 'Status', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Change', action: 'onStatusChange', cssClass: 'btn btn-warning', icon: 'fa fa-exchange', onStatusChange: (data: any) => this.onAction('statusChange', data)
+      headerName: 'Change Status',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        name: 'Change',
+        cssClass: 'btn btn-warning',
+        icon: 'fa fa-exchange',
+        action: 'onStatusChange',
+        onStatusChange: (data: any) => this.onAction('statusChange', data)
       }
     }
   ];
@@ -137,7 +187,7 @@ export class CustomerOrderComponent {
   }
 
   onDetails(data: any) {
-    this.getOrderMovementHistory(data.co_id); 
+    this.getOrderMovementHistory(data.co_id);
     this.icustomerOrder.getCustomerOrder(data.co_id).subscribe(
       (data: CustomerOrder) => {
         this.customerOrder = data;

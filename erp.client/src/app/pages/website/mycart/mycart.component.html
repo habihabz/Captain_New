@@ -118,17 +118,33 @@
             <div class="col-md-4" *ngIf="this.carts.length>0">
                 <div class="cust-card mt-2">
                     <div class="title">PRICE DETAILS</div>
+
                     <div class="row justify-content-between">
-                        <div class="col">Price (1 item)</div>
+                        <div class="col">Price ({{this.totalQty}} items)</div>
                         <div class="col-auto">₹{{this.totalPrice}}</div>
+                    </div>
+
+
+                    <div class="row justify-content-between">
+                        <div class="col">Discount %</div>
+                        <div class="col-auto text-success">{{this.discountPercentConstant.cv_value}}%</div>
                     </div>
                     <div class="row justify-content-between">
                         <div class="col">Discount</div>
-                        <div class="col-auto text-danger">₹{{this.discount | number:'1.2-2' }}</div>
+                        <div class="col-auto text-success">₹{{this.discount | number:'1.2-2' }}</div>
                     </div>
                     <div class="row justify-content-between">
                         <div class="col">Delivery Charges</div>
-                        <div class="col-auto text-green">₹{{this.deliveryCharge | number:'1.2-2'}}</div>
+                        <div class="col-auto">₹{{this.deliveryChargeConstant.cv_value | number:'1.2-2'}}
+                        </div>
+                    </div>
+                    <div class="row justify-content-between">
+                        <div class="col">GST %</div>
+                        <div class="col-auto">{{this.taxPercentConstant.cv_value}}%</div>
+                    </div>
+                    <div class="row justify-content-between">
+                        <div class="col">GST Amount</div>
+                        <div class="col-auto">₹{{taxAmount| number:'1.2-2'}}</div>
                     </div>
                     <div class="row justify-content-between total">
                         <div class="col">Total Amount</div>

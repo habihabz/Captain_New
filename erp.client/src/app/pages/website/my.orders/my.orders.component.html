@@ -39,22 +39,21 @@
               </p>
 
               <div class="row text-center text-md-start">
-                <div class="col-md-4 mb-2">
-                  <span class="label">Quantity <div class="value"> {{ order.co_qty }}</div></span>
 
+                <div class="col-md-4 mb-2 d-flex gap-2">
+                  <b>Quantity :</b> <span>{{ order.co_qty }}</span>
                 </div>
 
-                <div class="col-md-4 mb-2">
-                  <span class="label">Amount <div class="value text-success"> ₹ {{ order.co_amount }} </div></span>
-
+                <div class="col-md-4 mb-2 d-flex gap-2">
+                  <b>Amount :</b>
+                  <span class="text-success">₹ {{ order.co_net_amount | number:'1.2-2' }}</span>
                 </div>
 
-                <div class="col-md-4 mb-2 text-md-end">
-                  <span class="label">Date</span>
-                  <div class="value">
-                    {{ order.co_cre_date | date:'mediumDate' }}
-                  </div>
+                <div class="col-md-4 mb-2 d-flex justify-content-md-end gap-2">
+                  <b>Date :</b>
+                  <span>{{ order.co_cre_date | date:'mediumDate' }}</span>
                 </div>
+
               </div>
 
             </div>

@@ -37,6 +37,7 @@ import { SliderComponent } from './pages/slider/slider.component';
 import { AboutUsComponent } from './pages/website/about.us/about.us.component';
 import { BlogComponent } from './pages/blog/blog.component';
 import { OrderDetailsComponent } from './pages/website/order.details/order.details.component';
+import { ConstantValuesComponent } from './pages/constant.values/constant.values.component';
 
 
 
@@ -182,6 +183,11 @@ const routes: Routes = [
       {
         path: 'sliders',
         component: SliderComponent
+
+      },
+      {
+        path: 'constant-values',
+        component: ConstantValuesComponent
 
       }
     ]
