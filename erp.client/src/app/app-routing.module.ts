@@ -38,6 +38,7 @@ import { AboutUsComponent } from './pages/website/about.us/about.us.component';
 import { BlogComponent } from './pages/blog/blog.component';
 import { OrderDetailsComponent } from './pages/website/order.details/order.details.component';
 import { ConstantValuesComponent } from './pages/constant.values/constant.values.component';
+import { OrderReportComponent } from './pages/admin/order.report/order.report.component';
 
 
 
@@ -189,6 +190,10 @@ const routes: Routes = [
         path: 'constant-values',
         component: ConstantValuesComponent
 
+      },
+      {
+        path: 'order-report',
+        component: OrderReportComponent
       }
     ]
   }

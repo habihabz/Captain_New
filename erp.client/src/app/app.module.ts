@@ -69,6 +69,7 @@ import { BlogComponent } from './pages/blog/blog.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { OrderDetailsComponent } from './pages/website/order.details/order.details.component';
 import { ConstantValuesComponent } from './pages/constant.values/constant.values.component';
+import { OrderReportComponent } from './pages/admin/order.report/order.report.component';
 
 
 // Define a function to get the token
@@ -132,7 +133,8 @@ const jwtConfig: JwtModuleOptions = {
     SliderComponent,
     AboutUsComponent,
     OrderDetailsComponent,
-    ConstantValuesComponent
+    ConstantValuesComponent,
+    OrderReportComponent
   ],
   imports: [
     BrowserModule,

@@ -4,6 +4,7 @@ using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace Erp.Server.Controllers
 {
@@ -16,15 +17,19 @@ namespace Erp.Server.Controllers
         private readonly ICustomer icustomer;
         private readonly ICustomerOrder icustomerOrder;
         private readonly IJwtAuthManager ijwtAuthManager;
+        private readonly IGeneratePDF igeneratePDF;
+        private readonly IConstantValue iconstantValue;
 
         public CustomerOrderController(ILogger<CustomerOrderController> _logger,
-            IUser _iuser,ICustomerOrder _icustomerorder, IJwtAuthManager _ijwtAuthManager, ICustomer _icustomer)
+            IUser _iuser,ICustomerOrder _icustomerorder, IJwtAuthManager _ijwtAuthManager, ICustomer _icustomer,IGeneratePDF _igeneratePDF, IConstantValue _iconstantValue)
         {
             logger = _logger;
             iuser = _iuser;
             icustomerOrder = _icustomerorder;
             ijwtAuthManager = _ijwtAuthManager;
             icustomer = _icustomer;
+            igeneratePDF = _igeneratePDF;
+            iconstantValue = _iconstantValue;
 
         }
         [HttpPost("getCustomerOrders")]
@@ -87,6 +92,21 @@ namespace Erp.Server.Controllers
             DbResult dbResult = new DbResult();
             dbResult = icustomerOrder.updateStatusForCustomerOrder(requestParams);
             return dbResult;
+        }
+
+        [HttpGet("invoice/{id}")]
+        public IActionResult Invoice(int id)
+        {
+
+
+            CustomerOrder order =icustomerOrder.getCustomerOrder(id);
+            List<ConstantValue> constantValues = iconstantValue.getConstantValues();
+
+            if (order == null) return NotFound();
+
+            var pdf = igeneratePDF.Invoice(order, constantValues);
+
+            return File(pdf, "application/pdf",$"Invoice_CO_{order.co_id}.pdf");
         }
     }
 }

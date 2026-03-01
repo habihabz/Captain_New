@@ -40,9 +40,10 @@ export class ConstantValuesComponent {
     'Delivery Charge',
     'Return Policy Days',
     'Total Invoice Discount',
-    'Comapny Address',
+    'Company Address',
     'Company Phone',
     'Company Email',
+    'Company Tax Reg Number',
     'Default Language',
   ];
 

@@ -65,25 +65,35 @@ export class OrderDetailsComponent {
     return att;
   }
   downloadTaxInvoice() {
-    this.icustomerOrder.downloadTaxInvoice(this.orderId).subscribe(
-      (data: any) => {
-        const blob = new Blob([data], { type: 'application/pdf' });
 
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Tax_Invoice_Order_${this.orderId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      },
-      (error) => {
-        this.snackBarService.showError('Error downloading tax invoice.');
-      }
-    );
+    this.icustomerOrder.invoice(this.orderId)
+      .subscribe({
+
+        next: (data: Blob) => {
+
+          const blob = new Blob([data], { type: 'application/pdf' });
+
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Tax_Invoice_Order_${this.orderId}.pdf`;
+
+          document.body.appendChild(a);
+          a.click();
+
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        },
+
+        error: () => {
+          this.snackBarService.showError('Error downloading tax invoice.');
+        }
+
+      });
   }
-   getOrderMovementHistory(co_id: number) {
+
+  getOrderMovementHistory(co_id: number) {
     this.iOrderMovementHistoryService.getOrderMovementHistoriesByOrder(co_id).subscribe(
       (data: OrderMovementHistory[]) => {
         this.orderMovementHistories = data;

@@ -44,8 +44,11 @@ export class ICustomerOrder {
     return this.http.post<DbResult>(this.apiUrl + "/updateStatusForCustomerOrder", requestParms);
   }
 
-  downloadTaxInvoice(id: number): Observable<any> {
-    return this.http.post<any>(this.apiUrl + "/downloadTaxInvoice", id);
+  invoice(orderId: number) {
+    return this.http.get(
+      `${environment.serverHostAddress}/api/CustomerOrder/invoice/${orderId}`,
+      { responseType: 'blob' }
+    );
   }
 
   get refresh$() {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -108,9 +109,12 @@ builder.Services.AddTransient<IBlog, BlogRepository>();
 builder.Services.AddTransient<IOrderMovementHistory, OrderMovementHistoryRepository>();
 builder.Services.AddTransient<IFavourite, FavouriteRepository>();
 builder.Services.AddTransient<IConstantValue, ConstantValueRepository>();
+builder.Services.AddTransient<IReport, ReportRepository>();
+builder.Services.AddTransient<IGeneratePDF, GenetatePDFRepository>();
 
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
+QuestPDF.Settings.License = LicenseType.Community;
 var app = builder.Build();
 
 // ----------------------------------------------------
