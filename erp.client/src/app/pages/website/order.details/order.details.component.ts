@@ -52,7 +52,7 @@ export class OrderDetailsComponent {
         this.customerOrder = data;
       },
       (error) => {
-        this.snackBarService.showError('Error fetching order details.');
+       
       }
     );
   }

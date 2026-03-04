@@ -66,7 +66,7 @@ export class OrderReportComponent implements OnInit {
   ngOnInit(): void {
     this.getCustomerOrderStatuses();
     this.getMasterDatasByType("Category", (data) => { this.categories = data; });
-    this.getOrderReport();
+   
 
   }
 

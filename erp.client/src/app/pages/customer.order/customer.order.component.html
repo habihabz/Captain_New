@@ -54,18 +54,19 @@
                             </h5>
 
                             <h3 class="fw-bold mb-1">
-                                {{ customerOrder.p_name }}
+                                <b>{{ customerOrder.p_name }} </b>
                             </h3>
 
                             <h4 class="fw-bold text-success mb-2">
-                                ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}
+                                <b> ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }} </b>
                             </h4>
 
                             <hr />
 
                             <h5>
                                 Quantity : {{ customerOrder.co_qty }}
-                                {{ customerOrder.co_unit_price ? (' x ₹ ' + customerOrder.co_unit_price.toFixed(2)) : ''    }}
+                                {{ customerOrder.co_unit_price ? (' x ₹ ' + customerOrder.co_unit_price.toFixed(2)) : ''
+                                }}
                             </h5>
 
                             <h5>
@@ -79,7 +80,7 @@
 
                             <hr />
 
-                            <h5 class="fw-bold">Order Status</h5>
+                            <h5 class="fw-bold"> <b>Order Status</b></h5>
                             <ul class="tracker">
                                 <li *ngFor="let omh of orderMovementHistories" [ngClass]="{'done': omh.omh_cre_date}">
                                     <b>{{ omh.omh_status_name }}</b>
@@ -100,7 +101,7 @@
 
                         <div class="card border-0 rounded-3 mb-4 p-3">
 
-                            <h5 class="fw-bold text-center">Delivery Details</h5>
+                            <h4 class="fw-bold text-center"> <b>Delivery Details</b></h4>
                             <hr />
 
                             <p><i class="fa fa-user"></i> {{ customerOrder.co_customer_name }}</p>
@@ -115,16 +116,32 @@
                             <h5 class="fw-bold text-center">Payment Summary</h5>
                             <hr />
 
-                            <p>Sub Total : ₹ {{ customerOrder.co_amount | number:'1.2-2' }}</p>
-                            <p>Discount : ₹ {{ customerOrder.co_discount_amount | number:'1.2-2' }}</p>
-                            <p>GST : ₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</p>
-                            <p>Delivery : ₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</p>
+                            <div class="d-flex justify-content-between">
+                                <span>Sub Total</span>
+                                <span>₹ {{ customerOrder.co_amount | number:'1.2-2' }}</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Discount</span>
+                                <span>₹ {{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>GST</span>
+                                <span>₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Delivery</span>
+                                <span>₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
+                            </div>
 
                             <hr />
 
-                            <h5 class="fw-bold text-success">
-                                Grand Total : ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}
-                            </h5>
+                            <div class="d-flex justify-content-between fw-bold text-success fs-4">
+                                <span><b>Grand Total </b></span>
+                                <span> <b>₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}</b></span>
+                            </div>
 
                         </div>
 
@@ -135,6 +152,7 @@
             </div>
 
             <div class="modal-footer">
+                <button class="btn btn-warning text-gray pull-right" (click)="downloadTaxInvoice(customerOrder.co_id)">Download Tax Invoice </button>
                 <button class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
 

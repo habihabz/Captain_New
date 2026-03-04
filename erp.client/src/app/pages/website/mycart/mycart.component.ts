@@ -84,14 +84,14 @@ export class MycartComponent implements OnInit {
       (data: ConstantValue[]) => {
         this.constantValueList = data;
         this.constantValueList.forEach((item) => {
-          if(item.cv_name === 'Total Invoice Discount'){  
+          if (item.cv_name === 'Total Invoice Discount') {
             this.discountPercentConstant = item;
-          } else if(item.cv_name === 'Delivery Charge') {
+          } else if (item.cv_name === 'Delivery Charge') {
             this.deliveryChargeConstant = item;
             this.deliveryCharge = Number(this.deliveryChargeConstant.cv_value);
-          } else if(item.cv_name === 'Tax Percentage') {
+          } else if (item.cv_name === 'Tax Percentage') {
             this.taxPercentConstant = item;
-          } 
+          }
         });
       },
       (error: any) => {
@@ -190,22 +190,34 @@ export class MycartComponent implements OnInit {
   }
 
   getCartTotal() {
-    this.totalQty = this.carts.reduce((sum, cart) => sum + cart.c_qty, 0);
-    const total = this.carts.reduce(
-      (sum, cart) => sum + (cart.p_price * cart.c_qty),
-      0
+
+    this.totalQty = this.carts.reduce((s, c) => s + c.c_qty, 0);
+
+    // 1. Total Price
+    this.totalPrice = this.carts.reduce(
+      (s, c) => s + (c.p_price * c.c_qty), 0
     );
 
-    this.totalPrice = Math.round(total * 100) / 100;
-    this.discount = Math.round(this.totalPrice * 0.1 * 100) / 100;
-    this.deliveryCharge = Number(this.deliveryChargeConstant.cv_value);
-    this.discount = Math.round(this.totalPrice * Number(this.discountPercentConstant.cv_value) / 100 * 100) / 100;
-    this.taxPercentConstant.cv_value = this.taxPercentConstant.cv_value ? this.taxPercentConstant.cv_value : '0';
-    this.taxAmount = Math.round((this.totalPrice * Number(this.taxPercentConstant.cv_value) / 100) * 100) / 100;
-    this.netAmount = Math.round(
-      (this.totalPrice + this.deliveryCharge - this.discount + (this.totalPrice * Number(this.taxPercentConstant.cv_value) / 100)) * 100
-    ) / 100;
+    this.totalPrice = Math.round(this.totalPrice * 100) / 100;
 
+    // 2. Discount
+    const discountPerc = Number(this.discountPercentConstant?.cv_value || 0);
+    this.discount = Math.round(this.totalPrice * discountPerc / 100 * 100) / 100;
+
+    // 3. Taxable Amount
+    const taxableAmount = this.totalPrice - this.discount;
+
+    // 4. GST
+    const taxPerc = Number(this.taxPercentConstant?.cv_value || 0);
+    this.taxAmount = Math.round(taxableAmount * taxPerc / 100 * 100) / 100;
+
+    // 5. Delivery
+    this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+
+    // 6. Net Amount
+    this.netAmount = Math.round(
+      (taxableAmount + this.taxAmount + this.deliveryCharge) * 100
+    ) / 100;
   }
 
   placeOrder() {

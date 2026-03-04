@@ -69,12 +69,31 @@ export class CustomerOrderComponent {
 
   colDefs: ColDef[] = [
     { headerName: "Id", field: "co_id", width: 90 },
-
+    {
+      headerName: 'Details ',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        name: 'Details',
+        cssClass: 'btn btn-outline-default',
+        icon: 'fa fa-eye',
+        action: 'onDetails',
+        onDetails: (data: any) => this.onAction('details', data)
+      }
+    },
+    {
+      headerName: 'Change Status',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        name: 'Change Status',
+        cssClass: 'btn btn-outline-warning',
+        icon: 'fa fa-exchange',
+        action: 'onStatusChange',
+        onStatusChange: (data: any) => this.onAction('statusChange', data)
+      }
+    },
     { headerName: "Customer", field: "co_customer_name" },
     { headerName: "Phone", field: "co_customer_phone" },
-    { headerName: "Email", field: "co_customer_email" },
-
-    { headerName: "Address", field: "co_c_address_details" },
+    
     { headerName: "Product", field: "p_name" },
 
     { headerName: "Qty", field: "co_qty", width: 90 },
@@ -114,29 +133,11 @@ export class CustomerOrderComponent {
     },
 
     { headerName: "Status", field: "co_status_name" },
+    { headerName: "Email", field: "co_customer_email" },
 
-    {
-      headerName: 'View',
-      cellRenderer: 'actionRenderer',
-      cellRendererParams: {
-        name: 'Details',
-        cssClass: 'btn btn-info',
-        icon: 'fa fa-eye',
-        action: 'onDetails',
-        onDetails: (data: any) => this.onAction('details', data)
-      }
-    },
-    {
-      headerName: 'Change Status',
-      cellRenderer: 'actionRenderer',
-      cellRendererParams: {
-        name: 'Change',
-        cssClass: 'btn btn-warning',
-        icon: 'fa fa-exchange',
-        action: 'onStatusChange',
-        onStatusChange: (data: any) => this.onAction('statusChange', data)
-      }
-    }
+    { headerName: "Address", field: "co_c_address_details" }
+
+
   ];
 
 
@@ -207,7 +208,7 @@ export class CustomerOrderComponent {
   onGridReady(event: GridReadyEvent) {
     setTimeout(() => {
       this.customerOrderGrid.api.sizeColumnsToFit();
-    }, 500);
+    }, 0);
   }
 
   getCustomerOrders() {
@@ -215,7 +216,9 @@ export class CustomerOrderComponent {
     this.icustomerOrder.getCustomerOrders(this.requestParms).subscribe(
       (data: CustomerOrder[]) => {
         this.customerOrders = data;
-
+        setTimeout(() => {
+          this.customerOrderGrid.api.autoSizeAllColumns();
+        }, 500);
       },
       (error: any) => {
 
@@ -266,5 +269,34 @@ export class CustomerOrderComponent {
       (error: any) => {
       }
     );
+  }
+
+  downloadTaxInvoice(orderId: number) {
+
+    this.icustomerOrder.invoice(orderId)
+      .subscribe({
+
+        next: (data: Blob) => {
+
+          const blob = new Blob([data], { type: 'application/pdf' });
+
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Tax_Invoice_Order_${orderId}.pdf`;
+
+          document.body.appendChild(a);
+          a.click();
+
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        },
+
+        error: () => {
+          this.snackBarService.showError('Error downloading tax invoice.');
+        }
+
+      });
   }
 }
