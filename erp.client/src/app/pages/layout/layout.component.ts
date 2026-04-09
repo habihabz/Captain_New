@@ -10,6 +10,7 @@ import { ScriptLoaderService } from '../../services/script.loader.service';
   encapsulation: ViewEncapsulation.None 
 })
 export class LayoutComponent implements OnInit {
+  currentYear: number = new Date().getFullYear();
   constructor(private scriptLoaderService: ScriptLoaderService) {
     
   }

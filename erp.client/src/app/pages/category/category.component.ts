@@ -9,38 +9,106 @@ import { Category } from '../../models/category.model';
 
 declare var $: any;
 
+import { ColDef, DomLayoutType } from 'ag-grid-community';
+import { ActionRendererComponent } from '../../directives/action.renderer';
+
 @Component({
   selector: 'app-category',
-  templateUrl: './category.component.html', // Update template URL
+  templateUrl: './category.component.html',
   styleUrls: ['./category.component.css']
 })
 export class CategoryComponent implements OnInit, OnDestroy {
-  categories: Category[] = []; // Update variable to categories
-  category: Category = new Category(); // Update variable to Category
+  categories: Category[] = [];
+  category: Category = new Category();
   currentUser: User = new User();
   dbResult: DbResult = new DbResult();
   private subscription: Subscription = new Subscription();
-  dtOptions: any = {};
-  dtTrigger: Subject<any> = new Subject<any>();
+  
+  pagination = true;
+  domLayout: DomLayoutType = 'autoHeight';
 
-  constructor(
-    private iuserService: IuserService,
-    private icategoryService: ICategoryService, // Update service injection
-    private router: Router
-  ) {
+  colDefs: ColDef[] = [
+    { 
+      headerName: "ID", 
+      field: "ct_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted'
+    },
+    { 
+      headerName: "Category Name", 
+      field: "ct_name", 
+      flex: 1.2,
+      cellClass: 'fw-bold text-dark'
+    },
+    { 
+      headerName: "Description", 
+      field: "ct_description", 
+      flex: 1.5,
+      cellClass: 'text-muted small'
+    },
+    { 
+      headerName: "Active", 
+      field: "ct_active_yn", 
+      width: 100,
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const isActive = p.value === 'Y';
+        return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Active' : 'Inactive'}</span>`;
+      }
+    },
+    {
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Category',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.editCategory(data.ct_id)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Category',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.deleteCategory(data.ct_id)
+          }
+        ]
+      }
+    },
+    { 
+        headerName: "Created On", 
+        field: "ct_cre_date", 
+        width: 130, 
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    }
+  ];
+
+  frameworkComponents = {
+    actionRenderer: ActionRendererComponent
+  };
+
+  defaultColDef = {
+    sortable: true,
+    filter: true
+  };
+
+  constructor(private iuserService: IuserService, private icategoryService: ICategoryService, private router: Router) { 
     this.currentUser = iuserService.getCurrentUser();
-    if (this.currentUser.u_id === 0) {
+    if(this.currentUser.u_id == 0) { 
       this.router.navigate(['login']);
     }
   }
 
   ngOnInit(): void {
-    this.dtOptions = {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      processing: true,
-      dom: '<"row"<"col-sm-6 text-left"l><"col-sm-6 text-right"f>>t<"row"<"col-sm-6"i><"col-sm-6"p>>'
-    };
     this.loadCategories();
     this.subscription.add(
       this.icategoryService.refreshCategories$.subscribe(() => {
@@ -57,7 +125,6 @@ export class CategoryComponent implements OnInit, OnDestroy {
     this.icategoryService.getCategories().subscribe(
       (data: Category[]) => {
         this.categories = data;
-        this.dtTrigger.next(null);
       },
       (error: any) => {
         console.error('Error fetching categories', error);
@@ -65,65 +132,49 @@ export class CategoryComponent implements OnInit, OnDestroy {
     );
   }
 
+  onGridReady(params: any) {
+    params.api.sizeColumnsToFit();
+  }
+
   createOrUpdateCategory(): void {
-    this.category.ct_cre_by = this.currentUser.u_id; // Update property to match Category model
+    this.category.ct_cre_by = this.currentUser.u_id;
     this.icategoryService.createOrUpdateCategory(this.category).subscribe(
       (data: DbResult) => {
-        this.dbResult = data;
         if (data.message === "Success") {
           this.icategoryService.refreshCategories();
-          this.removeDatatable();
-          $('#categoryFormModal').modal('hide'); // Update modal ID
+          $('#categoryFormModal').modal('hide');
         } else {
           alert(data.message);
         }
-      },
-      (error: any) => {
-        console.error('Error creating/updating category', error);
-        alert('An error occurred while creating/updating the category.');
       }
     );
   }
 
   deleteCategory(id: number): void {
-    this.icategoryService.deleteCategory(id).subscribe(
-      (data: DbResult) => {
-        this.dbResult = data;
-        if (this.dbResult.message === "Success") {
-          this.categories = this.categories.filter(category => category.ct_id !== id);
-          this.icategoryService.refreshCategories();
-          this.removeDatatable();
-          alert("Successfully Removed");
-        } else {
-          alert(this.dbResult.message);
+    if(confirm("Are you sure you want to delete this category?")) {
+      this.icategoryService.deleteCategory(id).subscribe(
+        (data: DbResult) => {
+          if (data.message === "Success") {
+            this.icategoryService.refreshCategories();
+          } else {
+            alert(data.message);
+          }
         }
-      },
-      (error: any) => {
-        console.error('Error deleting category', error);
-      }
-    );
+      );
+    }
   }
 
   editCategory(id: number): void {
     this.icategoryService.getCategory(id).subscribe(
       (data: Category) => {
         this.category = data;
-        $('#categoryFormModal').modal('show'); // Update modal ID
-      },
-      (error: any) => {
-        console.error('Error fetching category', error);
+        $('#categoryFormModal').modal('show');
       }
     );
   }
 
   createCategory(): void {
-    this.category = new Category(); // Reset category
-    $('#categoryFormModal').modal('show'); // Update modal ID
-  }
-
-  removeDatatable() {
-    if ($.fn.dataTable.isDataTable('#DataTables_Table_0')) {
-      $('#DataTables_Table_0').DataTable().clear().destroy();
-    }
+    this.category = new Category();
+    $('#categoryFormModal').modal('show');
   }
 }

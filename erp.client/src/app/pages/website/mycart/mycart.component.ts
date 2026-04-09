@@ -45,6 +45,7 @@ export class MycartComponent implements OnInit {
   addresses: Address[] = [];
   address: Address = new Address();
   showAddressForm: boolean = false;
+  showAllAddresses: boolean = false;
   constantValueList: ConstantValue[] = [];
   discountPercentConstant: ConstantValue = new ConstantValue();
   deliveryChargeConstant: ConstantValue = new ConstantValue();
@@ -102,11 +103,30 @@ export class MycartComponent implements OnInit {
   }
 
   getAttachementOfaProduct(p_attachements: string) {
-    var att: any;
     if (p_attachements) {
-      att = JSON.parse(p_attachements);
+      return JSON.parse(p_attachements);
     }
-    return att;
+    return [];
+  }
+
+  getCartItemImage(cart: Cart): string {
+    const attachments = this.getAttachementOfaProduct(cart.p_attachements);
+    if (!attachments || attachments.length === 0) return '';
+
+    // 1. Try to find the exact color match
+    const matchingImage = attachments.find((x: any) => x.pa_color == cart.c_color);
+    if (matchingImage) {
+      return matchingImage.pa_image_path;
+    }
+
+    // 2. Fallback to shared assets (color 0)
+    const sharedImage = attachments.find((x: any) => !x.pa_color || x.pa_color == 0);
+    if (sharedImage) {
+      return sharedImage.pa_image_path;
+    }
+
+    // 3. Ultimate fallback: show the first available image
+    return attachments[0].pa_image_path;
   }
 
   selectImage(index: number) {
@@ -190,34 +210,30 @@ export class MycartComponent implements OnInit {
   }
 
   getCartTotal() {
-
     this.totalQty = this.carts.reduce((s, c) => s + c.c_qty, 0);
 
-    // 1. Total Price
+    // 1. Total Price (Inclusive of Tax)
     this.totalPrice = this.carts.reduce(
       (s, c) => s + (c.p_price * c.c_qty), 0
     );
-
     this.totalPrice = Math.round(this.totalPrice * 100) / 100;
 
-    // 2. Discount
+    // 2. Discount (Calculated on Inclusive Price)
     const discountPerc = Number(this.discountPercentConstant?.cv_value || 0);
     this.discount = Math.round(this.totalPrice * discountPerc / 100 * 100) / 100;
 
-    // 3. Taxable Amount
-    const taxableAmount = this.totalPrice - this.discount;
+    // 3. Taxable Amount (Still Inclusive here)
+    const netTaxableAmount = this.totalPrice - this.discount;
 
-    // 4. GST
+    // 4. GST Extraction (Since price is Inclusive Tax)
     const taxPerc = Number(this.taxPercentConstant?.cv_value || 0);
-    this.taxAmount = Math.round(taxableAmount * taxPerc / 100 * 100) / 100;
+    this.taxAmount = Math.round((netTaxableAmount * taxPerc / (100 + taxPerc)) * 100) / 100;
 
     // 5. Delivery
     this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
 
-    // 6. Net Amount
-    this.netAmount = Math.round(
-      (taxableAmount + this.taxAmount + this.deliveryCharge) * 100
-    ) / 100;
+    // 6. Net Amount (Tax is already part of netTaxableAmount)
+    this.netAmount = Math.round((netTaxableAmount + this.deliveryCharge) * 100) / 100;
   }
 
   placeOrder() {
@@ -259,6 +275,15 @@ export class MycartComponent implements OnInit {
       (error: any) => {
       }
     );
+  }
+
+  get hasDefaultAddress(): boolean {
+    return this.addresses.some(ad => ad.ad_is_default_yn?.toUpperCase() === 'Y');
+  }
+
+  get selectedAddress(): Address | null {
+    if (this.addresses.length === 0) return null;
+    return this.addresses.find(ad => ad.ad_is_default_yn?.toUpperCase() === 'Y') || this.addresses[0];
   }
 
   CreateOrUpdateAddress() {

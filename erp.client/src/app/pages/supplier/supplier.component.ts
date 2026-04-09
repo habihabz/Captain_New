@@ -8,6 +8,9 @@ import { Router } from '@angular/router';
 import { ISupplierService } from '../../services/isupplier.service';
 declare var $: any;
 
+import { ColDef, DomLayoutType } from 'ag-grid-community';
+import { ActionRendererComponent } from '../../directives/action.renderer';
+
 @Component({
   selector: 'app-supplier',
   templateUrl: './supplier.component.html',
@@ -19,25 +22,93 @@ export class SupplierComponent implements OnInit, OnDestroy {
   currentUser: User = new User();
   dbResult: DbResult = new DbResult();
   private subscription: Subscription = new Subscription();
-  dtOptions: any ={};
-  dtTrigger:Subject<any>=new Subject<any>();
+  
+  pagination = true;
+  domLayout: DomLayoutType = 'autoHeight';
 
-  constructor(private iuserService: IuserService, private isupplierService: ISupplierService,private router: Router) { 
+  colDefs: ColDef[] = [
+    { 
+      headerName: "ID", 
+      field: "s_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted'
+    },
+    { 
+      headerName: "Supplier Name", 
+      field: "s_name", 
+      flex: 1.2,
+      cellClass: 'fw-bold text-dark'
+    },
+    { 
+      headerName: "Contact Number", 
+      field: "s_mobile", 
+      width: 150,
+      cellClass: 'text-center'
+    },
+    { 
+      headerName: "Email Address", 
+      field: "s_email", 
+      flex: 1.5 
+    },
+    { 
+      headerName: "Address", 
+      field: "s_address", 
+      flex: 1.5,
+      cellClass: 'text-muted small'
+    },
+    {
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Supplier',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.editSupplier(data.s_id)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Supplier',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.deleteSupplier(data.s_id)
+          }
+        ]
+      }
+    },
+    { 
+        headerName: "Created On", 
+        field: "s_cre_date", 
+        width: 130, 
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    }
+  ];
 
+  frameworkComponents = {
+    actionRenderer: ActionRendererComponent
+  };
+
+  defaultColDef = {
+    sortable: true,
+    filter: true
+  };
+
+  constructor(private iuserService: IuserService, private isupplierService: ISupplierService, private router: Router) { 
     this.currentUser = iuserService.getCurrentUser();
-    if(this.currentUser.u_id==0) { 
+    if(this.currentUser.u_id == 0) { 
       this.router.navigate(['login']);
     }
-    
   }
 
   ngOnInit(): void {
-    this.dtOptions= {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      processing: true,
-      dom: '<"row"<"col-sm-6 text-left"l><"col-sm-6 text-right"f>>t<"row"<"col-sm-6"i><"col-sm-6"p>>'
-    };
     this.loadSuppliers();
     this.subscription.add(
       this.isupplierService.refreshSuppliers$.subscribe(() => {
@@ -47,14 +118,13 @@ export class SupplierComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
+    this.subscription.unsubscribe();
   }
 
   loadSuppliers(): void {
     this.isupplierService.getSuppliers().subscribe(
       (data: Supplier[]) => {
         this.suppliers = data;
-        this.dtTrigger.next(null);
       },
       (error: any) => {
         console.error('Error fetching suppliers', error);
@@ -62,56 +132,43 @@ export class SupplierComponent implements OnInit, OnDestroy {
     );
   }
 
+  onGridReady(params: any) {
+    params.api.sizeColumnsToFit();
+  }
+
   createOrUpdateSupplier(): void {
-   
     this.supplier.s_cre_by = this.currentUser.u_id;
     this.isupplierService.createOrUpdateSupplier(this.supplier).subscribe(
       (data: DbResult) => {
-        this.dbResult = data;
         if (data.message === "Success") {
           this.isupplierService.refreshSuppliers();
-          this.removeDatatable();
           $('#supplierFormModal').modal('hide');
-      
         } else {
           alert(data.message);
         }
-      },
-      (error: any) => {
-        console.error('Error creating/updating supplier', error);
-        alert('An error occurred while creating/updating the supplier.');
       }
     );
   }
 
   deleteSupplier(id: number): void {
-    this.isupplierService.deleteSupplier(id).subscribe(
-      (data: DbResult) => {
-        this.dbResult = data;
-        if (this.dbResult.message === "Success") {
-          this.suppliers = this.suppliers.filter(supplier => supplier.s_id !== id);
-          this.isupplierService.refreshSuppliers();
-          this.removeDatatable();
-          alert("Successfully Removed");
-        } else {
-          alert(this.dbResult.message);
+    if(confirm("Are you sure you want to delete this supplier?")) {
+      this.isupplierService.deleteSupplier(id).subscribe(
+        (data: DbResult) => {
+          if (data.message === "Success") {
+            this.isupplierService.refreshSuppliers();
+          } else {
+            alert(data.message);
+          }
         }
-      },
-      (error: any) => {
-        console.error('Error deleting supplier', error);
-      }
-    );
+      );
+    }
   }
-  
 
   editSupplier(id: number): void {
     this.isupplierService.getSupplier(id).subscribe(
       (data: Supplier) => {
         this.supplier = data;
         $('#supplierFormModal').modal('show');
-      },
-      (error: any) => {
-        console.error('Error fetching supplier', error);
       }
     );
   }
@@ -119,11 +176,6 @@ export class SupplierComponent implements OnInit, OnDestroy {
   createSupplier(): void {
     this.supplier = new Supplier();
     $('#supplierFormModal').modal('show');
-  }
-  removeDatatable(){
-    if ($.fn.dataTable.isDataTable('#DataTables_Table_0')) {
-      $('#DataTables_Table_0').DataTable().clear().destroy();
-    }
   }
 }
 

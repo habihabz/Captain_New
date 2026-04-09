@@ -1,52 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <!-- Meta, title, CSS, favicons, etc. -->
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-nf
-  <title>Captain</title>
-</head>
-<body class="login">
-  <div>
-    <a class="hiddenanchor" id="signup"></a>
-    <a class="hiddenanchor" id="signin"></a>
-    <div class="login_wrapper">
-      <div class="animate form login_form">
-        <section class="login_content">
-          <img src="/images/captain.png" alt="Logo" style="width:150px;height:150px;" />
-          <br/>
-          <br/>
-          <form>
-            <h1>Login</h1>
-            <div>
-              <input type="text" class="form-control" placeholder="Username" [(ngModel)]="credential.username" name="username" required />
-            </div>
-            <div>
-              <input type="password" class="form-control" placeholder="Password" [(ngModel)]="credential.password" name="password" required />
-            </div>
-            <div>
-              <button type="button" class="btn" (click)="onLogin()">Login</button>
-              <a class="reset_pass" href="#">Lost your password?</a>
-            </div>
-            <div class="clearfix"></div>
-            <div class="separator">
-              <p class="change_link">New to site?
-                <a (click)="navigateTo('user-registration')" class="to_register"> Create Account </a>
-              </p>
-              <div class="clearfix"></div>
-              <br />
-              <div>
-                
-                <p>©{{ currentYear  }} All Rights Reserved. Captain</p>
-            </div>
-            </div>
-          </form>
-        </section>
+<div class="login-page-container">
+  <div class="login-card-glass">
+    <div class="login-header mb-4 mt-2">
+      <img src="/images/captain.png" alt="Captain Logo" class="login-logo mb-3" />
+      <h3 class="fw-bold text-dark m-0">Welcome Back</h3>
+      <p class="text-muted small">Please sign in to your account</p>
+    </div>
+
+    <form class="login-form px-2">
+      <div class="form-group mb-3">
+        <label class="login-label">Username</label>
+        <div class="input-group-premium">
+          <i class="fa fa-user-circle"></i>
+          <input type="text" class="form-control" placeholder="Enter your username" 
+                 [(ngModel)]="credential.username" name="username" required autocomplete="off" />
+        </div>
       </div>
+
+      <div class="form-group mb-4">
+        <label class="login-label d-flex justify-content-between">
+          Password
+          <a class="text-xs text-primary text-decoration-none fw-600" style="cursor: pointer;">Forgot?</a>
+        </label>
+        <div class="input-group-premium">
+          <i class="fa fa-lock"></i>
+          <input type="password" class="form-control" placeholder="••••••••" 
+                 [(ngModel)]="credential.password" name="password" required />
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-pill w-100 py-3 shadow-lg hover-lift mb-4 fw-bold" (click)="onLogin()">
+        SECURE LOGIN <i class="fa fa-arrow-right ms-2 small"></i>
+      </button>
+
+      <div class="text-center">
+        <p class="text-muted small mb-0">Don't have an account?</p>
+        <a (click)="navigateTo('user-registration')" class="text-dark fw-bold small text-decoration-none" style="cursor: pointer;">
+          Create New Account
+        </a>
+      </div>
+    </form>
+
+    <div class="login-footer text-center mt-5">
+      <p class="text-xs text-muted mb-0">© {{ currentYear }} Captain ERP. All rights reserved.</p>
     </div>
   </div>
-</body>
-</html>
+</div>

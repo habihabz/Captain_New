@@ -64,40 +64,65 @@ export class BlogComponent {
   // GRID CONFIG
   // =======================
   colDefs: ColDef[] = [
-    { headerName: "ID", field: "b_id", width: 80 },
-    { headerName: "Title", field: "b_title" },
-    { headerName: "Description", field: "b_description" },
+    { 
+      headerName: "ID", 
+      field: "b_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted',
+      headerClass: 'text-center'
+    },
+    { 
+      headerName: "Blog Title", 
+      field: "b_title", 
+      flex: 1.2, 
+      headerClass: 'text-start' 
+    },
     {
-      headerName: "Cover",
+      headerName: "Preview",
       field: "b_image_url",
+      width: 120,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
       cellRenderer: (p: any) =>
-        `<img src="${this.attachmentUrl}/${p.value}" width="60" height="40" style="object-fit:cover;">`
+        p.value ? `<img src="${this.attachmentUrl}/${p.value}" class="rounded shadow-xs" width="80" height="40" style="object-fit:cover;">` : ''
     },
     {
-      headerName: "Active",
+      headerName: "Status",
       field: "b_active_yn",
-      cellRenderer: (p: any) => p.value === 'Y' ? 'Yes' : 'No'
-    },
-    {
-      headerName: 'Edit',
-      cellRenderer: 'actionRenderer',
-      cellRendererParams: {
-        name: 'Edit',
-        action: 'onEdit',
-        cssClass: 'btn btn-info',
-        icon: 'fa fa-edit',
-        onEdit: (data: any) => this.onAction('edit', data)
+      width: 100,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const isActive = p.value === 'Y';
+        return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Published' : 'Draft'}</span>`;
       }
     },
     {
-      headerName: 'Delete',
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      headerClass: 'text-center',
+      cellClass: 'text-center',
       cellRenderer: 'actionRenderer',
       cellRendererParams: {
-        name: 'Delete',
-        action: 'onDelete',
-        cssClass: 'btn btn-danger',
-        icon: 'fa fa-trash',
-        onDelete: (data: any) => this.onAction('delete', data)
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Blog',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.onAction('edit', data)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Blog',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.onAction('delete', data)
+          }
+        ]
       }
     }
   ];

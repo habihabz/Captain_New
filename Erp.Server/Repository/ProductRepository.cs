@@ -2,6 +2,7 @@
 using Erp.Server.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 
 namespace Erp.Server.Repository
@@ -117,6 +118,53 @@ namespace Erp.Server.Repository
                 _id, _categories, _subcategories, _sizes, _orderBy,_country).ToList();
 
             return products;
+        }
+
+        public List<ProdAttachment> getProductAttachementsByColor(RequestParams requestParams)
+        {
+            var _id = new SqlParameter("id", requestParams.id + "");
+            var _color = new SqlParameter("color", requestParams.color + "");
+       
+            var prodAttachments = db.Set<ProdAttachment>().FromSqlRaw("EXEC dbo.getProductAttachementsByColor @id,@color",
+                _id, _color).ToList();
+
+            return prodAttachments;
+        }
+
+        public DbResult uploadProdAttachements(List<ProdAttachment> prodAttachments)
+        {
+            var attachmentsJson = JsonConvert.SerializeObject(
+                prodAttachments.Select(a => new
+                {
+                    pa_prod_id = a.pa_prod_id,
+                    pa_color = a.pa_color,
+                    pa_image_path = a.pa_image_path,
+                    pa_cre_by = a.pa_cre_by
+                })
+            );
+
+            var _prodAttachments = new SqlParameter("@p_attachements", attachmentsJson);
+
+            var dbResult = db.Set<DbResult>().FromSqlRaw(
+                "EXEC dbo.uploadProdAttachements @p_attachements",
+                _prodAttachments
+            ).ToList().FirstOrDefault() ?? new DbResult();
+
+            return dbResult;
+        }
+
+        public DbResult deleteProductAttachement(int id)
+        {
+            var _id = new SqlParameter("id", id + "");
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.deleteProductAttachement @id;", _id).ToList().FirstOrDefault() ?? new DbResult();
+            return dbresult;
+        }
+
+        public ProdAttachment getProductAttachment(int id)
+        {
+            var _id = new SqlParameter("id", id + "");
+            var dbresult = db.Set<ProdAttachment>().FromSqlRaw("EXEC dbo.getProductAttachment @id;", _id).ToList().FirstOrDefault() ?? new ProdAttachment();
+            return dbresult;
         }
     }
 

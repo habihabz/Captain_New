@@ -79,6 +79,15 @@ namespace Erp.Server.Controllers
             return product;
         }
 
+        [HttpPost("getProductAttachementsByColor")]
+        // [Authorize]
+        public List<ProdAttachment> getProductAttachementsByColor([FromBody] RequestParams requestParams)
+        {
+            
+           List<ProdAttachment>  prodAttachments =iproduct.getProductAttachementsByColor(requestParams);
+            return prodAttachments;
+        }
+
         [HttpPost("createOrUpdateProduct")]
         [Authorize]
         public async Task<DbResult> createOrUpdateProduct([FromForm] IFormCollection form)
@@ -118,8 +127,78 @@ namespace Erp.Server.Controllers
             dbResult = iproduct.createOrUpdateProduct(product);
             return dbResult;
         }
+        [HttpPost("uploadProdAttachements")]
+        [Authorize]
+        public async Task<DbResult> uploadProdAttachements([FromForm] IFormCollection form)
+        {
+            DbResult dbResult = new DbResult();
 
+            int.TryParse(form["product"], out int product);
+            int.TryParse(form["color"], out int color);
+            int.TryParse(form["user"], out int user);
+            List<ProdAttachment> prodAttachments = new List<ProdAttachment>();
 
+            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/product");
 
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            foreach (var file in form.Files)
+            {
+                if (file.Length > 0)
+                {
+                    var extension = Path.GetExtension(file.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + extension;
+
+                    var filePath = Path.Combine(uploadPath, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    prodAttachments.Add(new ProdAttachment
+                    {
+                        pa_image_path = $"uploads/product/{uniqueFileName}",
+                        pa_color = color,
+                        pa_prod_id= product,
+                        pa_cre_by= user
+                    });
+                }
+            }
+
+            // ✅ call new method instead of create/update product
+            dbResult = iproduct.uploadProdAttachements( prodAttachments);
+
+            return dbResult;
+        }
+
+        [HttpPost("deleteProductAttachement")]
+        [Authorize]
+        public DbResult deleteProductAttachement([FromBody] int id)
+        {
+            DbResult dbResult = new DbResult();
+
+            // 1. Get attachment details (before delete)
+            var attachment = iproduct.getProductAttachment(id); // create this method
+
+            if (attachment != null && !string.IsNullOrEmpty(attachment.pa_image_path))
+            {
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", attachment.pa_image_path);
+
+                // 2. Delete physical file
+                if (System.IO.File.Exists(fullPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                }
+            }
+
+            // 3. Delete from DB
+            dbResult = iproduct.deleteProductAttachement(id);
+
+            return dbResult;
+        }
     }
 }

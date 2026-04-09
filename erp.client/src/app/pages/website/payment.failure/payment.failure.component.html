@@ -1,1 +1,51 @@
-<p>payment.failure works!</p>
+<div class="payment-outcome-wrapper py-5">
+    <div class="container py-5 mt-lg-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="card border-0 shadow-sm overflow-hidden text-center" 
+                     style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
+                    
+                    <!-- TOP ACCENT BAR -->
+                    <div class="bg-danger opacity-75" style="height: 6px;"></div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <!-- ANIMATED ICON AREA -->
+                        <div class="outcome-icon-container mb-4">
+                            <div class="failure-icon-ring mx-auto d-flex align-items-center justify-content-center">
+                                <i class="fa fa-exclamation-circle text-danger" style="font-size: 52px;"></i>
+                            </div>
+                        </div>
+
+                        <h2 class="fw-bold text-dark mb-2">Transaction Incomplete</h2>
+                        <p class="text-muted mb-4 px-lg-3">We encountered an issue while processing your payment. Don't worry, no funds were deducted from your account.</p>
+
+                        <!-- TROUBLESHOOTING CARD -->
+                        <div class="bg-white border text-start p-3 mb-4" style="border-radius: 0;">
+                            <h6 class="fw-bold text-dark mb-2 small"><i class="fa fa-info-circle me-2 text-danger"></i> What could have happened?</h6>
+                            <ul class="list-unstyled mb-0 text-muted" style="font-size: 12px; line-height: 1.8;">
+                                <li><i class="fa fa-check-circle-o me-2 opacity-50"></i> Insufficient funds in the selected account.</li>
+                                <li><i class="fa fa-check-circle-o me-2 opacity-50"></i> Incorrect CVV or card details entered.</li>
+                                <li><i class="fa fa-check-circle-o me-2 opacity-50"></i> Temporary connection issue with your bank.</li>
+                            </ul>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="d-grid gap-3">
+                            <button routerLink="/payment" class="btn btn-dark py-3 fw-bold btn-premium-action shadow-sm" style="border-radius: 0; letter-spacing: 1px;">
+                                <i class="fa fa-refresh me-2"></i> RETRY TRANSACTION
+                            </button>
+                            <button routerLink="/my-cart" class="btn btn-outline-secondary py-2 fw-medium" style="border-radius: 0; font-size: 13px; border-color: #dee2e6;">
+                                <i class="fa fa-shopping-cart me-2"></i> Return to My Cart
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 pt-2">
+                    <p class="text-muted small">Need help? <a href="#" class="text-decoration-none text-dark fw-bold">Contact Support</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

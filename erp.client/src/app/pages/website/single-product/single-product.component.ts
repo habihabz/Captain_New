@@ -18,6 +18,7 @@ import { IuserService } from '../../../services/iuser.service';
 import { User } from '../../../models/user.model';
 import { Favourite } from '../../../models/favourite.model';
 import { IFavouriteService } from '../../../services/ifavourite.service';
+import { ProdAttachement } from '../../../models/prod.attachments.model';
 declare var $: any;
 
 @Component({
@@ -32,6 +33,7 @@ export class SingleProductComponent implements OnInit {
   product: Product = new Product();
   selectedImagePath: string = '';
   selectedSize: number = 0;
+  selectedColor: number = 0;
   productReview: ProductReview = new ProductReview();
   productReviews: ProductReview[] = [];
   productsMayLike: Product[] = [];
@@ -43,6 +45,30 @@ export class SingleProductComponent implements OnInit {
   cart: Cart = new Cart();
   currentUser: User = new User();
   favourite: Favourite = new Favourite();
+  productAttachements: any[] = [];
+
+  // IMAGE ZOOM VARIABLES
+  isZoomed: boolean = false;
+  transformOrigin: string = 'center center';
+
+  onMouseMove(event: MouseEvent) {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    // Slight boundary clamping so it doesn't zoom too far on the edges
+    const clampX = Math.max(0, Math.min(100, x));
+    const clampY = Math.max(0, Math.min(100, y));
+
+    this.transformOrigin = `${clampX}% ${clampY}%`;
+    this.isZoomed = true;
+  }
+
+  onMouseLeave() {
+    this.isZoomed = false;
+    this.transformOrigin = 'center center';
+  }
 
   constructor(
     private router: Router,
@@ -62,18 +88,42 @@ export class SingleProductComponent implements OnInit {
   ngOnInit(): void {
     this.country = this.geolocationService.getCurrentCountry();
     this.productId = +this.route.snapshot.paramMap.get('id')!;
+
     this.getProductByCountry(this.productId);
     this.getProductsMayLike(this.productId);
     this.getProductReviews(this.productId);
-    this.applyFilters();
   }
   getProductByCountry(productId: number) {
+    this.productAttachements= [];
     this.requestParms.id = productId;
     this.requestParms.country = this.country.md_id;
     this.iproductService.getProductByCountry(this.requestParms).subscribe(
       (data: Product) => {
         this.product = data;
-        this.selectedImagePath = this.apiUrl + '/' + this.getAttachementOfaProduct(this.product.p_attachements)[0].pa_image_path;
+        // Set default color and size
+        const colors = this.getListFromJSON(this.product.p_colors);
+        if (colors && colors.length > 0) {
+          this.selectedColor = colors[0].pc_color;
+        }
+
+        const sizes = this.getListFromJSON(this.product.p_sizes);
+        if (sizes && sizes.length > 0) {
+          this.selectedSize = sizes[0].ps_size;
+        }
+
+        // Set initial image preview based on the selected color
+        const attachments = this.getAttachementOfaProduct(this.product.p_attachements);
+        if (attachments && attachments.length > 0) {
+          // Try to find the first image for the default color
+          const firstColorImage = attachments.find((x: any) => x.pa_color == this.selectedColor);
+          if (firstColorImage) {
+            this.selectedImagePath = this.apiUrl + '/' + firstColorImage.pa_image_path;
+          } else {
+            // Fallback to first image if no color-specific image exists
+            this.selectedImagePath = this.apiUrl + '/' + attachments[0].pa_image_path;
+          }
+        }
+         this.getProductAttachementsByColor();
       },
       (error: any) => {
       }
@@ -81,15 +131,41 @@ export class SingleProductComponent implements OnInit {
   }
 
   getAttachementOfaProduct(p_attachements: string) {
-    var att: any;
     if (p_attachements) {
-      att = JSON.parse(p_attachements);
+      return JSON.parse(p_attachements);
     }
-    return att;
+    return [];
   }
+
+  getFilteredAttachments() {
+    const attachments = this.getAttachementOfaProduct(this.product.p_attachements);
+    if (!attachments || attachments.length === 0) return [];
+
+    // 1. Try to get images specifically for this selected color
+    const specificMatches = attachments.filter((x: any) => x.pa_color == this.selectedColor && x.pa_color != 0);
+
+    if (specificMatches.length > 0) {
+      // If we have color-specific images, only show those + any shared/general photos (color 0)
+      return attachments.filter((x: any) => (x.pa_color == this.selectedColor) || (!x.pa_color || x.pa_color == 0));
+    }
+
+    // 2. If NO color-specific images exist, show only General/Shared images (color 0)
+    // This allows you to see the shoes if they were uploaded without a specific color tag, 
+    // but hides images explicitly tagged as "Red" when you pick "Yellow".
+    const sharedMatches = attachments.filter((x: any) => !x.pa_color || x.pa_color == 0);
+    if (sharedMatches.length > 0) {
+      return sharedMatches;
+    }
+
+    // 3. Ultimate fallback: if there's no color logic at all, show everything
+    return attachments;
+  }
+
   selectImage(index: number) {
-    const selectedAttachment = this.getAttachementOfaProduct(this.product.p_attachements)[index];
-    this.selectedImagePath = this.apiUrl + '/' + selectedAttachment.pa_image_path;
+    const selectedAttachment = this.getFilteredAttachments()[index];
+    if (selectedAttachment) {
+      this.selectedImagePath = this.apiUrl + '/' + selectedAttachment.pa_image_path;
+    }
   }
 
   getListFromJSON(jsonStr: string) {
@@ -103,8 +179,28 @@ export class SingleProductComponent implements OnInit {
   selectSize(size: number) {
     this.selectedSize = size;
   }
+  selectColor(color: number) {
+    this.selectedColor = color;
+    this.productAttachements = [];
+    this.getProductAttachementsByColor();
+  }
+
+  getProductAttachementsByColor() {
+    this.iproductService.getProductAttachementsByColor({ id: this.product.p_id, color: this.selectedColor } as RequestParms).subscribe(
+      (data: ProdAttachement[]) => {
+        if (data && data.length > 0) {
+          this.selectedImagePath = this.apiUrl + '/' + data[0].pa_image_path;
+          this.product.p_attachements = JSON.stringify(data);
+          this.productAttachements = data;
+        }
+      },
+      (error: any) => {
+      }
+    );
+  }
+
   getProductsMayLike(productId: number) {
-    this.iproductService.getProducts().subscribe(
+    this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
       (data: Product[]) => {
         this.productsMayLike = data.filter(x => x.p_id != productId).slice(0, 4);
       },
@@ -145,7 +241,7 @@ export class SingleProductComponent implements OnInit {
     this.iproductReviewService.getProductReviews(prod_id).subscribe(
       (data: ProductReview[]) => {
         this.productReviews = data;
-        this.filteredReviews = data;
+        this.applyFilters();
       },
       (error: any) => {
       }
@@ -156,7 +252,11 @@ export class SingleProductComponent implements OnInit {
     this.filteredReviews = this.productReviews.filter(review => {
       const reviewDate = new Date(review.pr_created_on);
       const dayDifference = Math.floor((today.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24));
-      return ((review.pr_overall_rating == this.selectedRating) || this.selectedRating == 0) && (dayDifference <= this.selectedDate || dayDifference == 0);
+      
+      const matchesRating = this.selectedRating == 0 || review.pr_overall_rating == this.selectedRating;
+      const matchesDate = this.selectedDate == 0 || dayDifference <= this.selectedDate;
+      
+      return matchesRating && matchesDate;
     });
   }
 
@@ -166,22 +266,40 @@ export class SingleProductComponent implements OnInit {
   }
 
   addToCart() {
-    if (this.selectedSize != 0) {
-      this.cart.c_size = this.selectedSize;
-      this.cart.c_product = this.product.p_id;
-      this.cart.c_qty = 1;
-      this.cart.c_cre_by = this.currentUser.u_id;
-      this.icartService.createOrUpdateCart(this.cart).subscribe(
-        (data: DbResult) => {
-          this.router.navigate(['my-cart']);
-        },
-        (error: any) => {
-        }
-      );
+    const hasSizes = this.getListFromJSON(this.product.p_sizes)?.length > 0;
+    const hasColors = this.getListFromJSON(this.product.p_colors)?.length > 0;
+
+    if (hasSizes && this.selectedSize == 0) {
+      this.snackbarService.showError("Please Choose Size");
+      return;
     }
-    else {
-      this.snackbarService.showSuccess("Please Choose Size");
+    if (hasColors && this.selectedColor == 0) {
+      this.snackbarService.showError("Please Choose Color");
+      return;
     }
+
+    this.cart.c_size = this.selectedSize;
+    this.cart.c_color = this.selectedColor;
+
+    // Resolve names for the cart display
+    const sizes = this.getListFromJSON(this.product.p_sizes);
+    const sizeMatch = sizes?.find((s: any) => s.ps_size == this.selectedSize);
+    this.cart.c_size_name = sizeMatch ? sizeMatch.ps_size_name : '';
+
+    const colors = this.getListFromJSON(this.product.p_colors);
+    const colorMatch = colors?.find((c: any) => c.pc_color == this.selectedColor);
+    this.cart.c_color_name = colorMatch ? colorMatch.pc_color_name : '';
+
+    this.cart.c_product = this.product.p_id;
+    this.cart.c_qty = 1;
+    this.cart.c_cre_by = this.currentUser.u_id;
+    this.icartService.createOrUpdateCart(this.cart).subscribe(
+      (data: DbResult) => {
+        this.router.navigate(['my-cart']);
+      },
+      (error: any) => {
+      }
+    );
   }
 
   addToFavourites(productId: number) {

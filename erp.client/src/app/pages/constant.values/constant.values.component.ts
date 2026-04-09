@@ -72,37 +72,72 @@ export class ConstantValuesComponent {
   // GRID CONFIG
   // =======================
   colDefs: ColDef[] = [
-    { headerName: "ID", field: "cv_id", width: 80 },
-    { headerName: "Name", field: "cv_name" },
-    { headerName: "Value", field: "cv_value" },
+    { 
+      headerName: "ID", 
+      field: "cv_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted',
+      headerClass: 'text-center'
+    },
+    { 
+      headerName: "Configuration Name", 
+      field: "cv_name", 
+      flex: 1, 
+      headerClass: 'text-start' 
+    },
+    { 
+      headerName: "Setting Value", 
+      field: "cv_value", 
+      flex: 1.5,
+      headerClass: 'text-start',
+      cellClass: 'fw-bold text-primary'
+    },
     {
       headerName: "Active",
       field: "cv_active_yn",
-      cellRenderer: (p: any) => p.value === 'Y' ? 'Yes' : 'No'
-    },
-    { headerName: "Created By", field: "cv_cre_by_name" },
-    { headerName: "Created Date", field: "cv_cre_date" },
-    {
-      headerName: 'Edit',
-      cellRenderer: 'actionRenderer',
-      cellRendererParams: {
-        name: 'Edit',
-        cssClass: 'btn btn-info',
-        icon: 'fa fa-edit',
-        action: 'onEdit',
-        onEdit: (data: any) => this.onAction('edit', data)
+      width: 100,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const isActive = p.value === 'Y';
+        return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Yes' : 'No'}</span>`;
       }
     },
     {
-      headerName: 'Delete',
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      headerClass: 'text-center',
+      cellClass: 'text-center',
       cellRenderer: 'actionRenderer',
       cellRendererParams: {
-        name: 'Delete',
-        cssClass: 'btn btn-danger',
-        icon: 'fa fa-trash',
-        action: 'onDelete',
-        onDelete: (data: any) => this.onAction('delete', data)
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Configuration',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.onAction('edit', data)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Configuration',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.onAction('delete', data)
+          }
+        ]
       }
+    },
+    { 
+        headerName: "Created On", 
+        field: "cv_cre_date", 
+        width: 130, 
+        headerClass: 'text-center',
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
     }
   ];
 

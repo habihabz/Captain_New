@@ -1,139 +1,226 @@
-<div class="container-fluid my-4 mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb bg-light px-3 py-2 rounded">
-            <li class="breadcrumb-item">
-                <a routerLink="/home">Home</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                Order Details
-            </li>
-        </ol>
-    </nav>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card shadow  border-0 rounded-3 p-3 ">
-                    <div class="row align-items-center">
-                        <div class="col-md-9 ">
-                            <h5 class="fw-bold mb -1">Order Number : {{ customerOrder.co_id }}</h5>
-                            <h1 class="fw-bold mb -1"> {{ customerOrder.p_name}} </h1>
-                            <h1 class="fw-bold mb -1"><span>&#x20B9;</span> {{ customerOrder.co_net_amount }}</h1>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <img *ngFor="let p_attachement of getAttachementOfaProduct(customerOrder.p_attachements).slice(0,1); let i=index"
-                                [src]="apiUrl + '/' + p_attachement.pa_image_path" class="product-img img-fluid rounded"
-                                style="height: 150px;" alt="product_image">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 p-3">
+<div class="order-details-wrapper">
+    <div class="container-fluid py-3">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-light px-4 py-2 rounded-pill m-0 border border-light">
+                <li class="breadcrumb-item">
+                    <a routerLink="/home" class="text-decoration-none small text-muted">Home</a>
+                </li>
+                <li class="breadcrumb-item active small" aria-current="page">
+                    Order Details
+                </li>
+            </ol>
+        </nav>
 
-                            <h4 class="fw-bold mb-1">
-                                Quantity : {{ customerOrder.co_qty }}
-                            </h4>
+        <div class="container container-compact">
+            <div class="row gx-lg-4">
+                <!-- LEFT COLUMN: Order Info -->
+                <div class="col-lg-8">
+                    <!-- PRODUCT HERO CARD -->
+                    <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="order-id-badge">ORDER #{{ customerOrder.co_id }}</span>
+                                <div *ngIf="!isOrderCanceled()" class="status-badge status-badge-active">ACTIVE</div>
+                                <div *ngIf="isOrderCanceled()" class="status-badge status-badge-cancelled">CANCELLED</div>
+                            </div>
 
-                            <h5 class="mb-1">
-                                Unit Price : ₹ {{ customerOrder.co_unit_price | number:'1.2-2' }}
-                            </h5>
+                            <div class="row align-items-center">
+                                <div class="col-md-9">
+                                    <h3 class="fw-bold mb-1 text-dark">{{ customerOrder.p_name }}</h3>
+                                    <p class="text-muted small mb-2" *ngIf="customerOrder.co_size_name || customerOrder.co_color_name">
+                                        Size: <span class="text-dark">{{ customerOrder.co_size_name }}</span> | 
+                                        Color: <span class="text-dark">{{ customerOrder.co_color_name }}</span>
+                                    </p>
+                                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                                        <h4 class="fw-bold text-success mb-0">₹{{ customerOrder.co_net_amount | number:'1.2-2' }}</h4>
+                                        <span class="text-muted small">/ {{ customerOrder.co_qty }} Qty</span>
+                                    </div>
+                                    <div class="d-flex gap-3 text-muted small border-top border-light pt-2 mt-2">
+                                        <span>Unit: ₹{{ customerOrder.co_unit_price | number:'1.2-2' }}</span>
+                                        <span>Total: ₹{{ (customerOrder.co_unit_price * customerOrder.co_qty) | number:'1.2-2' }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center mt-3 mt-md-0">
+                                    <img [src]="apiUrl + '/' + getOrderItemImage(customerOrder)" class="product-img"
+                                        style="max-height: 100px; object-fit: contain;" alt="product_image">
+                                </div>
+                            </div>
 
-                            <h5 class="fw-bold text-success">
-                                Total Amount Before Discount    : ₹ {{ (customerOrder.co_unit_price * customerOrder.co_qty) | number:'1.2-2' }}
-                            </h5>
-
-                        </div>
-                    </div>
-
-                    <div class="g-3 align-items-center">
-                        <div class="col-md-12">
-                            <div class="position-relative ps-4">
-                                <div class="order-box">
-                                    <h2 class="fw-bold text-center">Order Status</h2>
-                                    <hr />
-                                    <ul class="tracker">
-                                        <li *ngFor="let omh of orderMovementHistories"
-                                            [ngClass]="{'done': omh.omh_cre_date}">
-
-                                            <b>{{ omh.omh_status_name }}</b>
-                                            <span>
-                                                {{ omh.omh_cre_date
-                                                ? (omh.omh_cre_date | date:'dd:MM:yyyy hh:mm:ss a')
-                                                : 'Pending' }}
-                                            </span>
-                                        </li>
-                                    </ul>
+                            <!-- CANCELLED ALERT (SOFTENED) -->
+                            <div class="status-alert status-alert-danger mt-4 d-flex align-items-start" *ngIf="isOrderCanceled()">
+                                <i class="fa fa-info-circle mt-1 me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Cancelled</div>
+                                    <div class="small opacity-75">This order shows as cancelled in your history.</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4 ">
-                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2 class="fw-bold mb -1 text-center">Delivery Details</h2>
-                            <hr />
-                            <h4 class="mb -1"><i class="fa fa-home"></i> {{ customerOrder.co_c_address_details }}</h4>
-                            <h4 class="mb -1"><i class="fa fa-user"></i> {{ customerOrder.co_customer_name }} </h4>
-                            <h4 class="mb -1"><i class="fa fa-phone"></i> {{ customerOrder.co_customer_phone }}</h4>
+
+                    <!-- STATUS TRACKER -->
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-white border-0 pt-4 pb-0 px-4 px-md-5">
+                            <h6 class="section-header mb-0">Order Journey</h6>
+                        </div>
+                        <div class="card-body px-4 px-md-5 pb-5">
+                            <ul class="tracker">
+                                <li *ngFor="let omh of orderMovementHistories"
+                                    [ngClass]="{
+                                        'done': omh.omh_cre_date && omh.omh_status_name !== 'Canceled',
+                                        'canceled': omh.omh_cre_date && omh.omh_status_name === 'Canceled'
+                                    }">
+                                    <div class="tracker-content">
+                                        <b class="fw-bold">{{ omh.omh_status_name }}</b>
+                                        <span class="fw-medium">
+                                            <i class="fa fa-clock-o me-1 opacity-50"></i>
+                                            {{ omh.omh_cre_date ? (omh.omh_cre_date | date:'dd MMM yyyy • hh:mm a') : 'Awaiting processing...' }}
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-                <div class="card shadow order-card border-0 rounded-3 mb-4 p-3">
-                    <div class="row">
-                        <div class="col-md-12">
 
-                            <h2 class="fw-bold mb-3 text-center">Payment Details</h2>
-                            <hr />
-
-                            <h5 class="mb-2">
-                                <i class="fa fa-money"></i>
-                                Sub Total :
-                                <span>₹ {{ customerOrder.co_amount | number:'1.2-2' }}</span>
-                            </h5>
-
-                            <h5 class="mb-2">
-                                <i class="fa fa-percent"></i>
-                                Discount ({{ customerOrder.co_discount_perc }}%) :
-                                <span>- ₹ {{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
-                            </h5>
-
-                            <h5 class="mb-2">
-                                <i class="fa fa-percent"></i>
-                                GST ({{ customerOrder.co_gst_perc }}%) :
-                                <span>₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
-                            </h5>
-
-                            <h5 class="mb-2">
-                                <i class="fa fa-truck"></i>
-                                Delivery Charge :
-                                <span>₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
-                            </h5>
-
-                            <hr />
-
-                            <h4 class="fw-bold text-success">
-                                Grand Total :
-                                ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}
-                            </h4>
-
+                <!-- RIGHT COLUMN: Summaries -->
+                <div class="col-lg-4">
+                    <!-- DELIVERY -->
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                            <h6 class="section-header mb-0">Delivery Details</h6>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <div class="d-flex align-items-start gap-3 mb-4">
+                                <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                    <i class="fa fa-map-marker"></i>
+                                </div>
+                                <div style="min-width: 0;">
+                                    <div class="fw-bold text-dark mb-1">{{ customerOrder.co_customer_name }}</div>
+                                    <div class="text-muted small mb-1"><i class="fa fa-phone me-1"></i> {{ customerOrder.co_customer_phone }}</div>
+                                    <p class="text-muted small mb-0 lh-sm">{{ customerOrder.co_c_address_details }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card shadow order-card  border-0 rounded-3 mb-4 p-3">
-                    <div class="row ">
-                        <div class="col-md-12">
-                            <button class="btn btn-warning text-gray w-100" (click)="downloadTaxInvoice()">Download Tax
-                                Invoice </button>
+
+                    <!-- PAYMENT -->
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                            <h6 class="section-header mb-0">Payment Summary</h6>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <div class="summary-item text-muted">
+                                <span>Sub Total</span>
+                                <span class="fw-bold">₹{{ customerOrder.co_amount | number:'1.2-2' }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="text-muted">Discount ({{ customerOrder.co_discount_perc }}%)</span>
+                                <span class="text-success fw-bold text-monospace">-₹{{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
+                            </div>
+                            <div class="summary-item text-muted">
+                                <span>GST ({{ customerOrder.co_gst_perc }}%)</span>
+                                <span class="fw-bold">₹{{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
+                            </div>
+                            <div class="summary-item text-muted">
+                                <span>Delivery</span>
+                                <span class="fw-bold">₹{{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
+                            </div>
+
+                            <div class="summary-total d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark">GRAND TOTAL</span>
+                                <span class="fw-bold h4 mb-0 text-success">₹{{ customerOrder.co_net_amount | number:'1.2-2' }}</span>
+                            </div>
+
+                            <!-- ACTIONS -->
+                            <div class="mt-4 pt-4 border-top border-light">
+                                <div class="d-flex flex-column gap-2" *ngIf="!isOrderCanceled() && !isOrderReturned()">
+                                    <div class="d-flex gap-2" *ngIf="isOrderDelivered() && !showReturnForm">
+                                        <button class="btn btn-outline-dark btn-action flex-grow-1" (click)="downloadTaxInvoice()">
+                                            <i class="fa fa-download me-2"></i> Invoice
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-action flex-grow-1" (click)="returnCustomerOrder()">
+                                            <i class="fa fa-reply me-2"></i> Return
+                                        </button>
+                                    </div>
+
+                                    <!-- RETURN FORM -->
+                                    <div class="return-form-container mt-2" *ngIf="showReturnForm">
+                                        <div class="card bg-light border-0 rounded-4 overflow-hidden">
+                                            <div class="card-body p-4">
+                                                <h6 class="fw-bold mb-3 d-flex align-items-center"><i class="fa fa-question-circle me-2 text-danger"></i> Return Request</h6>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="small fw-bold text-muted mb-1 ms-1">Reason for return</label>
+                                                    <select class="form-select border-0 shadow-sm rounded-3 py-2 px-3" [(ngModel)]="returnReason">
+                                                        <option value="">Select a reason</option>
+                                                        <option *ngFor="let res of returnReasonsList" [value]="res">{{res}}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="small fw-bold text-muted mb-1 ms-1">Comments (optional)</label>
+                                                    <textarea class="form-control border-0 shadow-sm rounded-3 py-2 px-3" rows="2" placeholder="Tell us more about the issue..." [(ngModel)]="returnComments"></textarea>
+                                                </div>
+
+                                                <!-- BANK DETAILS -->
+                                                <div class="row g-2 mb-4">
+                                                    <div class="col-12 mt-3">
+                                                        <h6 class="small fw-bold text-dark mb-2 ms-1"><i class="fa fa-university me-2 text-primary"></i> Refund Bank Details:</h6>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <input type="text" class="form-control border-0 shadow-sm rounded-3 py-2 px-3" placeholder="Bank Name" [(ngModel)]="bankName">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control border-0 shadow-sm rounded-3 py-2 px-3" placeholder="Account Number" [(ngModel)]="accountNo">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control border-0 shadow-sm rounded-3 py-2 px-3" placeholder="IFSC Code" [(ngModel)]="ifscCode">
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-dark btn-action flex-grow-1" (click)="submitReturnRequest()">
+                                                        Submit Request
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary btn-action" (click)="showReturnForm = false">
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn btn-link text-danger text-decoration-none fw-bold small py-3" (click)="cancelCustomerOrder()" *ngIf="!isOrderDelivered()">
+                                        Cancel Order
+                                    </button>
+                                </div>
+                                
+                                <!-- RETURNED STATUS -->
+                                <div class="status-alert status-alert-danger mt-2 d-flex align-items-start" *ngIf="isOrderReturned()">
+                                    <i class="fa fa-undo mt-1 me-2"></i>
+                                    <div>
+                                        <div class="fw-bold">Order Returned</div>
+                                        <div class="small opacity-75">A return was processed for this order.</div>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="isOrderCanceled() && !isOrderReturned()">
+                                    <button class="btn btn-success text-white btn-action w-100" (click)="orderAgain()">
+                                        <i class="fa fa-refresh me-2"></i> ORDER AGAIN
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="col-md-12 p-3">
-                Return policy ended on Jan 01, 2024. For more details, please contact our support team.
+                    <!-- FOOTER INFO -->
+                    <div class="px-4 text-center">
+                        <p class="text-muted" style="font-size: 11px;">
+                           <i class="fa fa-info-circle me-1"></i> Return policy ended on Jan 01, 2024. For more details, please contact our support team.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 </div>

@@ -26,11 +26,12 @@
         </div>
 
       </div>
-      <div class="row">
-        <div class="col-md-2 col-sm-4">
+      <div class="row" style="height: 100%;">
+        <!-- Filter Sidebar -->
+        <div class="col-md-2 col-sm-4" style="max-height: 80vh; overflow-y: auto; overflow-x: hidden;">
           <mat-list>
             <!-- Category Section -->
-            <h4 matSubheader (click)="toggleSection('category')"> Category &nbsp;
+            <h4 matSubheader (click)="toggleSection('category')" class="cursor-pointer"> Category &nbsp;
               <i class="fa" [ngClass]="openSection === 'category' ? 'fa-angle-up' : 'fa-angle-down'"></i>
             </h4>
             <div *ngIf="openSection === 'category'">
@@ -44,7 +45,7 @@
             </div>
             <hr />
             <!-- Subcategory Section -->
-            <h4 matSubheader (click)="toggleSection('subcategory')"> Sub Category &nbsp;
+            <h4 matSubheader (click)="toggleSection('subcategory')" class="cursor-pointer"> Sub Category &nbsp;
               <i class="fa" [ngClass]="openSection === 'subcategory' ? 'fa-angle-up' : 'fa-angle-down'"></i>
             </h4>
             <div *ngIf="openSection === 'subcategory'">
@@ -59,12 +60,13 @@
             </div>
             <hr />
             <!-- size Section -->
-            <h4 matSubheader (click)="toggleSection('size')"> Size &nbsp;
+            <h4 matSubheader (click)="toggleSection('size')" class="cursor-pointer"> Size &nbsp;
               <i class="fa" [ngClass]="openSection === 'size' ? 'fa-angle-up' : 'fa-angle-down'"></i>
             </h4>
             <div *ngIf="openSection === 'size'">
               <mat-list-item *ngFor="let sz of sizes">
-                <input type="checkbox" id="size-{{ sz.md_name }}" (change)="onSizeChange($event, sz.md_id)" /> &nbsp;
+                <input type="checkbox" id="size-{{ sz.md_name }}" (change)="onSizeChange($event, sz.md_id)" />
+                &nbsp;
                 <label for="size-{{ sz.md_name }}">
                   {{ sz.md_name }}
                 </label>
@@ -73,10 +75,11 @@
             <hr />
           </mat-list>
         </div>
-        <div class="col-md-10 col-sm-8">
 
+        <!-- Products Area -->
+        <div class="col-md-10 col-sm-8" style="max-height: 80vh; overflow-y: auto; overflow-x: hidden;">
           <div class="row">
-            <div *ngFor="let product of this.products" class="col-md-4 col-sm-12">
+            <div *ngFor="let product of this.products" class="col-md-3 col-sm-12">
               <div class="product">
                 <div class="product__thumb">
                   <a>
@@ -84,7 +87,7 @@
                       *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"
                       [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
                       [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                      style="height: 300px; width: auto;">
+                      style="height: 200px; width: auto;">
                   </a>
                   <div class="product-info mb-10">
                     <div class="product_category">

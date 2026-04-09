@@ -10,8 +10,10 @@ export class Menu {
   m_cre_by_name: string;
   m_cre_date: string;
   m_menu_items :Menu [];
+  isSearchMatch: boolean;
  
   constructor() {
+    this.isSearchMatch = false;
 
     this.m_id = 0;
     this.m_name='',

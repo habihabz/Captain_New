@@ -35,6 +35,26 @@ export class MenuAllocationComponent implements OnInit{
   private subscription: Subscription = new Subscription();
   requestParms : RequestParms =new RequestParms();
   
+  // Search and Filtering
+  searchAll: string = "";
+  searchAllowed: string = "";
+  
+  get filteredAllMenus(): Menu[] {
+    if (!this.searchAll) return this.allMenus;
+    return this.allMenus.filter(m => 
+      m.m_name?.toLowerCase().includes(this.searchAll.toLowerCase()) || 
+      m.m_link?.toLowerCase().includes(this.searchAll.toLowerCase())
+    );
+  }
+
+  get filteredAllowedMenus(): Menu[] {
+    if (!this.searchAllowed) return this.allowedMenus;
+    return this.allowedMenus.filter(m => 
+      m.m_name?.toLowerCase().includes(this.searchAllowed.toLowerCase()) || 
+      m.m_link?.toLowerCase().includes(this.searchAllowed.toLowerCase())
+    );
+  }
+  
   
   @ViewChild('multiselectleft') multiselectleft!: ElementRef;
   @ViewChild('multiselectright') multiselectright!: ElementRef;

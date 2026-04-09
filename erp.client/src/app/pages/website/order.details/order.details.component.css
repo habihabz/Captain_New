@@ -1,0 +1,156 @@
+.order-details-wrapper .card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.order-details-wrapper .section-header {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 1rem;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.status-badge-active {
+    background-color: rgba(25, 135, 84, 0.08);
+    color: #198754;
+}
+
+.status-badge-cancelled {
+    background-color: rgba(220, 53, 69, 0.08);
+    color: #dc3545;
+}
+
+/* Order ID Badge */
+.order-id-badge {
+    background: #fdfdfd;
+    color: #495057;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #eee;
+}
+
+/* Status Tracker */
+.tracker {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.tracker li {
+    padding-left: 3rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    min-height: 40px;
+}
+
+.tracker li::before {
+    content: "";
+    position: absolute;
+    left: 0.7rem;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border: 2px solid #dee2e6;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.tracker li::after {
+    content: "";
+    position: absolute;
+    left: 1.1rem;
+    top: 18px;
+    width: 2px;
+    height: calc(100% + 0.5rem);
+    background: #f1f3f5;
+    z-index: 1;
+}
+
+.tracker li:last-child::after {
+    display: none;
+}
+
+.tracker li.done::before {
+    background: #198754;
+    border-color: #198754;
+}
+
+.tracker li.done::after {
+    background: #198754;
+}
+
+.tracker li.canceled::before {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.tracker li.canceled::after {
+    background: #dc3545;
+}
+
+.tracker li b {
+    display: block;
+    font-size: 0.9rem;
+    color: #343a40;
+}
+
+.tracker li span {
+    font-size: 0.75rem;
+    color: #adb5bd;
+}
+
+/* Summary List */
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+}
+
+.summary-total {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px dashed #f1f3f5;
+}
+
+/* Hero Info */
+.product-img {
+    mix-blend-mode: multiply;
+    transition: transform 0.3s ease;
+}
+
+.status-alert {
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    border-left: 4px solid #dc3545;
+}
+
+.status-alert-danger {
+    background-color: rgba(220, 53, 69, 0.05);
+    color: #dc3545;
+}
+
+.btn-action {
+    padding: 0.6rem;
+    font-weight: 600;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}

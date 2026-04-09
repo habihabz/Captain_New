@@ -6,6 +6,7 @@ export class RequestParms {
   details:string;
   user:number;
   status:number;
+  color:number;
   constructor() {
     this.id = 0;
     this.name='',
@@ -14,6 +15,7 @@ export class RequestParms {
     this.details='';
     this.user=0;
     this.status=0;
+    this.color=0;
   }
 
 }

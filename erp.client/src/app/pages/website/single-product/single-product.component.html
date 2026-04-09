@@ -1,32 +1,67 @@
+<nav aria-label="breadcrumb" class="mb-4 mt-2">
+    <ol class="breadcrumb bg-light px-3 py-2 rounded">
+        <li class="breadcrumb-item">
+            <a routerLink="/home" class="text-decoration-none text-dark">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a routerLink="/shop" class="text-decoration-none text-dark">Shop</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {{ this.product.p_name }}
+        </li>
+    </ol>
+</nav>
 <div class="container" style="padding: 10px;">
     <div class="row">
         <div class="col-12 col-sm-12 col-md-1">
-            <div class="d-flex thumbnail-wrapper">
-                <div *ngFor="let attachment of getAttachementOfaProduct(product.p_attachements); let i = index"
-                    class="thumbnail-item">
+
+            <!-- Thumbnails -->
+            <div class="d-flex thumbnail-wrapper" *ngIf="productAttachements.length > 0">
+                <div *ngFor="let attachment of productAttachements; let i = index" class="thumbnail-item">
+
                     <img [src]="apiUrl + '/' + attachment.pa_image_path" class="img-thumbnail cursor-pointer thumb-img"
                         (click)="selectImage(i)" alt="Product Thumbnail Image">
                 </div>
             </div>
         </div>
+
+        <!-- Main Image Section -->
         <div class="col-md-6 col-sm-12">
-            <div class="main-image-container">
-                <img [src]="selectedImagePath" class="d-block w-100" alt="Primary product image">
+
+            <!-- ✅ Show image if available -->
+            <div *ngIf="productAttachements.length > 0; else noImagesMain" class="main-image-container text-center"
+                (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()"
+                style="overflow: hidden; position: relative; cursor: crosshair;">
+
+                <img [src]="selectedImagePath" class="img-fluid zoom-img" [class.zoomed]="isZoomed"
+                    [style.transformOrigin]="transformOrigin"
+                    style="max-height: 450px; object-fit: contain; transition: transform 0.15s ease-out;"
+                    alt="Primary product image">
             </div>
+
         </div>
+
+        <!-- ✅ Only one fallback (MAIN AREA ONLY) -->
+        <ng-template #noImagesMain>
+            <div class="text-center">
+                <img src="assets/no-image.png" class="img-fluid" style="max-height: 300px;" alt="No Image">
+                &nbsp; &nbsp;
+                <p class="text-muted small mt-2">No images available</p>
+            </div>
+        </ng-template>
+
         <div class="col-md-5 col-sm-12">
             <div class="product__details">
-                <h1><a href="shop.html">{{this.product.p_name}}</a></h1>
-                <h3>{{this.product.p_short_name}}</h3>
+                <h3><a href="shop.html" class="text-dark text-decoration-none">{{this.product.p_name}}</a></h3>
+                <h5 class="text-muted">{{this.product.p_short_name}}</h5>
                 <br />
-                <div class="d-flex justify-content-between">
-                    <p class="price">MRP : <span>&#x20B9;</span>{{this.product.p_price}}</p>
+                <div class="d-flex justify-content-between mt-3">
+                    <h4 class="text-success fw-bold mb-0">MRP : <span>&#x20B9;</span>{{this.product.p_price}}</h4>
                 </div>
-                <br />
-                <h5>
+                <small class="text-muted d-block mt-2 mb-3">
                     Inclusive of all taxes
                     (Also includes all applicable duties)
-                </h5>
+                </small>
                 <div class="product_category mt-2">
                     <span>{{ product.p_sub_category_name + ', ' + product.p_division_name }}</span>
                 </div>
@@ -46,21 +81,44 @@
                     </a>
                 </div>
                 <br />
-                <h5>Select Size</h5>
-                <div class="row text-center">
-                    <div class="col-auto mb-2" *ngFor="let size of getListFromJSON(product.p_sizes); let i = index">
-                        <button class="btn btn-outline-secondary size-button"
-                            [class.selected]="size.ps_size === selectedSize" (click)="selectSize(size.ps_size)">
-                            {{ size.ps_size_name }}
-                        </button>
+                <div *ngIf="getListFromJSON(product.p_colors)?.length > 0">
+                    <h6 class="fw-bold mt-3 text-muted text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                        Select Color</h6>
+                    <div class="row text-center mb-3">
+                        <div class="col-auto mb-2"
+                            *ngFor="let color of getListFromJSON(product.p_colors); let i = index">
+                            <button class="btn btn-outline-secondary shadow-none px-3 py-1 size-button"
+                                style="font-size: 13px;" [class.selected]="color.pc_color === selectedColor"
+                                (click)="selectColor(color.pc_color)">
+                                {{ color.pc_color_name }}
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <button class="btn btn-success" (click)="addToCart()"><i class="fa fa-shopping-bag"> </i> Add to
-                    Bag</button>
-                <button class="btn btn-default" (click)="addToFavourites(product.p_id)"> Favourite <i class="fa fa-heart"></i></button>
-                <h5>
+
+                <div *ngIf="getListFromJSON(product.p_sizes)?.length > 0">
+                    <h6 class="fw-bold mt-3 text-muted text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                        Select Size</h6>
+                    <div class="row text-center mb-4">
+                        <div class="col-auto mb-2" *ngFor="let size of getListFromJSON(product.p_sizes); let i = index">
+                            <button class="btn btn-outline-secondary shadow-none px-3 py-1 size-button"
+                                style="font-size: 13px;" [class.selected]="size.ps_size === selectedSize"
+                                (click)="selectSize(size.ps_size)">
+                                {{ size.ps_size_name }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-success px-4 py-2" style="font-size: 14px;" (click)="addToCart()"><i
+                        class="fa fa-shopping-bag me-1"></i> Add to Bag</button>
+                <button class="btn btn-white border px-4 py-2 ms-2 shadow-sm" style="font-size: 14px;"
+                    (click)="addToFavourites(product.p_id)"><i class="fa fa-heart text-muted me-1"></i>
+                    Favourite</button>
+
+                <p class="text-muted mt-4" style="font-size: 14px; line-height: 1.6;">
                     {{ product.p_description }}
-                </h5>
+                </p>
                 <br />
                 <br />
             </div>
@@ -70,9 +128,9 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <h1>
+            <h3 class="mb-4">
                 You Might Also Like
-            </h1>
+            </h3>
         </div>
         <div class="col-12">
             <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-3 col-sm-12">
@@ -82,7 +140,7 @@
                             <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 4); let i = index"
                                 [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
                                 [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                                style="height: 300px; width: auto;">
+                                style="height: 200px; width: auto; max-width: 100%; object-fit: contain;">
                         </a>
                         <div class="product-info mb-10">
                             <div class="product_category">
@@ -121,115 +179,128 @@
     </div>
 </div>
 <br />
-<div class="container" id="reviewContainer">
-    <div class="row">
-        <div class="col-md-9">
-            <h1>Ratings & Reviews</h1>
+<div class="container mt-5" id="reviewContainer">
+    <!-- Header -->
+    <div class="row align-items-center border-bottom pb-3 mb-4 mt-5">
+        <div class="col-md-8">
+            <h3 class="mb-0 fw-bold">Ratings & Reviews</h3>
         </div>
-        <div class="col-md-3">
-            <button class="btn btn-outline-secondary pull-right" (click)="toggleCreateDiv()">
-                {{ isCreateDivVisible ? 'Hide Review Form' : 'Add a Review' }}
+        <div class="col-md-4 text-end">
+            <button class="btn btn-outline-dark px-4 rounded-pill" (click)="toggleCreateDiv()">
+                {{ isCreateDivVisible ? 'Cancel Review' : 'Write a Review' }}
             </button>
         </div>
     </div>
 
-    <!-- Overall Rating Section -->
-    <div class="row mt-4">
-        <div class="col-6">
-            <div class="overall-rating">
-                <h3>Overall Rating: {{ (product.p_overall_rating || 0) | number: '1.1-1' }} / 5</h3>
-                <div class="product_rating">
-                    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
-                        <i class="fa fa-star" [ngClass]="{'start-color': i < (product.p_overall_rating || 0)}"></i>
-                    </ng-container>
-                </div>
-                <p class="text-muted">{{ productReviews.length }} reviews</p>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="filter-container d-flex justify-content-end">
-                <div class="filter-rating">
-                    <label for="ratingFilter" class="mr-2">Rating</label>
-                    <select id="ratingFilter" [(ngModel)]="selectedRating" (change)="applyFilters()"
-                        class="form-control">
-                        <option value="0">All Ratings</option>
-                        <option value="1">1 Star</option>
-                        <option value="2">2 Stars</option>
-                        <option value="3">3 Stars</option>
-                        <option value="4">4 Stars</option>
-                        <option value="5">5 Stars</option>
-                    </select>
-                </div>
-                &nbsp;
-                <div class="filter-date">
-                    <label for="dateFilter" class="mr-2">Date</label>
-                    <select id="dateFilter" [(ngModel)]="selectedDate" (change)="applyFilters()" class="form-control">
-                        <option value="0">All Time</option>
-                        <option value="7">Last 7 Days</option>
-                        <option value="30">Last 30 Days</option>
-                        <option value="90">Last 90 Days</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-
     <!-- Toggleable Create Review Div -->
-    <div class="row mt-4" *ngIf="isCreateDivVisible">
+    <div class="row mb-5" *ngIf="isCreateDivVisible">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5>Create a New Review</h5>
-                    <div class="form-group">
-                        <label for="reviewRating">Rating &nbsp;</label>
-                        <div class="rating">
+            <div class="card border-0 shadow-sm rounded-4 bg-light">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Compose Your Review</h5>
+                    <div class="mb-3">
+                        <label class="form-label text-muted fw-semibold mb-1">Overall Rating</label>
+                        <div class="rating fs-4 cursor-pointer">
                             <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
-                                <i class="fa fa-star" [ngClass]="{'star-selected': i < productReview.pr_overall_rating}"
+                                <i class="fa fa-star me-1"
+                                    [ngClass]="{'start-color text-warning': i < productReview.pr_overall_rating, 'text-secondary': i >= productReview.pr_overall_rating}"
                                     (click)="setRating(i + 1)"></i>
                             </ng-container>
                         </div>
-                        <p class="text-muted">Click on a star to select your rating.</p>
                     </div>
-                    <!-- Add your form fields here -->
-                    <div class="form-group">
-                        <label for="reviewTitle">Title</label>
-                        <input type="text" id="reviewTitle" class="form-control"
-                            [(ngModel)]="productReview.pr_head_line">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="reviewTitle" class="form-label text-muted fw-semibold">Review Title</label>
+                            <input type="text" id="reviewTitle" class="form-control rounded-3"
+                                placeholder="Summarize your thoughts..." [(ngModel)]="productReview.pr_head_line">
+                        </div>
+                        <div class="col-md-12 mb-4">
+                            <label for="reviewText" class="form-label text-muted fw-semibold">Detailed
+                                Review</label>
+                            <textarea id="reviewText" class="form-control rounded-3" rows="4"
+                                placeholder="What did you like or dislike? What should other shoppers know?"
+                                [(ngModel)]="productReview.pr_review"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="reviewText">Review</label>
-                        <textarea id="reviewText" class="form-control" [(ngModel)]="productReview.pr_review"></textarea>
-                    </div>
-                    <button class="btn btn-primary mt-3" (click)="createOeUpdateProductReview()">Submit Review</button>
+                    <button class="btn btn-dark px-5 rounded-pill" (click)="createOeUpdateProductReview()">Submit
+                        Review</button>
                 </div>
             </div>
-            <br /><br />
         </div>
     </div>
 
-    <!-- Display Existing Reviews -->
     <div class="row">
-        <div class="col-12 mb-4" *ngFor="let pr of filteredReviews">
-            <div class="card">
-                <div class="card-body">
-                    <!-- Created date at the top-right corner -->
-                    <p class="text-muted text-end mb-0"> {{ pr.pr_created_on | date: 'medium' }}</p>
-
-                    <h5 class="card-title">{{ pr.pr_head_line }}</h5>
-                    <div class="product_rating">
-                        <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
-                            <a href="#">
-                                <i class="fa fa-star" [ngClass]="{'start-color': i < pr.pr_overall_rating}"></i>
-                            </a>
-                        </ng-container>
-                    </div>
-                    <p class="card-text">{{ pr.pr_review }}</p>
-                    <p class="text-muted">{{ pr.pr_cre_by_name }}</p>
+        <!-- Left: Overall Rating Summary -->
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 text-center py-5 h-100 bg-light">
+                <h2 class="display-3 fw-bold text-dark mb-0">
+                    {{ (product.p_overall_rating || 0) | number: '1.1-1' }} <small class="fs-5 text-muted">/
+                        5</small>
+                </h2>
+                <div class="product_rating my-3 fs-3">
+                    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
+                        <i class="fa fa-star mx-1"
+                            [ngClass]="{'start-color text-warning': i < (product.p_overall_rating || 0), 'text-secondary': i >= (product.p_overall_rating || 0)}"></i>
+                    </ng-container>
                 </div>
+                <p class="text-muted fw-medium mb-0">Based on {{ productReviews.length }} reviews</p>
             </div>
         </div>
-    </div>
 
+        <!-- Right: Filters & List -->
+        <div class="col-lg-8 col-md-12">
+
+            <!-- Filters -->
+            <div class="d-flex justify-content-lg-end gap-2 mb-4 flex-wrap">
+                <select id="ratingFilter" [(ngModel)]="selectedRating" (change)="applyFilters()"
+                    class="form-select w-auto border-0 bg-light rounded-pill ps-3 pe-5 py-2 text-muted fw-semibold">
+                    <option value="0">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="2">2 Stars</option>
+                    <option value="1">1 Star</option>
+                </select>
+                <select id="dateFilter" [(ngModel)]="selectedDate" (change)="applyFilters()"
+                    class="form-select w-auto border-0 bg-light rounded-pill ps-3 pe-5 py-2 text-muted fw-semibold">
+                    <option value="0">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+            </div>
+
+            <!-- Reviews List -->
+            <div class="review-list mt-2">
+                <div *ngIf="filteredReviews.length === 0" class="text-center py-5 text-muted">
+                    <i class="fa fa-comment-o fs-1 mb-3"></i>
+                    <h5>No reviews match your filters.</h5>
+                </div>
+
+                <div class="card border-0 border-bottom mb-4 pb-4 rounded-0 bg-transparent"
+                    *ngFor="let pr of filteredReviews">
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div class="product_rating mb-1">
+                                    <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
+                                        <i class="fa fa-star me-1"
+                                            [ngClass]="{'start-color text-warning': i < pr.pr_overall_rating, 'text-secondary': i >= pr.pr_overall_rating}"></i>
+                                    </ng-container>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-0">{{ pr.pr_head_line }}</h5>
+                            </div>
+                            <span class="text-muted small">{{ pr.pr_created_on | date: 'mediumDate' }}</span>
+                        </div>
+                        <p class="card-text text-secondary lh-lg mb-2 mt-3">{{ pr.pr_review }}</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <i class="fa fa-user-circle text-muted fs-4 me-2"></i>
+                            <span class="text-muted fw-semibold small">{{ pr.pr_cre_by_name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>

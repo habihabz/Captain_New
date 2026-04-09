@@ -56,6 +56,11 @@ export class IuserService {
     this.refreshUsersSubject.next();
   }
 
+  updatePassword(userId: number, newPassword: string): Observable<DbResult> {
+    const headers = this.getHttpHeaders();
+    return this.http.post<DbResult>(`${this.apiUrl}/updatePassword`, { userId, newPassword }, { headers });
+  }
+
   getCurrentUser(): User  {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {

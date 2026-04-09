@@ -102,7 +102,7 @@ builder.Services.AddTransient<IProductReview, ProductReviewRepository>();
 builder.Services.AddTransient<ISellingPrice, sellingPriceRepository>();
 builder.Services.AddTransient<ICart, CartRepository>();
 builder.Services.AddTransient<ICustomerOrder, CustomerOrderRepository>();
-builder.Services.AddTransient<ICustomerOrderStatus, CustomerOrderStatusRepository>();
+builder.Services.AddTransient<IStatus, StatusRepository>();
 builder.Services.AddTransient<IAddress, AddressRepository>();
 builder.Services.AddTransient<ISlider, SliderRepository>();
 builder.Services.AddTransient<IBlog, BlogRepository>();
@@ -110,6 +110,7 @@ builder.Services.AddTransient<IOrderMovementHistory, OrderMovementHistoryReposit
 builder.Services.AddTransient<IFavourite, FavouriteRepository>();
 builder.Services.AddTransient<IConstantValue, ConstantValueRepository>();
 builder.Services.AddTransient<IReport, ReportRepository>();
+builder.Services.AddTransient<IReturnOrder, ReturnOrderRepository>();
 builder.Services.AddTransient<IGeneratePDF, GenetatePDFRepository>();
 
 builder.WebHost.CaptureStartupErrors(true);

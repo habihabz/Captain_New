@@ -1,0 +1,119 @@
+<div class="right_col" style="min-height: 99vh;">
+    <div class="row mb-1">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb px-0 mb-2" style="background: transparent;">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-muted">Home</a></li>
+                    <li class="breadcrumb-item active text-dark fw-bold">Returned Orders</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="x_panel">
+        <div class="x_content" style="display: block;">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group mb-0">
+                        <label for="statusFilter">Status Filter</label>
+                        <select appSelect2 id="statusFilter" class="form-control" (selectionChanged)="onStatusFilterChange($event)">
+                            <option value="0">All Returns</option>
+                            <option *ngFor="let cos of statuses" [value]="cos.s_id">{{ cos.s_name }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-9 border-left" *ngIf="selectedRowsCount > 0">
+                    <div class="row align-items-end">
+                        <div class="col-md-4">
+                            <div class="form-group mb-0">
+                                <label class="text-primary fw-bold"><i class="fa fa-tasks"></i> Bulk Action: Update Status</label>
+                                <select *ngIf="isBulkListReady" appSelect2 class="form-control" #bulkStatusSelect (selectionChanged)="bulkStatusId = +$event">
+                                    <option value="0">Select New Status</option>
+                                    <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary shadow-sm" [disabled]="!bulkStatusId" (click)="onBulkUpdate()">
+                                <i class="fa fa-bolt me-1"></i> Bulk Update Selected
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <ag-grid-angular
+                #returnOrderGrid
+                style="width: 100%;"
+                class="ag-theme-quartz ag-theme-acmecorp"
+                [rowData]="returnOrders"
+                [columnDefs]="colDefs"
+                [pagination]="pagination"
+                [domLayout]="domLayout"
+                [defaultColDef]="defaultColDef"
+                [components]="frameworkComponents"
+                rowSelection="multiple"
+                [suppressRowClickSelection]="true"
+                (gridReady)="onGridReady($event)"
+                (selectionChanged)="onSelectionChanged()">
+            </ag-grid-angular>
+        </div>
+    </div>
+</div>
+
+<!-- Return Detail Modal -->
+<div class="modal fade" id="returnDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Return Request Details</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" *ngIf="selectedReturn">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><b>Customer Information</b></h6>
+                        <p><b>Name:</b> {{ selectedReturn.co_customer_name }}</p>
+                        <p><b>Product:</b> {{ selectedReturn.p_name }}</p>
+                        <p><b>Amount:</b> ₹ {{ selectedReturn.co_net_amount | number:'1.2-2' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><b>Return Metadata</b></h6>
+                        <p><b>Reason:</b> {{ selectedReturn.ro_reason }}</p>
+                        <p><b>Status:</b> {{ selectedReturn.ro_status_name }}</p>
+                        <p><b>Date:</b> {{ selectedReturn.ro_cre_date | date:'dd-MM-yyyy' }}</p>
+                    </div>
+                </div>
+                <hr>
+                <h6><b>Bank Details for Refund</b></h6>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <p><b>Bank:</b> {{ selectedReturn.ro_bank_name }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><b>Account:</b> {{ selectedReturn.ro_account_no }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><b>IFSC:</b> {{ selectedReturn.ro_ifsc_code }}</p>
+                    </div>
+                </div>
+
+                <hr>
+                <h6 class="fw-bold text-primary mb-3"><i class="fa fa-history me-2"></i> Return Process Tracker</h6>
+                <ul class="tracker">
+                    <li *ngFor="let omh of orderMovementHistories" [ngClass]="{'done': omh.omh_cre_date}">
+                        <b>{{ omh.omh_status_name }}</b>
+                        <span>
+                            {{ omh.omh_cre_date
+                            ? (omh.omh_cre_date | date:'dd-MM-yyyy hh:mm a')
+                            : 'Pending' }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

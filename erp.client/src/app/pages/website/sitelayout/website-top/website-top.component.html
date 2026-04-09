@@ -21,37 +21,40 @@
     <div class="container-fluid top-fixed-nav d-flex justify-content-between align-items-center">
 
         <!-- LEFT SIDE -->
-        <ul class="navbar-nav d-flex flex-row gap-3">
+        <ul class="navbar-nav flex-row gap-2 gap-md-3 d-none d-md-flex mb-0">
             <li class="nav-item">
-                <a class="nav-link" href="#">English <i class="fa fa-chevron-down"></i></a>
+                <a class="nav-link" href="#" style="font-size: 13px;">English <i class="fa fa-chevron-down ms-1" style="font-size: 10px;"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">{{ this.country.md_name }}
-                    <i class="fa fa-chevron-down"></i>
+                <a class="nav-link" href="#" style="font-size: 13px;">{{ this.country.md_name }}
+                    <i class="fa fa-chevron-down ms-1" style="font-size: 10px;"></i>
                 </a>
             </li>
         </ul>
 
         <!-- RIGHT SIDE -->
-        <ul class="navbar-nav d-flex flex-row ms-auto gap-3">
-
-
+        <ul class="navbar-nav d-flex flex-row ms-auto gap-3 gap-md-4 mb-0 flex-nowrap" style="overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px;">
             <ng-container *ngIf="isLoggedIn; else guestLinks">
-                <li class="nav-item"><a class="nav-link" routerLink="/myorders">My Orders</a></li>
-                <li class="nav-item"><a class="nav-link" (click)="navigateTo('favourites')">Favourites</a></li>
-                <li class="nav-item"><a class="nav-link" (click)="navigateTo('my-cart')">My Cart</a></li>
-                <li class="nav-item"><a class="nav-link">Hi, {{ currentUser.u_name }}</a></li>
-
-                <li class="nav-item" *ngIf="currentUser.u_is_admin == 'Y'">
-                    <a class="nav-link" href="#/dashboard">Console</a>
+                <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" routerLink="/myorders"><i class="fa fa-shopping-bag me-1"></i> Orders</a></li>
+                <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" (click)="navigateTo('favourites')"><i class="fa fa-heart me-1 text-danger"></i> Favourites</a></li>
+                <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" (click)="navigateTo('my-cart')"><i class="fa fa-shopping-cart me-1"></i> Cart</a></li>
+                
+                <!-- Hidden on tiny mobile screens to save space -->
+                <li class="nav-item d-none d-sm-block text-white">
+                    <a class="nav-link text-light opacity-75" style="font-size: 13px; cursor: default;"><i class="fa fa-user-circle me-1"></i> Hi, {{ currentUser.u_name }}</a>
                 </li>
 
-                <li class="nav-item"><a class="nav-link" (click)="logout()">Logout</a></li>
+                <!-- Hidden on small screens to save space -->
+                <li class="nav-item d-none d-md-block text-white" *ngIf="currentUser.u_is_admin == 'Y'">
+                    <a class="nav-link text-warning fw-bold" style="font-size: 13px; cursor: pointer;" href="#/dashboard"><i class="fa fa-cogs me-1"></i> Console</a>
+                </li>
+
+                <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" (click)="logout()"><i class="fa fa-sign-out me-1"></i> Logout</a></li>
             </ng-container>
 
             <ng-template #guestLinks>
-                <li class="nav-item"><a class="nav-link" routerLink="/user-registration">Sign Up</a></li>
-                <li class="nav-item"><a class="nav-link" routerLink="/login">Login</a></li>
+                <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" routerLink="/user-registration"><i class="fa fa-user-plus me-1"></i> Sign Up</a></li>
+                <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" routerLink="/login"><i class="fa fa-sign-in me-1"></i> Login</a></li>
             </ng-template>
         </ul>
 
@@ -75,7 +78,7 @@
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('shop')">Shop</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('features')">Features</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('blog')">Blogs</a></li>
-                    <li class="nav-item"><a class="nav-link" (click)="navigateTo('contact-us')">Contact Us</a>
+                    <li class="nav-item"><a class="nav-link" (click)="navigateTo('contact-us')">Contact Us</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('about-us')">About Us</a></li>
                 </ul>
 

@@ -16,6 +16,10 @@ namespace Erp.Server.Services
         List<Product> getProductsByCountry(int id);
         Product getProductByCountry(RequestParams requestParams);
         List<Product> getProductsByFilters(ProductSearchParms productSearchParms);
+        List<ProdAttachment> getProductAttachementsByColor(RequestParams requestParams);
+        DbResult uploadProdAttachements( List<ProdAttachment> prodAttachments);
+        DbResult deleteProductAttachement(int id);
+        ProdAttachment getProductAttachment(int id);
     }
 
 }

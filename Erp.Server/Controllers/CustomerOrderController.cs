@@ -108,5 +108,15 @@ namespace Erp.Server.Controllers
 
             return File(pdf, "application/pdf",$"Invoice_CO_{order.co_id}.pdf");
         }
+
+
+        [HttpPost("cancelCustomerOrder")]
+        [Authorize]
+        public DbResult cancelCustomerOrder([FromBody] RequestParams requestParams)
+        {
+            DbResult dbResult = new DbResult();
+            dbResult = icustomerOrder.cancelCustomerOrder(requestParams);
+            return dbResult;
+        }
     }
 }

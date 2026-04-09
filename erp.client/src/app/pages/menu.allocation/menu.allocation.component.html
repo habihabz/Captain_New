@@ -1,64 +1,124 @@
-<div class="right_col"  role="main" style="min-height: 100vh;">
-    <div class="row">
-        <div class="col-12 d-flex justify-content-start align-items-center">
-                <div *ngFor="let option of menuTypes" >
-                    <label class="btn btn-secondary" >
-                            <input type="radio" [id]="option.menuType" [value]="option.menuType" name="options" [(ngModel)]="this.menuType" (change)="onOptionChange(option.menuType)"  />
-                            {{option.menuType}}
+<div class="right_col" role="main" style="padding-top: 10px;">
+    <!-- Breadcrumbs at the top -->
+    <div class="row mb-2">
+        <div class="col-12 px-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb px-0 mb-0" style="background: transparent;">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-muted small">Home</a></li>
+                    <li class="breadcrumb-item active text-dark fw-bold small">Menu Allocation</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row align-items-center px-3 mb-3">
+        <div class="col-md-6">
+            <div class="segmented-control p-1 bg-light rounded-pill d-inline-flex border shadow-xs">
+                <div *ngFor="let option of menuTypes" class="control-item">
+                    <input type="radio" [id]="option.menuType" [value]="option.menuType" name="options" 
+                           [(ngModel)]="this.menuType" (change)="onOptionChange(option.menuType)" class="d-none" />
+                    <label [for]="option.menuType" class="px-4 py-2 rounded-pill mb-0 cursor-pointer fw-bold transition-all small"
+                           [class.bg-white]="this.menuType === option.menuType"
+                           [class.shadow-xs]="this.menuType === option.menuType"
+                           [class.text-teal]="this.menuType === option.menuType">
+                        <i class="fa {{ option.menuType === 'Menu' ? 'fa-folder' : 'fa-link' }} me-2"></i>
+                        {{option.menuType}}
                     </label>
                 </div>
+            </div>
         </div>
     </div>
-    <br/>
-    <div class="row">
-        <div class="col-5">
-                <div class="form-group">
-                    <label  class="control-label">Role List</label>
-                    <select appSelect2 #u_role_id class="form-control"  name="u_role_id" required [(ngModel)]="this.role" (selectionChanged)="getMenusByRoleAndType($event)">
-                        <option *ngFor="let role of roles" [value]="role.r_id" >{{ role.r_name }}</option>
-                      </select>
+
+    <div class="x_panel border-0 shadow-sm rounded-4 mb-3 mx-3">
+        <div class="x_content py-3">
+            <div class="row align-items-end g-3">
+                <div class="col-md-4">
+                    <div class="form-group mb-0">
+                        <label class="small fw-bold text-muted text-uppercase mb-1">Target Role</label>
+                        <select appSelect2 #u_role_id class="form-control" name="u_role_id" required 
+                                [(ngModel)]="this.role" (selectionChanged)="getMenusByRoleAndType($event)"
+                                placeholder="Select a role...">
+                            <option *ngFor="let role of roles" [value]="role.r_id">{{ role.r_name }}</option>
+                        </select>
+                    </div>
                 </div>
-        </div>
-        <div class="col-7 d-flex justify-content-start">
-            <div class="form-group">
-                <button type="button"  class="btn btn btn-success" style="margin-top: 19px;" (click)="createOrUpdateRoleMenu();"> <i class="fa fa-save"></i> Save</button>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-create px-4 shadow-sm" (click)="createOrUpdateRoleMenu();">
+                        <i class="fa fa-save me-2"></i> Confirm Allocation
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-5">
-            <div class="form-group">
-                <label>All Functions</label>
-                <select name="from" id="multiselect" class="form-control" size="30" multiple="multiple" #multiselectleft>
-                    <option *ngFor="let m of allMenus; let i = index" [value]="m.m_id">
-                      {{ m.m_name + (m.m_link ? ' - ' + m.m_link : '') }}
-                    </option>
-                  </select>
-                  
+
+    <div class="row g-3 px-3 dashboard-list-container">
+        <!-- All Functions -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-white border-0 py-2 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold text-muted small"><i class="fa fa-list-ul me-2 text-primary"></i> ALL FUNCTIONS</h6>
+                    <span class="badge bg-light text-primary rounded-pill">{{ filteredAllMenus.length }}</span>
+                </div>
+                <!-- Search Bar -->
+                <div class="px-3 py-2 bg-light border-bottom border-top">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-0"><i class="fa fa-search text-muted"></i></span>
+                        <input type="text" class="form-control border-0 shadow-none ps-0" placeholder="Search functions..." [(ngModel)]="searchAll">
+                        <span class="input-group-text bg-white border-0" *ngIf="searchAll" (click)="searchAll = ''" style="cursor: pointer;">
+                            <i class="fa fa-times-circle text-muted"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <select name="from" id="multiselect" class="modern-multiselect form-control border-0" size="15" multiple="multiple" #multiselectleft>
+                        <option *ngFor="let m of filteredAllMenus" [value]="m.m_id" class="px-3 py-2 small">
+                           {{ m.m_name }} {{ m.m_link ? ' → ' + m.m_link : '' }}
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
-        <div class="col-2">
-            <div class="form-group d-flex flex-column">
-                <button type="button" id="multiselect_rightAll" class="btn btn-block" (click)="rightAll()">
-                    <i class="fa fa-forward"></i>
-                </button>
-                <button type="button" id="multiselect_rightSelected" class="btn btn-block" (click)="rightSelected()">
-                    <i class="fa fa-chevron-right"></i>
-                </button>
-                <button type="button" id="multiselect_leftSelected" class="btn btn-block" (click)="leftSelected()">
-                    <i class="fa fa-chevron-left"></i>
-                </button>
-                <button type="button" id="multiselect_leftAll" class="btn btn-block" (click)="leftAll()">
-                    <i class="fa fa-backward"></i>
-                </button>
-            </div>
+
+        <!-- Action Controls -->
+        <div class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-2">
+            <button type="button" class="btn btn-action-transfer shadow-sm bg-white" (click)="rightAll()" title="Move All Right">
+                <i class="fa fa-angle-double-right"></i>
+            </button>
+            <button type="button" class="btn btn-action-transfer shadow-sm bg-primary text-white" (click)="rightSelected()" title="Move Selected Right">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+            <button type="button" class="btn btn-action-transfer shadow-sm bg-primary text-white" (click)="leftSelected()" title="Move Selected Left">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <button type="button" class="btn btn-action-transfer shadow-sm bg-white" (click)="leftAll()" title="Move All Left">
+                <i class="fa fa-angle-double-left"></i>
+            </button>
         </div>
-        <div class="col-5">
-            <div class="form-group">
-                <label>Allowed Functions</label>
-                <select name="to" id="multiselect_to" class="form-control" size="30" multiple="multiple" #multiselectright>
-                        <option *ngFor="let m of allowedMenus; let i = index" [value]="m.m_id"> {{ m.m_name + (m.m_link ? ' - ' + m.m_link : '') }}</option>
-                </select>
+
+        <!-- Allowed Functions -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-white border-0 py-2 px-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold text-muted small"><i class="fa fa-check-circle me-2 text-success"></i> ALLOWED FUNCTIONS</h6>
+                    <span class="badge bg-light text-success rounded-pill">{{ filteredAllowedMenus.length }}</span>
+                </div>
+                <!-- Search Bar -->
+                <div class="px-3 py-2 bg-light border-bottom border-top">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-0"><i class="fa fa-search text-muted"></i></span>
+                        <input type="text" class="form-control border-0 shadow-none ps-0" placeholder="Search allowed..." [(ngModel)]="searchAllowed">
+                        <span class="input-group-text bg-white border-0" *ngIf="searchAllowed" (click)="searchAllowed = ''" style="cursor: pointer;">
+                            <i class="fa fa-times-circle text-muted"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <select name="to" id="multiselect_to" class="modern-multiselect form-control border-0" size="15" multiple="multiple" #multiselectright>
+                        <option *ngFor="let m of filteredAllowedMenus" [value]="m.m_id" class="px-3 py-2 small">
+                            {{ m.m_name }} {{ m.m_link ? ' → ' + m.m_link : '' }}
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>

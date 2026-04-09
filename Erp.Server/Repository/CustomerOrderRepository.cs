@@ -14,6 +14,14 @@ namespace Erp.Server.Repository
             db = _db;
         }
 
+        public DbResult cancelCustomerOrder(RequestParams requestParams)
+        {
+            var _id = new SqlParameter("id", requestParams.id + "");
+            var _user = new SqlParameter("user", requestParams.user + "");
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.cancelCustomerOrder @id,@user;", _id,_user).ToList().FirstOrDefault() ?? new DbResult();
+            return dbresult;
+        }
+
         public DbResult createOrUpdateCustomerOrder(RequestParams requestParams)
         {
             var user = new SqlParameter("user", requestParams.user + "");

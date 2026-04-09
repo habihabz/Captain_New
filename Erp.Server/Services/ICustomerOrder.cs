@@ -4,6 +4,7 @@ namespace Erp.Server.Services
 {
     public interface ICustomerOrder
     {
+        DbResult cancelCustomerOrder(RequestParams requestParams);
         DbResult createOrUpdateCustomerOrder(RequestParams requestParams);
         DbResult deleteCustomerOrder(int id);
         CustomerOrder getCustomerOrder(int id);

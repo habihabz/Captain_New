@@ -25,6 +25,9 @@ namespace Erp.Server.Models
         [Display(Name = "color")]
         public int? c_color { get; set; } = 0;
 
+        [Display(Name = "color")]
+        public string? c_color_name { get; set; } = "";
+
         [Display(Name = "Quantity")]
         public int? c_qty { get; set; } =0;
 

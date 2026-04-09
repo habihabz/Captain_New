@@ -58,10 +58,11 @@ export class ProductsComponent implements OnInit {
   prodColors: ProdColor[] = [];
   barcode: Barcode = new Barcode();
   barcodes: Barcode[] = [];
-  prodAttachement: ProdAttachement = new ProdAttachement();
   prodAttachements: ProdAttachement[] = [];
   imagePreviews: string[] = [];
   selectedFiles: File[] = [];
+  selectedColor: number = 0;
+  imageItems: any[] = [];
 
 
   @ViewChild('productsGrid') productsGrid!: AgGridAngular;
@@ -93,62 +94,147 @@ export class ProductsComponent implements OnInit {
   }
 
   colDefs: ColDef[] = [
-    { headerName: "Id", field: "p_id" },
-    { headerName: "Name", field: "p_name" },
-    { headerName: "Short Name", field: "p_short_name" },
-    { headerName: "Description", field: "p_description" },
-    { headerName: "Category", field: "p_category_name" },
-    { headerName: "Sub Category", field: "p_sub_category_name" },
-    { headerName: "Division", field: "p_division_name" },
-    { headerName: "Sub Division", field: "p_sub_division_name" },
-    {
-      headerName: 'Edit', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Edit', action: 'onEdit', cssClass: 'btn btn-info', icon: 'fa fa-edit', onEdit: (data: any) => this.onAction('edit', data)
-      },
+    { 
+      headerName: "ID", 
+      field: "p_id", 
+      width: 80,
+      cellClass: 'text-center fw-bold text-muted'
+    },
+    { 
+      headerName: "Product Name", 
+      field: "p_name", 
+      flex: 1.5
+    },
+    { 
+      headerName: "Short Name", 
+      field: "p_short_name", 
+      width: 150
+    },
+    { 
+      headerName: "Category", 
+      field: "p_category_name", 
+      width: 180,
+      cellRenderer: (p: any) => `<span class="grid-badge bg-light text-dark shadow-xs border">${p.value || ''}</span>`
+    },
+    { 
+      headerName: "Sub Category", 
+      field: "p_sub_category_name", 
+      width: 180
     },
     {
-      headerName: 'Delete', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Delete', action: 'onDelete', cssClass: 'btn btn-danger', icon: 'fa fa-trash', onDelete: (data: any) => this.onAction('delete', data)
-      },
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '', // Empty name for icon-only
+            tooltip: 'Attachments',
+            cssClass: 'btn btn-outline-default btn-xs rounded-pill me-1',
+            icon: 'fa fa-image',
+            action: 'onAttachments',
+            onAttachments: (data: any) => this.onAction('attachments', data)
+          },
+          {
+            name: '', 
+            tooltip: 'Edit Product',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.onAction('edit', data)
+          },
+          {
+            name: '', 
+            tooltip: 'Delete Product',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.onAction('delete', data)
+          }
+        ]
+      }
     },
-    { headerName: "Created By", field: "p_cre_by_name" },
-    { headerName: "Created Date", field: "p_cre_date" },
+    { 
+        headerName: "Created On", 
+        field: "p_cre_date", 
+        width: 130,
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    }
   ];
 
   barcodeColDefs: ColDef[] = [
-    { headerName: "Id", field: "b_id" },
-    { headerName: "Barcode", field: "b_bar_code" },
+    { headerName: "ID", field: "b_id", width: 70, cellClass: 'text-center fw-bold text-muted', headerClass: 'text-center' },
+    { headerName: "Barcode Value", field: "b_bar_code", flex: 1, cellClass: 'fw-bold', headerClass: 'text-start' },
     {
-      headerName: 'Delete', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Delete', action: 'onDeleteBarcode', cssClass: 'btn btn-danger', icon: 'fa fa-trash', onDeleteBarcode: (data: any) => this.onAction('deleteBarcode', data)
-      },
-    },
+      headerName: 'Action',
+      width: 100,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Delete Barcode',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDeleteBarcode',
+            onDeleteBarcode: (data: any) => this.onAction('deleteBarcode', data)
+          }
+        ]
+      }
+    }
   ];
 
   prodSizeColDefs: ColDef[] = [
-    { headerName: "Id", field: "ps_id" },
-    { headerName: "Size", field: "ps_size_name" },
+    { headerName: "ID", field: "ps_id", width: 70, cellClass: 'text-center fw-bold text-muted', headerClass: 'text-center' },
+    { headerName: "Size Name", field: "ps_size_name", flex: 1, cellClass: 'fw-bold', headerClass: 'text-start' },
     {
-      headerName: 'Delete', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Delete', action: 'onDeleteProdSize', cssClass: 'btn btn-danger', icon: 'fa fa-trash', onDeleteProdSize: (data: any) => this.onAction('deleteProdSize', data)
-      },
-    },
+      headerName: 'Action',
+      width: 100,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Delete Size',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDeleteProdSize',
+            onDeleteProdSize: (data: any) => this.onAction('deleteProdSize', data)
+          }
+        ]
+      }
+    }
   ];
 
-
   prodColorColDefs: ColDef[] = [
-    { headerName: "Id", field: "pc_id" },
-    { headerName: "Color", field: "pc_color_name" },
+    { headerName: "ID", field: "pc_id", width: 70, cellClass: 'text-center fw-bold text-muted', headerClass: 'text-center' },
+    { headerName: "Color Name", field: "pc_color_name", flex: 1, cellClass: 'fw-bold', headerClass: 'text-start' },
     {
-      headerName: 'Delete', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Delete', action: 'onDeleteProdColor', cssClass: 'btn btn-danger', icon: 'fa fa-trash', onDeleteProdColor: (data: any) => this.onAction('deleteProdColor', data)
-      },
-    },
+      headerName: 'Action',
+      width: 100,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Delete Color',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDeleteProdColor',
+            onDeleteProdColor: (data: any) => this.onAction('deleteProdColor', data)
+          }
+        ]
+      }
+    }
   ];
 
 
@@ -220,12 +306,40 @@ export class ProductsComponent implements OnInit {
         break;
       case 'deleteProdColor':
         this.onDeleteProdColor(data);
-      break;
+        break;
+      case 'attachments':
+        this.onAttachments(data);
+        break;
       default:
         this.snackBarService.showError("Unknown Action " + action);;
     }
   }
 
+  onAttachments(data: any) {
+    this.product = data;
+    this.imageItems = [];
+    this.selectedFiles = [];
+    this.refreshAttachmentGallery();
+    $('#AttachementModal').modal('show');
+  }
+
+  refreshAttachmentGallery() {
+    this.requestParms.id = this.product.p_id;
+    this.requestParms.color = this.selectedColor;
+
+    this.iproductService.getProductAttachementsByColor(this.requestParms)
+      .subscribe((data: any[]) => {
+        // Keep ONLY the locally added 'new' images that match THIS CURRENT variation, then add the refreshed set of 'existing' ones from the server
+        this.imageItems = this.imageItems.filter(x => x.type === 'new' && x.color === this.selectedColor);
+        data.forEach((x: any) => {
+          this.imageItems.push({
+            id: x.pa_id,
+            preview: `${environment.serverHostAddress}/${x.pa_image_path}`,
+            type: 'existing'
+          });
+        });
+      });
+  }
 
   onEdit(data: any) {
     $('#myTab a[href="#details"]').tab('show');
@@ -234,22 +348,17 @@ export class ProductsComponent implements OnInit {
         this.product = data;
 
         this.barcodes = this.parseJSON(data.p_barcodes);
-        this.prodColors = this.parseJSON(data.p_colors);
         this.prodSizes = this.parseJSON(data.p_sizes);
-        this.prodAttachements = this.parseJSON(data.p_attachements);
+        this.updateGrid(this.barcodeGrid, this.barcodes);
+        this.updateGrid(this.prodSizeGrid, this.prodSizes);
 
-       
-          this.updateGrid(this.barcodeGrid, this.barcodes);
-          this.updateGrid(this.prodColorGrid, this.prodColors);
-          this.updateGrid(this.prodSizeGrid, this.prodSizes);
+        this.imagePreviews = this.prodAttachements.map(
+          (x) => `${environment.serverHostAddress}/${x.pa_image_path}`
+        );
+        this.setSelect2Values();
+        $('#productFormModal').modal('show');
 
-          this.imagePreviews = this.prodAttachements.map(
-            (x) => `${environment.serverHostAddress}/${x.pa_image_path}`
-          );
-          this.setSelect2Values();
-          $('#productFormModal').modal('show');
-        
-        
+
       },
       (error: any) => {
         console.error('Error fetching product', error);
@@ -326,12 +435,16 @@ export class ProductsComponent implements OnInit {
 
   }
   onProdColorChange(pc_id: number) {
-    const selectedColor = this.colors.find(color => color.md_id == pc_id);
+
+    const selectedColor = this.colors.find(c => c.md_id == pc_id);
+
     if (selectedColor) {
       this.prodColor.pc_color = selectedColor.md_id;
       this.prodColor.pc_color_name = selectedColor.md_name;
     }
 
+    this.selectedColor = pc_id;
+    this.refreshAttachmentGallery();
   }
 
   createOrUpdateProduct() {
@@ -457,7 +570,7 @@ export class ProductsComponent implements OnInit {
 
 
   onDeleteProdColor(data: any) {
-    
+
     this.prodColors = this.prodColors.filter(prodColor => prodColor.pc_color !== data.pc_color);
     this.prodColorGrid.api.applyTransaction({ remove: [{ pc_color: data.pc_color }] });
     this.snackBarService.showSuccess("Color successfully removed");
@@ -470,23 +583,81 @@ export class ProductsComponent implements OnInit {
   }
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
-      this.selectedFiles = Array.from(input.files);
-      this.imagePreviews = [];
+    if (!input.files || input.files.length === 0) return;
 
-      // Generate preview URLs
-      this.selectedFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e: any) => this.imagePreviews.push(e.target.result);
-        reader.readAsDataURL(file);
-      });
-    }
-    this.fileInput.nativeElement.value = '';
+    const files = Array.from(input.files);
+    files.forEach(file => {
+      // Create a colored file wrapper for tracking
+      (file as any).targetColor = this.selectedColor;
+      this.selectedFiles.push(file);
+
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const result = e.target?.result as string;
+        this.imageItems.push({
+          file: file,
+          preview: result,
+          type: 'new',
+          color: this.selectedColor // Tag preview with color
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    input.value = '';
   }
 
   removeImage(index: number): void {
-    this.imagePreviews.splice(index, 1);
-    this.selectedFiles.splice(index, 1);
+    const item = this.imageItems[index];
+    if (item.type === 'existing') {
+      if (confirm("Are you sure you want to permanently delete this image from the server?")) {
+        this.iproductService.deleteProductAttachement(item.id).subscribe((res: any) => {
+          this.imageItems.splice(index, 1);
+          this.snackBarService.showSuccess("Image deleted successfully");
+        });
+      }
+    } else {
+      // For local removals, find and remove from selectedFiles buffer too
+      const fileIndex = this.selectedFiles.indexOf(item.file);
+      if (fileIndex > -1) this.selectedFiles.splice(fileIndex, 1);
+      this.imageItems.splice(index, 1);
+    }
   }
 
+
+  uploadProdAttachements() {
+    if (this.selectedFiles.length > 0) {
+      const formData = new FormData();
+      formData.append('product', this.product.p_id.toString());
+      formData.append('color', this.selectedColor.toString());
+      formData.append('user', this.currentUser.u_id.toString());
+      
+      // ONLY upload files that were intended for the CURRENT selected color
+      const filesToUpload = this.selectedFiles.filter((f: any) => f.targetColor === this.selectedColor);
+      
+      if (filesToUpload.length === 0) {
+          this.snackBarService.showError("No new images to upload for this color variation.");
+          return;
+      }
+
+      filesToUpload.forEach(file => {
+        formData.append('images', file, file.name);
+      });
+      this.iproductService.uploadProdAttachements(formData).subscribe(
+        (data: DbResult) => {
+          if (data.message === "Success") {
+            this.snackBarService.showSuccess("Assets synchronized successfully");
+            this.selectedFiles = []; // Clear the upload buffer
+            // Remove 'new' items from preview since they are now uploaded
+            this.imageItems = this.imageItems.filter(x => x.type !== 'new');
+            this.refreshAttachmentGallery(); // Fetch the official synced versions from server
+          }
+          else {
+            this.snackBarService.showError("Failed to upload attachments.");
+          }
+        }
+      );
+    }
+  }
 }
+

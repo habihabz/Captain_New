@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +77,14 @@ namespace Erp.Server.Repository
             var dbresult = db.Set<DbResult>().FromSqlRaw
                 ("EXEC dbo.registerUser @u_id,@u_name,@u_username,@u_password,@u_phone,@u_email,@u_date_of_birth,@u_agree_terms,@u_is_get_updates,@u_role_id,@u_is_admin,@u_active_yn,@u_cre_by;",
                 u_id, u_name, u_username, u_password, u_phone, u_email, u_date_of_birth, u_agree_terms, u_is_get_updates, u_role_id, u_is_admin, u_active_yn, u_cre_by).ToList().FirstOrDefault() ?? new DbResult();
+            return dbresult;
+        }
+
+        public DbResult updatePassword(int userId, string newPassword)
+        {
+            var _userId = new SqlParameter("userId", userId);
+            var _newPassword = new SqlParameter("newPassword", newPassword);
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.updateUserPassword @userId, @newPassword;", _userId, _newPassword).ToList().FirstOrDefault() ?? new DbResult();
             return dbresult;
         }
     }

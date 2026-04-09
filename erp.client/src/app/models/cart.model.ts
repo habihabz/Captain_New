@@ -6,6 +6,7 @@ export class Cart extends Product {
   c_size: number;
   c_size_name: string;
   c_color: number;
+  c_color_name: string;
   c_qty: number;
   c_price: number;
   c_cre_by: number;
@@ -19,6 +20,7 @@ export class Cart extends Product {
     this.c_size = 0;
     this.c_size_name='';
     this.c_color = 0;
+    this.c_color_name = '';
     this.c_qty = 0;
     this.c_price = this.calculatePrice(); 
     this.c_cre_by = 0;
@@ -37,6 +39,7 @@ export class Cart extends Product {
     c_size: this.c_size,
     c_size_name: this.c_size_name,
     c_color: this.c_color,
+    c_color_name: this.c_color_name,
     c_qty: this.c_qty,
     c_price: this.c_price,
     c_cre_by: this.c_cre_by

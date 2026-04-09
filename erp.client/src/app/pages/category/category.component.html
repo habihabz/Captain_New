@@ -1,49 +1,30 @@
 <div class="right_col" style="min-height: 99vh;">
-    <div class="x_panel">
-        <div class="x_title">
-            <button class="btn btn-warning" (click)="createCategory()"><i class="fa fa-plus"></i> Create</button>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content" style="display: block;">
-            <div *ngIf="categories.length === 0">
-                &nbsp;No Categories found.
-                <br/>
-            </div>
-
-            <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped jambo_table bulk_action">
-                <thead>
-                    <tr class="headings">
-                        <th class="column-title">Id</th>
-                        <th class="column-title">Name</th>
-                        <th class="column-title">Type</th>
-                        <th class="column-title">Created By</th>
-                        <th class="column-title">Created On</th>
-                        <th class="column-title no-link last"><span class="nobr">Action</span></th>
-                        <th class="column-title no-link last"><span class="nobr">Action</span></th>
-                    </tr>
-                </thead>
-                <tbody *ngIf="categories.length > 0">
-                    <tr *ngFor="let category of categories" id="row_{{ category.ct_id }}">
-                        <td>{{ category.ct_id }}</td>
-                        <td>{{ category.ct_name }}</td>
-                        <td>{{ category.ct_type }}</td>
-                        <td>{{ category.ct_cre_by_name }}</td>
-                        <td>{{ category.ct_cre_date }}</td>
-                        <td>
-                            <button class="btn btn-info" (click)="editCategory(category.ct_id)">
-                                <i class="fa fa-edit"></i> edit
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn btn-danger" (click)="deleteCategory(category.ct_id)">
-                                <i class="fa fa-trash"></i> delete
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <div class="x_panel">
+    <div class="x_title d-flex justify-content-between align-items-center">
+      <button class="btn-create" (click)="createCategory()">
+        <i class="fa fa-plus"></i> Create
+      </button>
+      <div class="clearfix"></div>
     </div>
+    <div class="x_content">
+      <div class="row">
+        <div class="col-12">
+          <ag-grid-angular
+            #categoryGrid
+            style="width: 100%; height: 75vh;"
+            class="ag-theme-quartz ag-theme-acmecorp"
+            [rowData]="categories"
+            [columnDefs]="colDefs"
+            [pagination]="pagination"
+            [defaultColDef]="defaultColDef"
+            [components]="frameworkComponents"
+            [domLayout]="domLayout"
+            (gridReady)="onGridReady($event)">
+          </ag-grid-angular>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="modal fade" id="categoryFormModal" tabindex="-1" role="dialog" aria-labelledby="categoryFormModalLabel" aria-hidden="true">

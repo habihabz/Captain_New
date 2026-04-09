@@ -1,19 +1,99 @@
-<div class="right_col" style="min-height: 99vh;">
-    <div class="x_panel">
-        <div class="x_content" style="display: block;">
-            <div *ngIf="feedbacks.length === 0">
-                &nbsp;No feedbacks found.
-                <br />
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <ag-grid-angular #feedbackGrid class="ag-theme-quartz ag-theme-acmecorp"
-                        style="height: 80vh; width: 100%;" [rowData]="feedbacks" [columnDefs]="colDefs"
-                        [pagination]="pagination" [defaultColDef]="defaultColDef" [components]="frameworkComponents"
-                        [paginationPageSize]="10" [paginationPageSizeSelector]="paginationPageSizeSelector"
-                        (gridReady)="onGridReady($event)"></ag-grid-angular>
+<div class="right_col d-flex flex-column" role="main" style="padding-top: 10px; height: 100vh; overflow: hidden;">
+    <!-- Breadcrumbs & Header Row -->
+    <div class="row mb-3 flex-shrink-0">
+        <div class="col-12 px-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 m-0">
+                    <li class="breadcrumb-item text-muted small">Reviews & Feedbacks</li>
+                    <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">General Feedbacks</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mt-1" style="font-size: 1.5rem;">Customer Feedbacks</h3>
+        </div>
+    </div>
+
+    <!-- Tabs Section (Directly under Header) -->
+    <div class="row mb-0 flex-shrink-0 px-2 transition-tabs">
+        <div class="col-12 px-4">
+            <ul class="nav nav-pills custom-tabs mb-0 border-0">
+                <li class="nav-item me-2">
+                    <a class="nav-link rounded-pill px-4 fw-bold" [class.active]="currentTab === 'active'" (click)="setTab('active')" style="cursor: pointer;">
+                        <i class="fa fa-envelope-open me-2"></i> ACTIVE MESSAGES
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4 fw-bold" [class.active]="currentTab === 'closed'" (click)="setTab('closed')" style="cursor: pointer;">
+                        <i class="fa fa-archive me-2"></i> CLOSED ARCHIVE
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="x_panel border-0 shadow-sm rounded-top-0 rounded-bottom-4 mx-2 mb-3 flex-grow-1 d-flex flex-column overflow-hidden mt-n1" style="border-top: 3px solid #1abb9c !important;">
+        <div class="x_title border-0 pb-0 px-3 pt-4 flex-shrink-0">
+            <div class="row align-items-center g-3">
+                <div class="col-md-auto" *ngIf="currentTab === 'active'">
+                    <h2 class="fw-bold text-muted mb-0" style="font-size: 0.85rem; letter-spacing: 1px;">
+                        <i class="fa fa-dot-circle-o me-2 text-success animate-pulse"></i> LIVE FEEDBACK
+                    </h2>
+                </div>
+                <div class="col-md-auto" *ngIf="currentTab === 'closed'">
+                    <h2 class="fw-bold text-muted mb-0" style="font-size: 0.85rem; letter-spacing: 1px;">
+                        <i class="fa fa-calendar me-2 text-primary"></i> HISTORY VIEW
+                    </h2>
+                </div>
+
+                <!-- Date Range Filter (Only for Closed Tab) -->
+                <div class="col-md-5 d-flex gap-2" *ngIf="currentTab === 'closed'">
+                    <input type="date" class="form-control form-control-sm border-0 bg-light rounded-pill px-3 shadow-none" [(ngModel)]="dateRange.start" (change)="onDateFilter()" style="height: 38px; font-weight: 600;">
+                    <span class="align-self-center text-muted">-</span>
+                    <input type="date" class="form-control form-control-sm border-0 bg-light rounded-pill px-3 shadow-none" [(ngModel)]="dateRange.end" (change)="onDateFilter()" style="height: 38px; font-weight: 600;">
+                </div>
+
+                <!-- Search (Active Tab Only) -->
+                <div class="col-md-4" *ngIf="currentTab === 'active'">
+                    <div class="input-group search-container-premium">
+                        <span class="input-group-text bg-light border-0 text-muted ps-3 py-0 rounded-start-pill">
+                            <i class="fa fa-search opacity-50"></i>
+                        </span>
+                        <input type="text" class="form-control border-0 bg-light py-2 rounded-end-pill shadow-none" 
+                               placeholder="Search across all active..."
+                               style="font-size: 13px; font-weight: 500;"
+                               (input)="onQuickFilterChanged($event)">
+                    </div>
+                </div>
+                
+                <div class="col text-end d-none d-lg-block">
+                    <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill fw-bold" style="background: rgba(94, 114, 228, 0.1); border: 1px solid rgba(94, 114, 228, 0.2); font-size: 11px;">
+                        {{ feedbacks.length }} TOTAL ENTRIES
+                    </span>
                 </div>
             </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="x_content p-3 flex-grow-1 overflow-hidden">
+            <div *ngIf="feedbacks.length === 0" class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="mb-3 opacity-25">
+                    <i class="fa fa-inbox" style="font-size: 5rem;"></i>
+                </div>
+                <h5 class="text-muted fw-bold">No messages found</h5>
+                <p class="text-muted small">Feedback for the selected criteria will appear here.</p>
+            </div>
+            
+            <ag-grid-angular *ngIf="feedbacks.length > 0" #feedbackGrid 
+                class="ag-theme-quartz ag-theme-acmecorp"
+                style="height: 100%; width: 100%;" 
+                [rowData]="feedbacks" 
+                [columnDefs]="colDefs"
+                [pagination]="pagination" 
+                [defaultColDef]="defaultColDef" 
+                [components]="frameworkComponents"
+                [paginationPageSize]="paginationPageSize" 
+                [paginationPageSizeSelector]="paginationPageSizeSelector"
+                (gridReady)="onGridReady($event)">
+            </ag-grid-angular>
         </div>
     </div>
 </div>

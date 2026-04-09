@@ -8,56 +8,118 @@ import { Router } from '@angular/router';
 import { IMasterDataService } from '../../services/imaster.data.service';
 import { MasterType } from '../../models/master.type.model';
 import { RequestParms } from '../../models/requestParms';
-
+import { ColDef, DomLayoutType } from 'ag-grid-community';
+import { ActionRendererComponent } from '../../directives/action.renderer';
 declare var $: any;
+
 
 @Component({
   selector: 'app-master-data',
   templateUrl: './master-data.component.html',
   styleUrl: './master-data.component.css'
 })
-export class MasterDataComponent  implements OnInit, OnDestroy {
+export class MasterDataComponent implements OnInit, OnDestroy {
   masterDatas: MasterData[] = [];
   masterData: MasterData = new MasterData();
-  masterTypes: MasterType[]=[];
-  masterType:string="";
-  requestParms : RequestParms =new RequestParms()
+  masterTypes: MasterType[] = [];
+  masterType: string = "";
+  requestParms: RequestParms = new RequestParms()
   currentUser: User = new User();
   dbResult: DbResult = new DbResult();
   private subscription: Subscription = new Subscription();
-  dtOptions: any ={};
-  dtTrigger:Subject<any>=new Subject<any>();
+  
+  pagination = true;
+  domLayout: DomLayoutType = 'autoHeight';
 
-  constructor(private iuserService: IuserService, private imasterDataService: IMasterDataService,private router: Router) { 
+  colDefs: ColDef[] = [
+    { 
+      headerName: "ID", 
+      field: "md_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted'
+    },
+    { 
+      headerName: "Value / Name", 
+      field: "md_name", 
+      flex: 1.5,
+      cellClass: 'fw-bold text-dark'
+    },
+    { 
+      headerName: "Type", 
+      field: "md_type", 
+      width: 150,
+      cellRenderer: (p: any) => `<span class="grid-badge bg-light text-muted border shadow-xs">${p.value || ''}</span>`
+    },
+    { 
+      headerName: "Active", 
+      field: "md_active_yn", 
+      width: 100,
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const isActive = p.value === 'Y';
+        return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Active' : 'Inactive'}</span>`;
+      }
+    },
+    {
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Record',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.editMasterData(data.md_id)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Record',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.deleteMasterData(data.md_id)
+          }
+        ]
+      }
+    },
+    { 
+        headerName: "Created On", 
+        field: "md_cre_date", 
+        width: 130, 
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    }
+  ];
 
+  frameworkComponents = {
+    actionRenderer: ActionRendererComponent
+  };
+
+  defaultColDef = {
+    sortable: true,
+    filter: true
+  };
+
+  constructor(private iuserService: IuserService, private imasterDataService: IMasterDataService, private router: Router) { 
     this.currentUser = iuserService.getCurrentUser();
-    if(this.currentUser.u_id==0) { 
+    if(this.currentUser.u_id == 0) { 
       this.router.navigate(['login']);
     }
-    
-    
   }
 
   ngOnInit(): void {
-    this.dtOptions = {
-      pagingType: 'simple_numbers', // Shows full pagination controls with "First", "Previous", "Next", and "Last"
-      pageLength: 10,
-      lengthMenu: [10, 25, 50, 100], // Allows users to select the number of records per page
-      dom: '<"row"<"col-sm-12 col-md-6 text-left"l><"col-sm-12 col-md-6 text-right"f>>' +
-           't<' +
-           '"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-      responsive: true, // Ensures that the table adjusts for small screens
-    };
-    
     this.LoadMasterTypes();
     this.subscription.add(
       this.imasterDataService.refreshMasterDatas$.subscribe(() => {
         this.getMasterDatasByType();
       })
     );
-    
   }
-
 
   LoadMasterTypes(): void {
     this.imasterDataService.getMasterDataTypes().subscribe(
@@ -67,111 +129,73 @@ export class MasterDataComponent  implements OnInit, OnDestroy {
           this.masterType = this.masterTypes[0].type;
           this.getMasterDatasByType();
         }
-      },
-      (error: any) => {
-        console.error('Error fetching menu type', error);
-        
       }
     );
-  }
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
   }
 
-  loadMasterDatas(): void {
-    this.imasterDataService.getMasterDatas().subscribe(
-      (data: MasterData[]) => {
-        this.masterDatas = data;
-        this.dtTrigger.next(null);
-      },
-      (error: any) => {
-        console.error('Error fetching masterDatas', error);
-      }
-    );
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  onGridReady(params: any) {
+    params.api.sizeColumnsToFit();
   }
 
   createOrUpdateMasterData(): void {
     this.masterData.md_cre_by = this.currentUser.u_id;
     this.imasterDataService.createOrUpdateMasterData(this.masterData).subscribe(
       (data: DbResult) => {
-        this.dbResult = data;
         if (data.message === "Success") {
           this.imasterDataService.refreshMasterDatas();
-          this.removeDatatable();
           $('#masterDataFormModal').modal('hide');
-      
         } else {
           alert(data.message);
         }
-      },
-      (error: any) => {
-        console.error('Error creating/updating masterData', error);
-        alert('An error occurred while creating/updating the masterData.');
       }
     );
   }
 
   deleteMasterData(id: number): void {
-    this.imasterDataService.deleteMasterData(id).subscribe(
-      (data: DbResult) => {
-        this.dbResult = data;
-        if (this.dbResult.message === "Success") {
-          this.masterDatas = this.masterDatas.filter(masterData => masterData.md_id !== id);
-          this.imasterDataService.refreshMasterDatas();
-          this.removeDatatable();     
-          alert("Successfully Removed");
-        } else {
-          alert(this.dbResult.message);
+    if(confirm("Are you sure you want to delete this master data?")) {
+      this.imasterDataService.deleteMasterData(id).subscribe(
+        (data: DbResult) => {
+          if (data.message === "Success") {
+            this.imasterDataService.refreshMasterDatas();
+          } else {
+            alert(data.message);
+          }
         }
-      },
-      (error: any) => {
-        console.error('Error deleting masterData', error);
-      }
-    );
+      );
+    }
   }
-  
 
   editMasterData(id: number): void {
     this.imasterDataService.getMasterData(id).subscribe(
       (data: MasterData) => {
         this.masterData = data;
-        
         $('#masterDataFormModal').modal('show');
-      },
-      (error: any) => {
-        console.error('Error fetching masterData', error);
       }
     );
   }
 
   createMasterData(): void {
     this.masterData = new MasterData();
-    this.masterData.md_type=this.masterType;
+    this.masterData.md_type = this.masterType;
     $('#masterDataFormModal').modal('show');
   }
-  removeDatatable(){
-    if ($.fn.dataTable.isDataTable('#DataTables_Table_0')) {
-      $('#DataTables_Table_0').DataTable().clear().destroy();
-    }
-  }
-  onOptionChange(option :any){
-    this.masterType=option;
+
+  onOptionChange(option: any){
+    this.masterType = option;
     this.getMasterDatasByType();
   }
 
   getMasterDatasByType(): void {
-    this.requestParms.type=this.masterType;
+    this.requestParms.type = this.masterType;
     this.imasterDataService.getMasterDatasByType(this.requestParms).subscribe(
       (data: MasterData[]) => {
         this.masterDatas = data;
-        this.removeDatatable();
-        this.dtTrigger.next(null);
-      },
-      (error: any) => {
-        console.error('Error fetching menu type', error);
-        
       }
     );
   }
-
 }
+

@@ -44,6 +44,11 @@ export class ICustomerOrder {
     return this.http.post<DbResult>(this.apiUrl + "/updateStatusForCustomerOrder", requestParms);
   }
 
+  cancelCustomerOrder(requestParms: RequestParms): Observable<DbResult> {
+    return this.http.post<DbResult>(this.apiUrl + "/cancelCustomerOrder", requestParms);
+  }
+
+
   invoice(orderId: number) {
     return this.http.get(
       `${environment.serverHostAddress}/api/CustomerOrder/invoice/${orderId}`,

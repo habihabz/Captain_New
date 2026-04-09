@@ -17,8 +17,6 @@ import { ActionRendererComponent } from '../../directives/action.renderer';
 import { GridService } from '../../services/igrid.service';
 import { AgGridAngular } from 'ag-grid-angular';
 import { CustomerOrderDetail } from '../../models/customer.order.detail.model';
-import { ICustomerOrderStatusService } from '../../services/icustomer.order.status.service';
-import { CustomerOrderStatus } from '../../models/customer.order.status.model';
 import { Slider } from '../../models/slider.model';
 import { ISliderService } from '../../services/islider.service';
 import { environment } from '../../../environments/environment';
@@ -69,31 +67,68 @@ export class SliderComponent {
     );
   }
   colDefs: ColDef[] = [
-    { headerName: "ID", field: "s_id", width: 80 },
-    { headerName: "Title", field: "s_title" },
+    { 
+      headerName: "ID", 
+      field: "s_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted',
+      headerClass: 'text-center'
+    },
+    { 
+      headerName: "Promotion Title", 
+      field: "s_title", 
+      flex: 1, 
+      headerClass: 'text-start' 
+    },
     {
-      headerName: "Image",
+      headerName: "Preview",
       field: "s_image_url",
+      width: 120,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
       cellRenderer: (params: any) =>
-        `<img src="${this.attachmentUrl + '/' + params.value}" width="60" height="40" style="object-fit:cover;">`
+        params.value ? `<img src="${this.attachmentUrl + '/' + params.value}" class="rounded shadow-xs" width="80" height="40" style="object-fit:cover;">` : ''
     },
     {
-      headerName: "Active",
-      field: "s_active",
-      cellRenderer: (p: any) => (p.value ? "Yes" : "No")
+      headerName: "Status",
+      field: "s_active_yn",
+      width: 100,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const isActive = p.value === 'Y';
+        return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Active' : 'Hidden'}</span>`;
+      }
     },
     {
-      headerName: 'Edit', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Edit', action: 'onEdit', cssClass: 'btn btn-info', icon: 'fa fa-edit', onEdit: (data: any) => this.onAction('edit', data)
-      },
-    },
-    {
-      headerName: 'Delete', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Delete', action: 'onDelete', cssClass: 'btn btn-danger', icon: 'fa fa-trash', onDelete: (data: any) => this.onAction('delete', data)
-      },
-    }];
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Slider',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.onAction('edit', data)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Slider',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.onAction('delete', data)
+          }
+        ]
+      }
+    }
+  ];
 
   frameworkComponents = {
     actionRenderer: ActionRendererComponent

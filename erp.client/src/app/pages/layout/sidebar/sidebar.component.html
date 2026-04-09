@@ -1,9 +1,9 @@
 <div class="col-md-3 left_col">
   <div class="left_col scroll-view">
     <div class="navbar nav_title" style="border: 0;">
-      <a href="index.html" class="site_title">
-          <img src="/assets/img/logo/logo-icon.png" alt="Logo" style="width:50px;height:50px;" /> 
-          <span>Captain</span>
+      <a href="index.html" class="site_title d-flex align-items-center gap-2">
+          <img src="/assets/img/logo/logo-icon.png" alt="Logo" class="sidebar-logo" style="width:50px;height:50px;" /> 
+          <span class="fs-4 fw-bold">Captain</span>
       </a>
   </div>
 
@@ -21,20 +21,34 @@
     </div>
     <!-- /menu profile quick info -->
 
-    <br />
+    <!-- sidebar search -->
+    <div class="sidebar-search px-3 mb-4 mt-2">
+        <div class="position-relative search-container">
+            <i class="fa fa-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; opacity: 0.7;"></i>
+            <input type="text" 
+                   class="form-control border-0 text-white rounded-pill" 
+                   style="padding-left: 35px; height: 36px; font-size: 12px; background: rgba(255,255,255,0.08) !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);" 
+                   placeholder="Quick search..."
+                   (input)="onSearch($event)">
+        </div>
+    </div>
 
     <!-- sidebar menu -->
     <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
       <div class="menu_section">
-        <h3>General</h3>
+        <h3 class="px-3 text-muted text-uppercase mb-3" style="font-size: 10px; letter-spacing: 1px;">General</h3>
         <ul class="nav side-menu">
           <!-- Dashboard Section -->
           <li><a href="dashboard"><i class="fa fa-home"></i> Home </a>
           </li>
-          <li *ngFor="let menu of menus"><a><i class="fa {{menu.m_fa_icon}}"></i> {{menu.m_name}} <span class="fa fa-chevron-down"></span></a>
-            <ul class="nav child_menu">
-              <li *ngFor="let menuitem of menu.m_menu_items"><a (click)="navigateTo(menuitem.m_link)">{{menuitem.m_name}}</a></li>
-              
+          <li *ngFor="let menu of menus" [class.search-expanded]="menu.isSearchMatch" [class.active]="menu.isSearchMatch && !searchTerm">
+            <a [style.display]="menu.isSearchMatch ? 'block' : ''">
+              <i class="fa {{menu.m_fa_icon}}"></i> {{menu.m_name}} <span class="fa fa-chevron-down"></span>
+            </a>
+            <ul class="nav child_menu" [style.display]="menu.isSearchMatch ? 'block' : ''" style="display: none;">
+              <li *ngFor="let menuitem of menu.m_menu_items" [class.active]="isActive(menuitem.m_link)">
+                <a (click)="navigateTo(menuitem.m_link)" style="cursor: pointer;">{{menuitem.m_name}}</a>
+              </li>
             </ul>
           </li>
          <!-- Masters Section -->
@@ -59,19 +73,19 @@
     
     <!-- /sidebar menu -->
 
-    <!-- /menu footer buttons -->
-    <div class="sidebar-footer hidden-small">
-      <a data-toggle="tooltip" data-placement="top" title="Settings">
-        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+    <!-- menu footer buttons -->
+    <div class="sidebar-footer d-flex align-items-center justify-content-center gap-4 py-3">
+      <a class="footer-action" data-toggle="tooltip" data-placement="top" title="Settings">
+        <i class="fa fa-cog"></i>
       </a>
-      <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+      <a class="footer-action" data-toggle="tooltip" data-placement="top" title="FullScreen">
+        <i class="fa fa-expand"></i>
       </a>
-      <a data-toggle="tooltip" data-placement="top" title="Lock">
-        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+      <a class="footer-action" data-toggle="tooltip" data-placement="top" title="Lock">
+        <i class="fa fa-lock"></i>
       </a>
-      <a data-toggle="tooltip" data-placement="top" title="Logout" href="logout">
-        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+      <a class="footer-action logout" data-toggle="tooltip" data-placement="top" title="Logout" (click)="logout()" style="cursor: pointer;">
+        <i class="fa fa-power-off"></i>
       </a>
     </div>
     <!-- /menu footer buttons -->

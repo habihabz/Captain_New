@@ -1,49 +1,51 @@
-<div class="right_col" supplier="main" style="min-height: 99vh;">
-  <div class="x_panel">
-    <div class="x_title">
-      <button class="btn btn-warning" (click)="createSupplier()"><i class="fa fa-plus"></i> Create</button>
+<div class="right_col" role="main" style="min-height: 99vh; padding-top: 10px;">
+  <!-- Breadcrumbs -->
+  <div class="row mb-4">
+    <div class="col-12 px-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 m-0">
+          <li class="breadcrumb-item text-muted small">Admin Console</li>
+          <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">Supplier Management</li>
+        </ol>
+      </nav>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <h3 class="fw-bold text-dark m-0">Global Partners</h3>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="text-muted small fw-bold">Active Vendors:</span>
+            <span class="badge bg-soft-success text-success px-4 py-2 rounded-pill fw-bold" style="background: rgba(45, 206, 137, 0.15); font-size: 13px;">{{ suppliers.length }} Entities</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="x_panel border-0 shadow-sm rounded-4 mx-2">
+    <div class="x_title border-0 pb-0 px-3 pt-4">
+      <div class="row align-items-center">
+        <div class="col">
+          <button class="btn-create shadow-sm hover-lift" (click)="createSupplier()">
+            <i class="fa fa-truck"></i> CREATE NEW SUPPLIER
+          </button>
+        </div>
+      </div>
       <div class="clearfix"></div>
     </div>
-    <div class="x_content" style="display: block;">
-      <div *ngIf="suppliers.length === 0">
-        &nbsp;No Suppliers found.
-        <br />
+    <div class="x_content">
+      <div class="row">
+        <div class="col-12">
+          <ag-grid-angular
+            #supplierGrid
+            style="width: 100%; height: 75vh;"
+            class="ag-theme-quartz ag-theme-acmecorp"
+            [rowData]="suppliers"
+            [columnDefs]="colDefs"
+            [pagination]="pagination"
+            [defaultColDef]="defaultColDef"
+            [components]="frameworkComponents"
+            [domLayout]="domLayout"
+            (gridReady)="onGridReady($event)">
+          </ag-grid-angular>
+        </div>
       </div>
-
-
-      <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-        class="table table-striped jambo_table bulk_action">
-        <thead>
-          <tr class="headings">
-            <th class="column-title">Id </th>
-            <th class="column-title">Name </th>
-            <th class="column-title">Is Active</th>
-            <th class="column-title">Created By </th>
-            <th class="column-title">Created On </th>
-            <th class="column-title no-link last"><span class="nobr">Action</span></th>
-            <th class="column-title no-link last"><span class="nobr">Action</span></th>
-          </tr>
-        </thead>
-        <tbody *ngIf="suppliers.length > 0">
-          <tr *ngFor="let supplier of suppliers" id="row_{{ supplier.s_id }}">
-            <td>{{ supplier.s_id }}</td>
-            <td>{{ supplier.s_name }}</td>
-            <td>{{ supplier.s_active_yn }}</td>
-            <td>{{ supplier.s_cre_by_name }}</td>
-            <td>{{ supplier.s_cre_date }}</td>
-            <td>
-              <button class="btn btn-info" (click)="editSupplier(supplier.s_id)">
-                <i class="fa fa-edit"></i> edit
-              </button>
-            </td>
-            <td>
-              <button class="btn btn-danger" (click)="deleteSupplier(supplier.s_id)">
-                <i class="fa fa-trash"></i> delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>

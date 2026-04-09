@@ -13,8 +13,8 @@ import { DataTableStructure } from '../../../methods/datatable.structure';
 import { IReportService } from '../../../services/ireport.service';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActionRendererComponent } from '../../../directives/action.renderer';
-import { CustomerOrderStatus } from '../../../models/customer.order.status.model';
-import { ICustomerOrderStatusService } from '../../../services/icustomer.order.status.service';
+import { Status } from '../../../models/status.model';
+import { StatusService } from '../../../services/status.service';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { FormControl, FormGroup } from '@angular/forms';
 declare var $: any;
@@ -32,7 +32,7 @@ export class OrderReportComponent implements OnInit {
   reportdata: any[] = [];
   orderDetails: any[] = [];
   categories: MasterData[] = [];
-  customerOrderStatuses: CustomerOrderStatus[] = [];
+  customerOrderStatuses: Status[] = [];
   pagination = true;
   paginationPageSize15 = 15;
   paginationPageSizeSelector15 = [15, 30, 50, 100];
@@ -54,7 +54,7 @@ export class OrderReportComponent implements OnInit {
     private dataTableStructure: DataTableStructure,
     private snackBarService: SnackBarService,
     private imasterDataService: IMasterDataService,
-    private icustomerOrderStatus: ICustomerOrderStatusService,
+    private statusService: StatusService,
     private igridService: GridService,
     private ireportService: IReportService
   ) {
@@ -107,8 +107,8 @@ export class OrderReportComponent implements OnInit {
   }
 
   getCustomerOrderStatuses() {
-    this.icustomerOrderStatus.getCustomerOrderStatuses().subscribe(
-      (data: CustomerOrderStatus[]) => {
+    this.statusService.getStatuses(0).subscribe(
+      (data: Status[]) => {
         this.customerOrderStatuses = data;
       },
       (error: any) => {

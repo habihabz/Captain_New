@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 
 namespace Erp.Server.Services
 {
@@ -10,5 +10,6 @@ namespace Erp.Server.Services
         User getUserByUsername(string username);
         List<User> getUsers();
         DbResult registerUser(User user);
+        DbResult updatePassword(int userId, string newPassword);
     }
 }

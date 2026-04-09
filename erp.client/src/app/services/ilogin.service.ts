@@ -25,6 +25,9 @@ export class ILoginService {
   }
   logout() {
     localStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.clear();
+    localStorage.clear();
   }
 
   getToken() {

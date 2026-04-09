@@ -15,7 +15,7 @@
                         <select appSelect2 id="rp_order_status" class="form-control" name="rp_order_status" required
                             (selectionChanged)="onOrderStatusChange($event);">
                             <option [value]="0">All</option>
-                            <option *ngFor="let c of customerOrderStatuses" [value]="c.cos_id">{{ c.cos_name }}</option>
+                            <option *ngFor="let c of customerOrderStatuses" [value]="c.s_id">{{ c.s_name }}</option>
                         </select>
                     </div>
                 </div>

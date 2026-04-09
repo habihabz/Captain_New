@@ -5,8 +5,11 @@ import { IuserService } from '../../services/iuser.service';
 import { DbResult } from '../../models/dbresult.model';
 import { User } from '../../models/user.model';
 import { Router } from '@angular/router';
+import { ColDef, DomLayoutType } from 'ag-grid-community';
+import { ActionRendererComponent } from '../../directives/action.renderer';
 import { ICustomerService } from '../../services/icustomer.service';
 declare var $: any;
+
 @Component({
   selector: 'app-customer',
   templateUrl: './customer.component.html',
@@ -18,25 +21,92 @@ export class CustomerComponent implements OnInit, OnDestroy {
   currentUser: User = new User();
   dbResult: DbResult = new DbResult();
   private subscription: Subscription = new Subscription();
-  dtOptions: any ={};
-  dtTrigger:Subject<any>=new Subject<any>();
 
-  constructor(private iuserService: IuserService, private icustomerService: ICustomerService,private router: Router) { 
+  pagination = true;
+  domLayout: DomLayoutType = 'autoHeight';
 
+  colDefs: ColDef[] = [
+    {
+      headerName: "ID",
+      field: "c_id",
+      width: 70,
+      cellClass: 'text-center fw-bold text-muted'
+    },
+    {
+      headerName: "Name",
+      field: "c_name",
+      flex: 1.2,
+      cellClass: 'fw-bold text-dark'
+    },
+    {
+      headerName: "Phone Number",
+      field: "c_mobile",
+      width: 140,
+      cellClass: 'text-center'
+    },
+    {
+      headerName: "Email Address",
+      field: "c_email",
+      flex: 1.5
+    },
+    {
+      headerName: "Address",
+      field: "c_address",
+      flex: 1.5
+    },
+    {
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Customer',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.editCustomer(data.c_id)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Customer',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.deleteCustomer(data.c_id)
+          }
+        ]
+      }
+    },
+    {
+      headerName: "Joined On",
+      field: "c_cre_date",
+      width: 130,
+      cellClass: 'text-center',
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    }
+  ];
+
+  frameworkComponents = {
+    actionRenderer: ActionRendererComponent
+  };
+
+  defaultColDef = {
+    sortable: true,
+    filter: true
+  };
+
+  constructor(private iuserService: IuserService, private icustomerService: ICustomerService, private router: Router) {
     this.currentUser = iuserService.getCurrentUser();
-    if(this.currentUser.u_id==0) { 
+    if (this.currentUser.u_id == 0) {
       this.router.navigate(['login']);
     }
-    
   }
 
   ngOnInit(): void {
-    this.dtOptions= {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      processing: true,
-      dom: '<"row"<"col-sm-6 text-left"l><"col-sm-6 text-right"f>>t<"row"<"col-sm-6"i><"col-sm-6"p>>'
-    };
     this.loadCustomers();
     this.subscription.add(
       this.icustomerService.refreshCustomers$.subscribe(() => {
@@ -46,14 +116,13 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
+    this.subscription.unsubscribe();
   }
 
   loadCustomers(): void {
     this.icustomerService.getCustomers().subscribe(
       (data: Customer[]) => {
         this.customers = data;
-        this.dtTrigger.next(null);
       },
       (error: any) => {
         console.error('Error fetching customers', error);
@@ -61,56 +130,47 @@ export class CustomerComponent implements OnInit, OnDestroy {
     );
   }
 
+  onGridReady(params: any) {
+    params.api.sizeColumnsToFit();
+  }
+
   createOrUpdateCustomer(): void {
-   
     this.customer.c_cre_by = this.currentUser.u_id;
     this.icustomerService.createOrUpdateCustomer(this.customer).subscribe(
       (data: DbResult) => {
         this.dbResult = data;
         if (data.message === "Success") {
           this.icustomerService.refreshCustomers();
-          this.removeDatatable();
           $('#customerFormModal').modal('hide');
-      
         } else {
           alert(data.message);
         }
       },
       (error: any) => {
         console.error('Error creating/updating customer', error);
-        alert('An error occurred while creating/updating the customer.');
       }
     );
   }
 
   deleteCustomer(id: number): void {
-    this.icustomerService.deleteCustomer(id).subscribe(
-      (data: DbResult) => {
-        this.dbResult = data;
-        if (this.dbResult.message === "Success") {
-          this.customers = this.customers.filter(customer => customer.c_id !== id);
-          this.icustomerService.refreshCustomers();
-          this.removeDatatable();
-          alert("Successfully Removed");
-        } else {
-          alert(this.dbResult.message);
+    if (confirm("Are you sure you want to delete this customer?")) {
+      this.icustomerService.deleteCustomer(id).subscribe(
+        (data: DbResult) => {
+          if (data.message === "Success") {
+            this.icustomerService.refreshCustomers();
+          } else {
+            alert(data.message);
+          }
         }
-      },
-      (error: any) => {
-        console.error('Error deleting customer', error);
-      }
-    );
+      );
+    }
   }
-  
 
   editCustomer(id: number): void {
     this.icustomerService.getCustomer(id).subscribe(
       (data: Customer) => {
         this.customer = data;
         $('#customerFormModal').modal('show');
-      },
-      (error: any) => {
-        console.error('Error fetching customer', error);
       }
     );
   }
@@ -118,10 +178,5 @@ export class CustomerComponent implements OnInit, OnDestroy {
   createCustomer(): void {
     this.customer = new Customer();
     $('#customerFormModal').modal('show');
-  }
-  removeDatatable(){
-    if ($.fn.dataTable.isDataTable('#DataTables_Table_0')) {
-      $('#DataTables_Table_0').DataTable().clear().destroy();
-    }
   }
 }

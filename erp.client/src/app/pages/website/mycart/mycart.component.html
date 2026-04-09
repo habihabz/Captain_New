@@ -1,177 +1,249 @@
-<div class="container-fluid" style="min-height: 80vh;">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb bg-light px-3 py-2 rounded">
-            <li class="breadcrumb-item">
-                <a routerLink="/home">Home</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                My Cart
-            </li>
-        </ol>
-    </nav>
-    <div class="container">
-        <div class="row" *ngIf="this.carts.length>0">
-            <h2>Delivery Address</h2>
-            <div class="col-md-8">
-                <div class="card mb-2" *ngFor="let ad of addresses; let i = index">
-                    <div class="card-body">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="exampleRadio" [id]="'radio' + i"
-                                [value]="ad.ad_address" [checked]="ad.ad_is_default_yn === 'Y'">
+<div class="cart-page-wrapper">
+    <div class="container-fluid" style="min-height: 80vh;">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-light px-4 py-3 rounded m-0 border-bottom">
+                <li class="breadcrumb-item">
+                    <a routerLink="/home" class="text-decoration-none small text-muted">Home</a>
+                </li>
+                <li class="breadcrumb-item active small" aria-current="page">
+                    My Cart
+                </li>
+            </ol>
+        </nav>
+        <div class="container py-4 py-md-5">
+            <div class="row gx-lg-5" *ngIf="this.carts.length > 0">
+                <!-- LEFT COLUMN: Items -->
+                <div class="col-lg-8 mb-4">
 
-                            <label class="form-check-label d-flex align-items-center justify-content-between"
-                                [for]="'radio' + i">
-                                <span>
-                                    {{ ad.ad_name }} &nbsp; | &nbsp; {{ ad.ad_phone }} &nbsp; | &nbsp; {{ ad.ad_pincode
-                                    }} &nbsp;| &nbsp; {{ ad.ad_address }}
-                                </span>
-                                <button type="button" class="btn btn-danger btn-sm ms-2"
-                                    (click)="deleteAddress(ad.ad_id); $event.stopPropagation();">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </label>
-
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-outline-secondary pull-right" (click)="onShowAddressForm()">
-                    <i class="fa fa-plus"></i> {{ showAddressForm ? 'Cancel' : 'Add Address' }}
-                </button>
-
-            </div>
-            <div class="col-md-8" *ngIf="showAddressForm">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label>Name</label>
-                        <input class="form-control" type="text" [(ngModel)]="this.address.ad_name" />
-                    </div>
-                    <div class="col-md-6">
-                        <label>Phone</label>
-                        <input class="form-control" type="text" [(ngModel)]="this.address.ad_phone" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <label>Address</label>
-                        <textarea class="form-control" [(ngModel)]="this.address.ad_address"></textarea>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <label>Pin Code</label>
-                        <input class="form-control" type="number" [(ngModel)]="this.address.ad_pincode" />
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <button class="btn btn-success pull-right mt-4" (click)="CreateOrUpdateAddress()"><i
-                                class="fa fa-save"></i> &nbsp;Save</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row" *ngIf="this.carts.length>0">
-            <div class="col-md-8">
-                <h2>Items </h2>
-                <div *ngFor="let cart of this.carts">
-                    <div class="card  mt-2">
-                        <div class="card-body">
-                            <div class="row g-0">
-                                <div class="col-md-4">
-                                    <img *ngFor="let p_attachement of getAttachementOfaProduct(cart.p_attachements).slice(0, 1); let i = index"
-                                        [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
-                                        [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                                        style="height: 150px; width: auto;">
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="card-body">
-                                        <h4 class="card-title mb-10">{{cart.p_name}}</h4>
-                                        <h4 class="card-title mb-10">{{cart.c_size_name}}</h4>
-                                        <p class="card-text">{{ cart.p_sub_category_name + ', ' + cart.p_division_name
-                                            }}</p>
-                                        <h4 class="card-text"><span>&#x20B9;</span>{{cart.c_price}}</h4>
-
-                                        <div class="action-row d-flex align-items-center gap-3">
-                                            <div class="quantity-control d-flex align-items-center">
-                                                <button class="btn btn-outline-secondary"
-                                                    (click)="decreaseQuantity(cart.c_id)">–</button>
-                                                <input type="text" class="form-control mx-2 text-center"
-                                                    [value]="cart.c_qty" readonly>
-                                                <button class="btn btn-outline-secondary "
-                                                    (click)="increaseQuantity(cart.c_id)">+</button>
+                    <!-- ITEMS SECTION -->
+                    <h6 class="section-header ms-1 mb-3">Cart Items</h6>
+                    <div *ngFor="let cart of this.carts">
+                        <div class="card border-0 shadow-sm rounded-4 mb-3">
+                            <div class="card-body p-3 p-md-4">
+                                <div class="row align-items-center gx-md-4">
+                                    <div class="col-md-2 col-sm-3 text-center">
+                                        <img [src]="apiUrl + '/' + getCartItemImage(cart)" alt="product_image"
+                                            class="img-fluid" style="max-height: 100px; object-fit: contain;">
+                                    </div>
+                                    <div class="col-md-10 col-sm-9 mt-2 mt-md-0">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="fw-bold mb-1 product-name">{{cart.p_name}}</h6>
+                                                <p class="text-muted small mb-1">{{ cart.p_sub_category_name }}, {{
+                                                    cart.p_division_name }}</p>
+                                                <span class="badge border bg-light text-muted rounded-pill px-2 py-1"
+                                                    style="font-size: 10px;">Size: {{cart.c_size_name}}</span>
+                                                <span class="badge border bg-light text-muted rounded-pill px-2 py-1 ms-1"
+                                                    style="font-size: 10px;">Color: {{cart.c_color_name}}</span>
                                             </div>
-                                            <a (click)="saveForLater(cart.c_id)" class="text-dark fw-normal"
-                                                style="cursor: pointer;"><b>SAVE FOR LATER</b></a>
-                                            <a (click)="removeCart(cart.c_id)" class="text-dark fw-normal ms-3"
-                                                style="cursor: pointer;"><b>REMOVE</b></a>
+                                            <h6 class="fw-bold text-success mb-0 price-text">₹{{cart.c_price}}</h6>
                                         </div>
 
+                                        <div
+                                            class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top border-light">
+                                            <div class="d-flex align-items-center quantity-control">
+                                                <button class="btn-quantity px-2"
+                                                    (click)="decreaseQuantity(cart.c_id)">–</button>
+                                                <span class="fw-bold px-2 small">{{cart.c_qty}}</span>
+                                                <button class="btn-quantity px-2"
+                                                    (click)="increaseQuantity(cart.c_id)">+</button>
+                                            </div>
+                                            <div class="d-flex gap-3">
+                                                <a (click)="saveForLater(cart.c_id)"
+                                                    class="text-muted fw-bold action-link text-decoration-none"
+                                                    style="cursor: pointer; font-size: 11px;"><i
+                                                        class="fa fa-heart-o me-1"></i> SAVE LATER</a>
+                                                <a (click)="removeCart(cart.c_id)"
+                                                    class="text-danger fw-bold action-link text-decoration-none"
+                                                    style="cursor: pointer; font-size: 11px;"><i
+                                                        class="fa fa-trash-o me-1"></i> REMOVE</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- DELIVERY ADDRESS SECTION -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                        <h6 class="section-header mb-0 ms-1">Delivery Address</h6>
+                        <button *ngIf="addresses.length > 0"
+                            class="btn btn-link btn-sm text-decoration-none fw-bold p-0 text-primary small"
+                            (click)="showAllAddresses = !showAllAddresses">
+                            {{ showAllAddresses ? 'Collapse' : 'Change' }}
+                        </button>
+                    </div>
+                    <div class="card border-0 shadow-sm mb-3 rounded-4 overflow-hidden">
+                        <div class="card-body p-3 p-md-4">
+                            <!-- COLLAPSED: Show only ONE selected address -->
+                            <div class="address-item" *ngIf="!showAllAddresses && selectedAddress">
+                                <div class="d-flex align-items-start gap-3">
+                                    <i class="fa fa-dot-circle-o text-primary mt-1" style="font-size: 16px;"></i>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <span class="fw-bold" style="font-size: 14px; color: #212529;">{{
+                                                selectedAddress.ad_name }}</span>
+                                        </div>
+                                        <div class="text-muted mb-1 d-flex align-items-center" style="font-size: 12px;">
+                                            <i class="fa fa-phone me-2 opacity-75"></i> {{ selectedAddress.ad_phone }}
+                                        </div>
+                                        <p class="text-muted mb-0 small" style="line-height: 1.4;">{{
+                                            selectedAddress.ad_address }}, {{ selectedAddress.ad_pincode }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- EXPANDED: Show all addresses for selection -->
+                            <ng-container *ngIf="showAllAddresses">
+                                <div class="address-item mb-3"
+                                    *ngFor="let ad of addresses; let i = index; let last = last"
+                                    [ngClass]="{'border-bottom pb-3': !last}">
+                                    <label class="form-check-label d-flex align-items-start gap-3 w-100 p-2"
+                                        [for]="'radio' + i" style="cursor: pointer;">
+                                        <input class="form-check-input mt-1 flex-shrink-0 custom-radio" type="radio"
+                                            name="exampleRadio" [id]="'radio' + i" [value]="ad.ad_address"
+                                            [checked]="ad === selectedAddress">
+
+                                        <div class="flex-grow-1" style="min-width: 0;">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <span class="fw-bold text-truncate pe-2" style="font-size: 14px;">{{
+                                                    ad.ad_name }}</span>
+                                                <button type="button"
+                                                    class="btn text-danger btn-sm shadow-none p-0 flex-shrink-0 ms-2"
+                                                    (click)="deleteAddress(ad.ad_id); $event.stopPropagation();">
+                                                    <i class="fa fa-trash-o" style="font-size: 14px;"></i>
+                                                </button>
+                                            </div>
+                                            <div class="text-muted mb-1 small">
+                                                <i class="fa fa-phone me-1 opacity-75"></i> {{ ad.ad_phone }}
+                                            </div>
+                                            <p class="text-muted mb-0 small" style="line-height: 1.4;">{{ ad.ad_address
+                                                }}, {{ ad.ad_pincode }}</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </ng-container>
+
+                            <div class="text-center mt-2 pt-2 border-top"
+                                *ngIf="showAllAddresses || addresses.length === 0">
+                                <button class="btn btn-outline-dark rounded-pill w-100 fw-bold py-1 btn-sm"
+                                    (click)="onShowAddressForm()">
+                                    <i class="fa" [ngClass]="showAddressForm ? 'fa-times' : 'fa-plus'"></i> {{
+                                    showAddressForm ? 'Cancel Format' : 'Add New Address' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADDRESS FORM -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" *ngIf="showAddressForm">
+                        <div class="card-body p-4 p-md-5 bg-light bg-opacity-25">
+                            <h6 class="fw-bold mb-4 d-flex align-items-center"><i
+                                    class="fa fa-map-marker me-2 text-primary"></i> Add New Address</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="small fw-bold text-muted mb-1 ms-1">Full Name</label>
+                                    <input class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white"
+                                        placeholder="Enter name" type="text" [(ngModel)]="this.address.ad_name" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold text-muted mb-1 ms-1">Phone Number</label>
+                                    <input class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white"
+                                        placeholder="Enter phone" type="text" [(ngModel)]="this.address.ad_phone" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="small fw-bold text-muted mb-1 ms-1">Full Address (House, Area,
+                                        Post)</label>
+                                    <textarea class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white"
+                                        placeholder="Street name / landmark / post" rows="3"
+                                        [(ngModel)]="this.address.ad_address"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold text-muted mb-1 ms-1">PIN Code</label>
+                                    <input class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white"
+                                        placeholder="e.g. 676123" type="number" [(ngModel)]="this.address.ad_pincode" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <button class="btn btn-dark w-100 rounded-pill shadow-sm py-2 fw-bold"
+                                        (click)="CreateOrUpdateAddress()"><i class="fa fa-save me-2"></i> Save
+                                        Address</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-            </div>
-            <div class="col-md-4" *ngIf="this.carts.length>0">
-                <div class="cust-card mt-2">
-                    <div class="title">PRICE DETAILS</div>
+                <!-- RIGHT COLUMN: Price Details -->
+                <div class="col-lg-4">
+                    <h6 class="section-header mb-0 ms-1">Price Details</h6>
+                    <div class="sticky-top mb-4" style="top: 100px;">
+                        <!-- PRICE DETAILS -->
+                        <div class="card border-0 shadow-sm rounded-4">
 
-                    <div class="row justify-content-between">
-                        <div class="col">Price ({{this.totalQty}} items)</div>
-                        <div class="col-auto">₹{{this.totalPrice}}</div>
-                    </div>
+                            <div class="card-body p-4 pt-3">
+                                <div class="d-flex justify-content-between mb-3 small">
+                                    <span class="text-muted">Price ({{this.totalQty}} items)</span>
+                                    <span class="fw-bold">₹{{this.totalPrice}}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3 small">
+                                    <span class="text-muted">Discount
+                                        ({{this.discountPercentConstant.cv_value}}%)</span>
+                                    <span class="text-success fw-bold">-₹{{this.discount | number:'1.2-2' }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3 small">
+                                    <span class="text-muted">Delivery Charges</span>
+                                    <span class="fw-bold text-success"
+                                        *ngIf="this.deliveryChargeConstant.cv_value == '0'">FREE</span>
+                                    <span class="fw-bold"
+                                        *ngIf="this.deliveryChargeConstant.cv_value != '0'">₹{{this.deliveryChargeConstant.cv_value
+                                        | number:'1.2-2'}}</span>
+                                </div>
+                                <div
+                                    class="d-flex justify-content-between mb-3 border-bottom border-light pb-3 small text-muted">
+                                    <span>GST ({{this.taxPercentConstant.cv_value}}%)</span>
+                                    <span>₹{{taxAmount| number:'1.2-2'}}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2">
+                                    <span class="fw-bold">Total Amount</span>
+                                    <span class="fw-bold h5 mb-0 text-dark">₹{{this.netAmount}}</span>
+                                </div>
 
+                                <div class="small fw-bold mt-4 text-center py-2 rounded-pill"
+                                    style="background-color: rgba(25, 135, 84, 0.08); color: #198754; font-size: 11px;">
+                                    <i class="fa fa-shield me-2"></i> You will save ₹{{discount}} on this order
+                                </div>
 
-                    <div class="row justify-content-between">
-                        <div class="col">Discount %</div>
-                        <div class="col-auto text-success">{{this.discountPercentConstant.cv_value}}%</div>
-                    </div>
-                    <div class="row justify-content-between">
-                        <div class="col">Discount</div>
-                        <div class="col-auto text-success">₹{{this.discount | number:'1.2-2' }}</div>
-                    </div>
-                    <div class="row justify-content-between">
-                        <div class="col">Delivery Charges</div>
-                        <div class="col-auto">₹{{this.deliveryChargeConstant.cv_value | number:'1.2-2'}}
-                        </div>
-                    </div>
-                    <div class="row justify-content-between">
-                        <div class="col">GST %</div>
-                        <div class="col-auto">{{this.taxPercentConstant.cv_value}}%</div>
-                    </div>
-                    <div class="row justify-content-between">
-                        <div class="col">GST Amount</div>
-                        <div class="col-auto">₹{{taxAmount| number:'1.2-2'}}</div>
-                    </div>
-                    <div class="row justify-content-between total">
-                        <div class="col">Total Amount</div>
-                        <div class="col-auto">₹{{this.netAmount | number:'1.2-2'}}</div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col text-green">You will save ₹{{this.discount | number:'1.2-2'}} on this order
-                        </div>
-                    </div>
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <button class="btn btn-warning pull-right" (click)="pay()">PLACE ORDER</button>
-
+                                <button class="btn btn-dark w-100 place-order-btn mt-4 shadow-sm py-2" (click)="pay()">
+                                    PLACE ORDER <i class="fa fa-arrow-right ms-2 animate-arrow"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row" *ngIf="this.carts.length===0">
-            <div class="col-md-12 mt-4">
-                <div class="empty-cart-container">
-                    <div class="empty-cart-icon">🛒</div>
-                    <div class="empty-cart-text">Your Cart is Empty</div>
-                    <div class="empty-cart-subtext">Looks like you haven’t added anything yet.</div>
-                    <a (click)="navigateTo('shop')" class="btn btn-danger text-white">Start Shopping</a>
+                <!-- EMPTY CART STATE -->
+                <div class="row" *ngIf="this.carts.length === 0">
+                    <div class="col-md-8 mx-auto mt-5">
+                        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+                            <div class="card-body p-5">
+                                <i class="fa fa-shopping-bag text-muted mb-4 d-block"
+                                    style="font-size: 4rem; opacity: 0.3;"></i>
+                                <h4 class="fw-bold text-dark mb-2">Your Cart is Empty</h4>
+                                <p class="text-muted mb-4 px-md-5" style="font-size: 14px;">It looks like you haven't
+                                    added
+                                    anything to your cart yet. Discover our premium collections and find your next
+                                    favorite
+                                    item!</p>
+                                <button (click)="navigateTo('shop')"
+                                    class="btn btn-dark rounded-pill px-4 py-2 shadow-sm fw-semibold text-uppercase"
+                                    style="letter-spacing: 1px; font-size: 13px;">
+                                    Start Shopping <i class="fa fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>

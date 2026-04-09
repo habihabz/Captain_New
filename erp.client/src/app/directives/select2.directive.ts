@@ -6,16 +6,18 @@ declare var $: any;
 })
 export class Select2Directive implements AfterViewInit, OnDestroy {
   @Input() options: any = {};
+  @Input() placeholder: string = 'Select an option';
+  @Input() allowClear: boolean = false;
   @Output() selectionChanged = new EventEmitter<any>();
 
   constructor(private el: ElementRef) {}
 
   ngAfterViewInit(): void {
-    // Merge default and provided options
     const select2Options = {
       ...this.options,
-      placeholder: 'Select an option',
-      allowClear: true
+      placeholder: this.placeholder,
+      allowClear: this.allowClear,
+      width: '100%'
     };
 
     // Initialize Select2 with the provided options

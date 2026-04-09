@@ -1,4 +1,4 @@
-﻿using Erp.Server.Services;
+using Erp.Server.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Erp.Server.Models
@@ -31,13 +31,14 @@ namespace Erp.Server.Models
         public DbSet<Cart> Cart { get; set; }
         public DbSet<CustomerOrder> CustomerOrders { get; set; }
         public DbSet<CustomerOrderDetail> CustomerOrderDetails { get; set; }
-        public DbSet<CustomerOrderStatus> CustomerOrderStatus { get; set; }
+        public DbSet<Status> Statuses { get; set; }
         public DbSet<Address> Address { get; set; }
         public DbSet<Slider> Sliders { get; set; }
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<OrderMovementHistory> OrderMovementHistories { get; set; }
         public DbSet<Favourite> Favourites { get; set; }
         public DbSet<ConstantValue> ConstantValues { get; set; }
+        public DbSet<ReturnOrder> ReturnOrders { get; set; }
 
 
     }

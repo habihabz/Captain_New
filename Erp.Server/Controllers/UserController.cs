@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,5 +65,20 @@ namespace Erp.Server.Controllers
             dbResult = iusers.registerUser(user);
             return dbResult;
         }
+
+        [HttpPost("updatePassword")]
+        [Authorize]
+        public DbResult updatePassword([FromBody] PasswordUpdateRequest request)
+        {
+            DbResult dbResult = new DbResult();
+            dbResult = iusers.updatePassword(request.userId, request.newPassword);
+            return dbResult;
+        }
+    }
+
+    public class PasswordUpdateRequest
+    {
+        public int userId { get; set; }
+        public string newPassword { get; set; }
     }
 }

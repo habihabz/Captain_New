@@ -34,7 +34,7 @@
 @media (max-width: 576px) {
   .thumb-img {
     max-width: 50px;
-     margin: 2px;
+    margin: 2px;
   }
 
   .thumbnail-wrapper {
@@ -42,4 +42,8 @@
     gap: 6px;
     overflow-x: auto;
   }
+}
+
+.zoom-img.zoomed {
+  transform: scale(2); /* Set zoom scale */
 }

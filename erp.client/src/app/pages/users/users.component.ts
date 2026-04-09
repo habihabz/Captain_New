@@ -7,6 +7,8 @@ import { Role } from '../../models/role.model';
 import { Subject, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { Select2Directive } from '../../directives/select2.directive';
+import { ColDef, DomLayoutType } from 'ag-grid-community';
+import { ActionRendererComponent } from '../../directives/action.renderer';
 declare var $: any;
 
 @Component({
@@ -20,12 +22,100 @@ export class UsersComponent implements OnInit {
   roles: Role[] = [];
   dbResult: DbResult = new DbResult();
   currentUser: User = new User();
-  role : any=0;
-  dtOptions: any ={};
+  role: any = 0;
   private subscription: Subscription = new Subscription();
-  dtTrigger:Subject<any>=new Subject<any>();
   
-  
+  pagination = true;
+  domLayout: DomLayoutType = 'autoHeight';
+
+  colDefs: ColDef[] = [
+    { 
+      headerName: "ID", 
+      field: "u_id", 
+      width: 70, 
+      cellClass: 'text-center fw-bold text-muted'
+    },
+    { 
+      headerName: "Full Name", 
+      field: "u_name", 
+      flex: 1.2,
+      cellClass: 'fw-bold text-dark'
+    },
+    { 
+      headerName: "Username", 
+      field: "u_username", 
+      flex: 1,
+      cellClass: 'text-primary'
+    },
+    { 
+      headerName: "Role", 
+      field: "u_role_name", 
+      width: 150,
+      cellRenderer: (p: any) => `<span class="grid-badge bg-info text-white shadow-xs">${p.value || ''}</span>`
+    },
+    { 
+      headerName: "Active", 
+      field: "u_active_yn", 
+      width: 90,
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const isActive = p.value === 'Y';
+        return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Yes' : 'No'}</span>`;
+      }
+    },
+    {
+      headerName: 'Actions',
+      width: 180,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit User',
+            cssClass: 'action-btn btn-edit',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.editUser(data.u_id)
+          },
+          {
+            name: '',
+            tooltip: 'Change Password',
+            cssClass: 'action-btn btn-password',
+            icon: 'fa fa-key',
+            action: 'onPassword',
+            onPassword: (data: any) => this.openPasswordModal(data.u_id)
+          },
+          {
+            name: '',
+            tooltip: 'Delete User',
+            cssClass: 'action-btn btn-delete',
+            icon: 'fa fa-trash-o',
+            action: 'onDelete',
+            onDelete: (data: any) => this.deleteUser(data.u_id)
+          }
+        ]
+      }
+    },
+    { 
+        headerName: "Created On", 
+        field: "u_cre_date", 
+        width: 130, 
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    }
+  ];
+
+  frameworkComponents = {
+    actionRenderer: ActionRendererComponent
+  };
+
+  defaultColDef = {
+    sortable: true,
+    filter: true
+  };
+
   constructor(private iuserService: IuserService, private iroleService: IroleService, private elRef: ElementRef, private cdr: ChangeDetectorRef, private router: Router) {
     this.currentUser = iuserService.getCurrentUser();
     if(this.currentUser.u_id == 0) { 
@@ -34,12 +124,6 @@ export class UsersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.dtOptions= {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      processing: true,
-      dom: '<"row"<"col-sm-6 text-left"l><"col-sm-6 text-right"f>>t<"row"<"col-sm-6"i><"col-sm-6"p>>'
-    };
     this.loadUsers();
     this.subscription.add(
       this.iuserService.refreshUsers$.subscribe(() => {
@@ -53,7 +137,6 @@ export class UsersComponent implements OnInit {
     this.iuserService.getUsers().subscribe(
       (data: User[]) => {
         this.users = data;
-        this.dtTrigger.next(null);
       },
       (error: any) => {
         console.error('Error fetching users', error);
@@ -73,33 +156,22 @@ export class UsersComponent implements OnInit {
     );
   }
 
-  deleteUser(id: number) {
-    this.iuserService.deleteUser(id).subscribe(
-      (data: DbResult) => {
-        this.dbResult = data;
-        if (this.dbResult.message === 'Success') {
-          this.users = this.users.filter(user => user.u_id !== id);
-          this.iuserService.refreshUsers();
-          this.removeDatatable();
-        } else {
-          alert(this.dbResult.message);
-        }
-      },
-      (error: any) => {
-        console.error('Error deleting user', error);
-      }
-    );
+  onGridReady(params: any) {
+    params.api.sizeColumnsToFit();
   }
 
-  getUser(id: number): void {
-    this.iuserService.getUser(id).subscribe(
-      (data: User) => {
-        this.user = data;
-      },
-      (error: any) => {
-        console.error('Error fetching user', error);
-      }
-    );
+  deleteUser(id: number) {
+    if(confirm("Are you sure you want to delete this user?")) {
+      this.iuserService.deleteUser(id).subscribe(
+        (data: DbResult) => {
+          if (data.message === 'Success') {
+            this.iuserService.refreshUsers();
+          } else {
+            alert(data.message);
+          }
+        }
+      );
+    }
   }
 
   createOrUpdateUser(): void {
@@ -107,17 +179,12 @@ export class UsersComponent implements OnInit {
     this.user.u_role_id = this.role;
     this.iuserService.createOrUpdateUser(this.user).subscribe(
       (data: DbResult) => {
-        this.dbResult = data;
         if(data.message == "Success") {
           this.iuserService.refreshUsers();
-          this.removeDatatable();
           this.closeModal();
         } else {
           alert(data.message);
         }
-      },
-      (error: any) => {
-        console.error('Error creating/updating user', error);
       }
     );
   }
@@ -126,16 +193,15 @@ export class UsersComponent implements OnInit {
     this.iuserService.getUser(id).subscribe(
       (data: User) => {
         this.user = data;
+        this.role = data.u_role_id;
         $('#userFormModal').modal('show');
-      },
-      (error: any) => {
-        console.error('Error fetching user', error);
       }
     );
   }
 
   createUser(): void {
     this.user = new User();
+    this.role = 0;
     $('#userFormModal').modal('show');
   }
 
@@ -143,13 +209,36 @@ export class UsersComponent implements OnInit {
     this.user = new User();
     $('#userFormModal').modal("hide");
   }
-  OnRoleChange(r_id:any ){
 
-    this.role=r_id;
+  OnRoleChange(r_id:any ){
+    this.role = r_id;
   }
-  removeDatatable(){
-    if ($.fn.dataTable.isDataTable('#DataTables_Table_0')) {
-      $('#DataTables_Table_0').DataTable().clear().destroy();
+
+  // Password Management
+  newPassword = "";
+  selectedUserId = 0;
+
+  openPasswordModal(id: number) {
+    this.selectedUserId = id;
+    this.newPassword = "";
+    $('#passwordModal').modal('show');
+  }
+
+  updatePassword() {
+    if(!this.newPassword) {
+      alert("Please enter a new password");
+      return;
     }
+    
+    this.iuserService.updatePassword(this.selectedUserId, this.newPassword).subscribe(
+      (data: DbResult) => {
+        if(data.message == "Success") {
+          alert("Password updated successfully");
+          $('#passwordModal').modal('hide');
+        } else {
+          alert(data.message);
+        }
+      }
+    );
   }
 }

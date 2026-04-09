@@ -70,6 +70,9 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { OrderDetailsComponent } from './pages/website/order.details/order.details.component';
 import { ConstantValuesComponent } from './pages/constant.values/constant.values.component';
 import { OrderReportComponent } from './pages/admin/order.report/order.report.component';
+import { ReturnedOrdersComponent } from './pages/returned.orders/returned-orders.component';
+import { StatusComponent } from './pages/status/status.component';
+import { ActionRendererComponent } from './directives/action.renderer';
 
 
 // Define a function to get the token
@@ -134,7 +137,10 @@ const jwtConfig: JwtModuleOptions = {
     AboutUsComponent,
     OrderDetailsComponent,
     ConstantValuesComponent,
-    OrderReportComponent
+    OrderReportComponent,
+    ReturnedOrdersComponent,
+    StatusComponent,
+    ActionRendererComponent
   ],
   imports: [
     BrowserModule,

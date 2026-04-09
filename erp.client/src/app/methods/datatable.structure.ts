@@ -13,34 +13,40 @@ export class DataTableStructure {
 
     const decimalFormatKeys = [
       'price', 'amount', 'value', 'rate', 'cost',
-      'commission', 'fee', 'profit', 'due', 'vat'
+      'commission', 'fee', 'profit', 'due', 'vat', 'net'
     ];
+    const centerKeys = ['id', 'no', 'qty', 'check', 'active', 'status', 'yn', 'on', 'date'];
 
     return Object.keys(data[0]).map(key => {
       const fieldName = key.toLowerCase();
       const shouldFormatDecimal = decimalFormatKeys.some(k => fieldName.includes(k));
+      const shouldCenter = centerKeys.some(k => fieldName.includes(k));
+      const isTotal = key.toLowerCase() === 'total' || key.toLowerCase().includes('amount');
 
       return {
         headerName: this.toTitleCase(key.replace(/_/g, ' ')),
         field: key,
-        aggFunc: this.isNumericColumn(data, key) ? 'sum' : undefined,
+        pinned: fieldName === 'id' ? 'left' : undefined,
+        headerClass: shouldCenter ? 'text-center' : (isTotal ? 'text-end' : 'text-start'),
+        cellClass: (params: any) => {
+          let classes = '';
+          if (shouldCenter) classes += 'text-center ';
+          if (isTotal) classes += 'text-end fw-bold ';
+          if (fieldName === 'id') classes += 'fw-bold text-muted ';
+          return classes.trim();
+        },
         valueFormatter: (params: any) => {
           const v = params.value;
-
-          // ✅ show empty string
-          if (
-            v === null ||
-            v === undefined ||
-            v === '' ||
-            typeof v === 'object' ||
-            Number.isNaN(v)
-          ) {
+          if (v === null || v === undefined || v === '' || typeof v === 'object' || Number.isNaN(v)) {
             return '';
           }
 
-          // decimal formatting
           if (shouldFormatDecimal && !isNaN(v)) {
-            return Number(Number(v).toFixed(2)  ).toLocaleString(); // format with commas
+            return "₹ " + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+          }
+
+          if (fieldName.includes('date') && !isNaN(Date.parse(v))) {
+             return new Date(v).toLocaleDateString('en-GB');
           }
 
           return v;

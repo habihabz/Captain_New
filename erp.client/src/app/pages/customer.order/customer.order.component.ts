@@ -1,7 +1,7 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { ColDef, DomLayoutType, GridReadyEvent } from 'ag-grid-community';
 import { User } from '../../models/user.model';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { DbResult } from '../../models/dbresult.model';
 import { CustomerOrder } from '../../models/customer.order.model';
 import { Router } from '@angular/router';
@@ -17,8 +17,8 @@ import { ActionRendererComponent } from '../../directives/action.renderer';
 import { GridService } from '../../services/igrid.service';
 import { AgGridAngular } from 'ag-grid-angular';
 import { CustomerOrderDetail } from '../../models/customer.order.detail.model';
-import { ICustomerOrderStatusService } from '../../services/icustomer.order.status.service';
-import { CustomerOrderStatus } from '../../models/customer.order.status.model';
+import { StatusService } from '../../services/status.service';
+import { Status } from '../../models/status.model';
 import { environment } from '../../../environments/environment';
 import { IOrderMovementHistoryService } from '../../services/iorder.movement.history.service';
 import { OrderMovementHistory } from '../../models/order.movement.history.model';
@@ -41,11 +41,15 @@ export class CustomerOrderComponent {
   subscription: Subscription = new Subscription();
   customerOrder: CustomerOrder = new CustomerOrder();
   customerOrders: CustomerOrder[] = [];
-  customerOrderStatuses: CustomerOrderStatus[] = [];
+  customerOrderStatuses: Status[] = [];
   dbResult: DbResult = new DbResult();
   requestParms: RequestParms = new RequestParms();
-  customerOrderStatus: CustomerOrderStatus = new CustomerOrderStatus();
+  customerOrderStatus: Status = new Status();
   orderMovementHistories: OrderMovementHistory[] = [];
+  bulkStatusId: number = 0;
+  selectedRowsCount: number = 0;
+  bulkUpdateStatuses: Status[] = [];
+  isBulkListReady: boolean = true;
   @ViewChild('customerOrderGrid') customerOrderGrid!: AgGridAngular;
 
 
@@ -59,7 +63,7 @@ export class CustomerOrderComponent {
     private icartService: ICartService,
     private iuser: IuserService,
     private icustomerOrder: ICustomerOrder,
-    private icustomerOrderStatus: ICustomerOrderStatusService,
+    private statusService: StatusService,
     private geolocationService: GeolocationService,
     private iOrderMovementHistoryService: IOrderMovementHistoryService
 
@@ -68,83 +72,94 @@ export class CustomerOrderComponent {
   }
 
   colDefs: ColDef[] = [
-    { headerName: "Id", field: "co_id", width: 90 },
     {
-      headerName: 'Details ',
+      headerName: "",
+      field: "check",
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
+      width: 50,
+      pinned: 'left',
+      headerClass: 'text-center',
+      cellClass: 'text-center'
+    },
+    { 
+      headerName: "Order ID", 
+      field: "co_id", 
+      width: 100,
+      cellClass: 'text-center fw-bold text-muted',
+      headerClass: 'text-center'
+    },
+    {
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      headerClass: 'text-center',
+      cellClass: 'text-center',
       cellRenderer: 'actionRenderer',
       cellRendererParams: {
-        name: 'Details',
-        cssClass: 'btn btn-outline-default',
-        icon: 'fa fa-eye',
-        action: 'onDetails',
-        onDetails: (data: any) => this.onAction('details', data)
+        actions: [
+          {
+            name: '',
+            tooltip: 'View Order Details',
+            cssClass: 'btn btn-outline-primary btn-xs rounded-pill',
+            icon: 'fa fa-eye',
+            action: 'onDetails',
+            onDetails: (data: any) => this.onAction('details', data)
+          }
+        ]
       }
     },
-    {
-      headerName: 'Change Status',
-      cellRenderer: 'actionRenderer',
-      cellRendererParams: {
-        name: 'Change Status',
-        cssClass: 'btn btn-outline-warning',
-        icon: 'fa fa-exchange',
-        action: 'onStatusChange',
-        onStatusChange: (data: any) => this.onAction('statusChange', data)
-      }
+    { 
+      headerName: "Customer", 
+      field: "co_customer_name",
+      flex: 1.5,
+      headerClass: 'text-start'
     },
-    { headerName: "Customer", field: "co_customer_name" },
-    { headerName: "Phone", field: "co_customer_phone" },
-    
-    { headerName: "Product", field: "p_name" },
-
-    { headerName: "Qty", field: "co_qty", width: 90 },
-
-    {
-      headerName: "Unit Price",
-      field: "co_unit_price",
-      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+    { 
+      headerName: "Phone", 
+      field: "co_customer_phone",
+      width: 130,
+      headerClass: 'text-start'
     },
+    { 
+      headerName: "Product", 
+      field: "p_name",
+      flex: 1.2,
+      headerClass: 'text-start'
+    },
+    { headerName: "Size", field: "co_size_name", width: 80, headerClass: 'text-center', cellClass: 'text-center' },
+    { headerName: "Color", field: "co_color_name", width: 90, headerClass: 'text-center', cellClass: 'text-center' },
+    { headerName: "Qty", field: "co_qty", width: 70, headerClass: 'text-center', cellClass: 'text-center fw-bold' },
     {
       headerName: "Total Amount",
-      field: "co_amount",
-      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
-    },
-    {
-      headerName: "Discount",
-      field: "co_discount_amount",
-      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
-    },
-
-    {
-      headerName: "GST",
-      field: "co_gst_amount",
-      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
-    },
-
-    {
-      headerName: "Delivery",
-      field: "co_delivery_charge",
-      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
-    },
-
-    {
-      headerName: "Total",
       field: "co_net_amount",
-      valueFormatter: p => "₹ " + Number(p.value || 0).toFixed(2)
+      width: 130,
+      headerClass: 'text-end',
+      cellClass: 'text-end fw-bold text-success',
+      valueFormatter: p => "₹ " + Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })
     },
-
-    { headerName: "Status", field: "co_status_name" },
-    { headerName: "Email", field: "co_customer_email" },
-
-    { headerName: "Address", field: "co_c_address_details" }
-
-
+    { 
+      headerName: "Status", 
+      field: "co_status_name",
+      width: 140,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        if (!p.value) return '';
+        const isCanceled = p.value.toLowerCase().includes('cancel');
+        const isDelivered = p.value.toLowerCase().includes('deliver');
+        const color = isCanceled ? '#dc3545' : (isDelivered ? '#198754' : '#6c757d');
+        return `<span style="background-color: ${color}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">${p.value}</span>`;
+      }
+    },
+    { headerName: "Email", field: "co_customer_email", width: 180, headerClass: 'text-start' },
+    { headerName: "Address", field: "co_c_address_details", width: 250, headerClass: 'text-start' }
   ];
 
 
 
   ngOnInit(): void {
-
-    this.getCustomerOrderStatuses();
+    this.getStatuses();
     this.getCustomerOrders();
     this.subscription.add(
       this.icustomerOrder.refresh$.subscribe(() => {
@@ -154,15 +169,24 @@ export class CustomerOrderComponent {
 
   }
 
-  getCustomerOrderStatuses() {
-    this.icustomerOrderStatus.getCustomerOrderStatuses().subscribe(
-      (data: CustomerOrderStatus[]) => {
-        this.customerOrderStatuses = data;
+  getStatuses() {
+    this.statusService.getStatuses(1).subscribe(
+      (data: Status[]) => {
+        this.customerOrderStatuses = data.filter(x => x.s_workflow_id === 1);
+        this.updateBulkStatusList();
       },
       (error: any) => {
 
       }
     );
+  }
+
+  updateBulkStatusList() {
+    this.isBulkListReady = false;
+    this.bulkUpdateStatuses = this.customerOrderStatuses.filter(x => Number(x.s_id) !== Number(this.requestParms.id));
+    setTimeout(() => {
+      this.isBulkListReady = true;
+    }, 50);
   }
 
   frameworkComponents = {
@@ -211,6 +235,10 @@ export class CustomerOrderComponent {
     }, 0);
   }
 
+  onSelectionChanged() {
+    this.selectedRowsCount = this.customerOrderGrid.api.getSelectedRows().length;
+  }
+
   getCustomerOrders() {
     this.requestParms.user = this.currentUser.u_id;
     this.icustomerOrder.getCustomerOrders(this.requestParms).subscribe(
@@ -226,8 +254,9 @@ export class CustomerOrderComponent {
     );
 
   }
-  onCustomerOrderStatusChange(cos_id: number) {
-    this.requestParms.id = cos_id;
+  onCustomerOrderStatusChange(s_id: number) {
+    this.requestParms.id = s_id;
+    this.updateBulkStatusList();
     this.getCustomerOrders();
   }
   onNewStatusChange(s_id: number) {
@@ -252,6 +281,43 @@ export class CustomerOrderComponent {
 
       }
     );
+  }
+
+  onBulkUpdate() {
+    const selectedRows = this.customerOrderGrid.api.getSelectedRows();
+    if (selectedRows.length === 0) {
+      this.snackBarService.showError("Please select at least one order.");
+      return;
+    }
+
+    if (this.bulkStatusId === 0) {
+      this.snackBarService.showError("Please select a new status for bulk update.");
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to update ${selectedRows.length} orders to ${this.customerOrderStatuses.find(x => x.s_id == this.bulkStatusId)?.s_name}?`)) {
+      return;
+    }
+
+    const updates = selectedRows.map(order => {
+      const params = new RequestParms();
+      params.id = order.co_id;
+      params.status = this.bulkStatusId;
+      params.user = this.currentUser.u_id;
+      return this.icustomerOrder.updateStatusForCustomerOrder(params);
+    });
+
+    forkJoin(updates).subscribe({
+      next: (results) => {
+        const successes = results.filter(r => r.message === "Success").length;
+        this.snackBarService.showSuccess(`Batch process completed: ${successes} orders updated successfully.`);
+        this.getCustomerOrders();
+        this.bulkStatusId = 0;
+      },
+      error: (err) => {
+        this.snackBarService.showError("Batch update failed. Please try again.");
+      }
+    });
   }
   getAttachementOfaProduct(p_attachements: string) {
     var att: any;

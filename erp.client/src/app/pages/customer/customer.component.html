@@ -1,49 +1,51 @@
-<div class="right_col" customer="main" style="min-height: 99vh;">
-  <div class="x_panel">
-    <div class="x_title">
-      <button class="btn btn-warning" (click)="createCustomer()"><i class="fa fa-plus"></i> Create</button>
+<div class="right_col d-flex flex-column" role="main" style="padding-top: 10px; height: 100vh; overflow: hidden;">
+  <!-- Breadcrumbs -->
+  <div class="row mb-4 flex-shrink-0">
+    <div class="col-12 px-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 m-0">
+          <li class="breadcrumb-item text-muted small">Admin Console</li>
+          <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">Customer Management</li>
+        </ol>
+      </nav>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <h3 class="fw-bold text-dark m-0">Customer Base</h3>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="text-muted small fw-bold">Market Reach:</span>
+            <span class="badge bg-soft-primary text-primary px-4 py-2 rounded-pill fw-bold" style="background: rgba(94, 114, 228, 0.15); font-size: 13px;">{{ customers.length }} Clients</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="x_panel border-0 shadow-sm rounded-4 mx-2 mb-3 flex-grow-1 d-flex flex-column overflow-hidden">
+    <div class="x_title border-0 pb-0 px-3 pt-4 flex-shrink-0">
+      <div class="row align-items-center">
+        <div class="col">
+          <button class="btn-create shadow-sm hover-lift px-4" (click)="createCustomer()">
+            <i class="fa fa-user-plus me-1"></i> CREATE NEW CUSTOMER
+          </button>
+        </div>
+      </div>
       <div class="clearfix"></div>
     </div>
-    <div class="x_content" style="display: block;">
-      <div *ngIf="customers.length === 0">
-        &nbsp;No Customers found.
-        <br />
+    <div class="x_content">
+      <div class="row">
+        <div class="col-12">
+          <ag-grid-angular
+            #customerGrid
+            style="width: 100%; height: 75vh;"
+            class="ag-theme-quartz ag-theme-acmecorp"
+            [rowData]="customers"
+            [columnDefs]="colDefs"
+            [pagination]="pagination"
+            [defaultColDef]="defaultColDef"
+            [components]="frameworkComponents"
+            [domLayout]="domLayout"
+            (gridReady)="onGridReady($event)">
+          </ag-grid-angular>
+        </div>
       </div>
-
-
-      <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-        class="table table-striped jambo_table bulk_action">
-        <thead>
-          <tr class="headings">
-            <th class="column-title">Id </th>
-            <th class="column-title">Name </th>
-            <th class="column-title">Is Active</th>
-            <th class="column-title">Created By </th>
-            <th class="column-title">Created On </th>
-            <th class="column-title no-link last"><span class="nobr">Action</span></th>
-            <th class="column-title no-link last"><span class="nobr">Action</span></th>
-          </tr>
-        </thead>
-        <tbody *ngIf="customers.length > 0">
-          <tr *ngFor="let customer of customers" id="row_{{ customer.c_id }}">
-            <td>{{ customer.c_id }}</td>
-            <td>{{ customer.c_name }}</td>
-            <td>{{ customer.c_active_yn }}</td>
-            <td>{{ customer.c_cre_by_name }}</td>
-            <td>{{ customer.c_cre_date }}</td>
-            <td>
-              <button class="btn btn-info" (click)="editCustomer(customer.c_id)">
-                <i class="fa fa-edit"></i> edit
-              </button>
-            </td>
-            <td>
-              <button class="btn btn-danger" (click)="deleteCustomer(customer.c_id)">
-                <i class="fa fa-trash"></i> delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>
