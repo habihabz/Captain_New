@@ -1,0 +1,47 @@
+.text-teal { color: #1abb9c !important; }
+.bg-teal { background-color: #1abb9c !important; }
+.bg-teal-soft { background-color: rgba(26, 187, 156, 0.1) !important; }
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 187, 156, 0.2) !important;
+}
+
+.ag-theme-alpine {
+    --ag-header-background-color: #f8fbfb;
+    --ag-header-foreground-color: #1abb9c;
+    --ag-border-color: #f0f3f3;
+    --ag-row-hover-color: #f4fcfb;
+    --ag-selected-row-background-color: rgba(26, 187, 156, 0.05);
+}
+
+.ag-theme-alpine .ag-header-cell-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.ag-theme-alpine .ag-cell {
+    display: flex;
+    align-items: center;
+    border-right: none !important;
+}
+
+.rounded-4 {
+    border-radius: 1rem !important;
+}
+
+.input-group-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: none;
+    border-color: #0d6efd;
+    background-color: #fff;
+}

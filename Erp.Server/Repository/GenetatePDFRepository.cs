@@ -114,10 +114,17 @@ namespace Erp.Server.Repository
 
                             row.RelativeItem().Column(t =>
                             {
-                                t.Item().PaddingVertical(4).Row(r => {
-                                    r.RelativeItem().Text($"Discount ({o.co_discount_perc}%)").FontSize(9).FontColor(Colors.Grey.Darken1);
-                                    r.ConstantItem(100).AlignRight().Text($"- ₹ {o.co_discount_amount:N2}").FontSize(9).FontColor(Colors.Grey.Darken3);
-                                });
+                                if ((o.co_discount_amount ?? 0) > 0)
+                                {
+                                    t.Item().PaddingVertical(4).Row(r => {
+                                        var label = !string.IsNullOrEmpty(o.co_promo_code) 
+                                            ? $"Promo Discount ({o.co_promo_code})" 
+                                            : $"Discount ({o.co_discount_perc}%)";
+                                        
+                                        r.RelativeItem().Text(label).FontSize(9).FontColor(Colors.Blue.Medium);
+                                        r.ConstantItem(100).AlignRight().Text($"- ₹ {o.co_discount_amount:N2}").FontSize(9).FontColor(Colors.Blue.Medium);
+                                    });
+                                }
 
                                 t.Item().PaddingVertical(4).Row(r => {
                                     r.RelativeItem().Text($"GST ({o.co_gst_perc}%)").FontSize(9).FontColor(Colors.Grey.Darken1);

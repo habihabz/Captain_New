@@ -1,79 +1,95 @@
-<div class="order-details-wrapper">
-    <div class="container-fluid py-3">
+<div class="order-details-wrapper" style="padding-top: 100px !important; background-color: #f8f9fa; min-height: 100vh;">
+    <div class="container py-0">
+        <!-- BREADCRUMBS -->
         <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb bg-light px-4 py-2 rounded-pill m-0 border border-light">
-                <li class="breadcrumb-item">
-                    <a routerLink="/home" class="text-decoration-none small text-muted">Home</a>
-                </li>
-                <li class="breadcrumb-item active small" aria-current="page">
-                    Order Details
-                </li>
+            <ol class="breadcrumb bg-transparent p-0 m-0 small">
+                <li class="breadcrumb-item"><a routerLink="/home" class="text-primary text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a routerLink="/my-orders" class="text-muted text-decoration-none">My Account</a></li>
+                <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Order Details</li>
             </ol>
         </nav>
 
-        <div class="container container-compact">
-            <div class="row gx-lg-4">
-                <!-- LEFT COLUMN: Order Info -->
-                <div class="col-lg-8">
-                    <!-- PRODUCT HERO CARD -->
-                    <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="order-id-badge">ORDER #{{ customerOrder.co_id }}</span>
-                                <div *ngIf="!isOrderCanceled()" class="status-badge status-badge-active">ACTIVE</div>
-                                <div *ngIf="isOrderCanceled()" class="status-badge status-badge-cancelled">CANCELLED</div>
+        <div class="row gx-4">
+            <!-- LEFT COLUMN -->
+            <div class="col-lg-8">
+                <!-- PRODUCT HERO CARD -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white mb-4 p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-9">
+                            <div class="badge bg-light text-muted border px-3 py-1 mb-2 shadow-xs" style="font-size: 10px;">ORDER #{{ customerOrder.co_id }}</div>
+                            <h2 class="fw-bold mb-1 text-dark" style="letter-spacing: -1px;">{{ customerOrder.p_name }}</h2>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <h3 class="fw-bold text-success mb-0">₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}</h3>
+                                <span class="badge bg-soft-success text-success px-2 py-1" style="font-size: 10px;">
+                                    {{ customerOrder.co_status_name || (allMovementHistories.length > 0 ? allMovementHistories[allMovementHistories.length - 1].omh_status_name : 'Return Initiated') }}
+                                </span>
                             </div>
-
-                            <div class="row align-items-center">
-                                <div class="col-md-9">
-                                    <h3 class="fw-bold mb-1 text-dark">{{ customerOrder.p_name }}</h3>
-                                    <p class="text-muted small mb-2" *ngIf="customerOrder.co_size_name || customerOrder.co_color_name">
-                                        Size: <span class="text-dark">{{ customerOrder.co_size_name }}</span> | 
-                                        Color: <span class="text-dark">{{ customerOrder.co_color_name }}</span>
-                                    </p>
-                                    <div class="d-flex align-items-baseline gap-2 mb-3">
-                                        <h4 class="fw-bold text-success mb-0">₹{{ customerOrder.co_net_amount | number:'1.2-2' }}</h4>
-                                        <span class="text-muted small">/ {{ customerOrder.co_qty }} Qty</span>
-                                    </div>
-                                    <div class="d-flex gap-3 text-muted small border-top border-light pt-2 mt-2">
-                                        <span>Unit: ₹{{ customerOrder.co_unit_price | number:'1.2-2' }}</span>
-                                        <span>Total: ₹{{ (customerOrder.co_unit_price * customerOrder.co_qty) | number:'1.2-2' }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 text-center mt-3 mt-md-0">
-                                    <img [src]="apiUrl + '/' + getOrderItemImage(customerOrder)" class="product-img"
-                                        style="max-height: 100px; object-fit: contain;" alt="product_image">
-                                </div>
+                            
+                            <!-- CONSOLIDATED SPEC ROW -->
+                            <div class="d-flex flex-wrap gap-4 border-top border-light pt-3 mt-1 pb-1 text-muted small text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">
+                                <div>Qty: <span class="text-dark">{{ customerOrder.co_qty }} units</span></div>
+                                <div>Unit: <span class="text-dark">₹{{ customerOrder.co_unit_price | number:'1.2-2' }}</span></div>
+                                <div>Size: <span class="text-dark">{{ customerOrder.co_size_name }}</span></div>
+                                <div>Color: <span class="text-dark">{{ customerOrder.co_color_name }}</span></div>
                             </div>
-
-                            <!-- CANCELLED ALERT (SOFTENED) -->
-                            <div class="status-alert status-alert-danger mt-4 d-flex align-items-start" *ngIf="isOrderCanceled()">
-                                <i class="fa fa-info-circle mt-1 me-2"></i>
-                                <div>
-                                    <div class="fw-bold">Cancelled</div>
-                                    <div class="small opacity-75">This order shows as cancelled in your history.</div>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="col-md-3 text-center d-none d-md-block">
+                            <img [src]="customerOrder.resolvedImageUrl || 'assets/no-product.png'" 
+                                 class="img-fluid"
+                                 style="max-height: 120px; width: 100%; object-fit: contain;"
+                                 onerror="this.onerror=null; this.src='assets/logo/logo.png'">
                         </div>
                     </div>
+                </div>
 
-                    <!-- STATUS TRACKER -->
-                    <div class="card shadow-sm border-0 rounded-4 mb-4">
-                        <div class="card-header bg-white border-0 pt-4 pb-0 px-4 px-md-5">
-                            <h6 class="section-header mb-0">Order Journey</h6>
+                <!-- CANCELLATION/RETURN ALERT BAR (Top View) -->
+                <div class="card border-0 rounded-4 p-4 d-flex align-items-center flex-row shadow-sm mb-4" 
+                     style="background-color: rgba(220, 53, 69, 0.06); color: #dc3545; border-left: 6px solid #dc3545; gap: 20px;" 
+                     *ngIf="isOrderCanceled() || isOrderReturned()">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 45px; height: 45px;">
+                        <i class="fa" [ngClass]="isOrderCanceled() ? 'fa-times' : 'fa-undo'" style="font-size: 20px;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="letter-spacing: -0.5px;">{{ isOrderCanceled() ? 'Order Cancelled' : 'Order Returned' }}</h5>
+                        <div class="small fw-medium opacity-75">
+                            {{ isOrderCanceled() ? 'This order has been officially cancelled. Refund status can be tracked below.' : 'This item has been sent back. Our team is inspecting the return.' }}
                         </div>
-                        <div class="card-body px-4 px-md-5 pb-5">
-                            <ul class="tracker">
-                                <li *ngFor="let omh of orderMovementHistories"
-                                    [ngClass]="{
-                                        'done': omh.omh_cre_date && omh.omh_status_name !== 'Canceled',
-                                        'canceled': omh.omh_cre_date && omh.omh_status_name === 'Canceled'
-                                    }">
-                                    <div class="tracker-content">
-                                        <b class="fw-bold">{{ omh.omh_status_name }}</b>
-                                        <span class="fw-medium">
-                                            <i class="fa fa-clock-o me-1 opacity-50"></i>
-                                            {{ omh.omh_cre_date ? (omh.omh_cre_date | date:'dd MMM yyyy • hh:mm a') : 'Awaiting processing...' }}
+                    </div>
+                </div>
+
+                <!-- UNIFIED ORDER JOURNEY TRACKER -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                    <h6 class="fw-bold mb-4 d-flex align-items-center text-dark" style="font-size: 13px;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
+                            <i class="fa fa-map-signs" style="font-size: 11px;"></i>
+                        </div>
+                        Order Status Journey
+                    </h6>
+                    
+                    <div class="journey-container ms-2">
+                        <div *ngFor="let omh of allMovementHistories; let i = index">
+                            
+                            <!-- WORKFLOW CHANGE HEADING -->
+                            <div *ngIf="showWorkflowHeader(i)" class="d-flex align-items-center mb-3 mt-1" [ngStyle]="{'margin-top': i > 0 ? '30px' : '2px'}">
+                                <div class="rounded-pill px-3 py-1 text-uppercase fw-bold shadow-xs border d-flex align-items-center gap-2" 
+                                     [ngStyle]="{'background-color': getWorkflowColor(omh.omh_workflow_id) + '10', 'color': getWorkflowColor(omh.omh_workflow_id), 'border-color': getWorkflowColor(omh.omh_workflow_id) + '30', 'font-size': '9px', 'letter-spacing': '1px'}">
+                                    <i class="fa {{ getWorkflowIcon(omh.omh_workflow_id) }}"></i>
+                                    {{ getWorkflowName(omh.omh_workflow_id) }}
+                                </div>
+                                <div class="flex-grow-1 border-top ms-2 opacity-25"></div>
+                            </div>
+
+                            <ul class="tracker m-0">
+                                <li [ngClass]="{
+                                    'canceled': (omh.omh_status_name || '').toLowerCase().includes('cancel'),
+                                    'done': omh.omh_status !== 13 && !(omh.omh_status_name || '').toLowerCase().includes('cancel'),
+                                    'refund': omh.omh_workflow_id === 3
+                                }">
+                                    <div class="d-flex flex-column">
+                                        <b class="text-dark" style="font-size: 13px;">{{ omh.omh_status_name }}</b>
+                                        <span class="text-muted" style="font-size: 11px;">
+                                            <i class="fa fa-calendar-check-o me-1 opacity-50"></i>
+                                            {{ omh.omh_cre_date ? (omh.omh_cre_date | date:'dd MMM yyyy • hh:mm a') : 'Awaiting Update' }}
                                         </span>
                                     </div>
                                 </li>
@@ -81,146 +97,169 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- RIGHT COLUMN: Summaries -->
-                <div class="col-lg-4">
-                    <!-- DELIVERY -->
-                    <div class="card shadow-sm border-0 rounded-4 mb-4">
-                        <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
-                            <h6 class="section-header mb-0">Delivery Details</h6>
+            <!-- RIGHT COLUMN -->
+            <div class="col-lg-4">
+                <!-- SHIPPING DESTINATION -->
+                <div class="card border border-light shadow-sm rounded-4 mb-4 overflow-hidden bg-white">
+                    <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                        <h6 class="fw-bold mb-0 d-flex align-items-center text-dark" style="font-size: 13px;">
+                            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 20px; height: 20px;">
+                                <i class="fa fa-map-marker" style="font-size: 10px;"></i>
+                            </div>
+                            Delivery Details
+                        </h6>
+                    </div>
+                    <div class="card-body p-4 pt-2">
+                        <div class="mb-3">
+                            <div class="fw-bold text-dark mb-1" style="font-size: 15px;">{{ customerOrder.co_customer_name }}</div>
+                            <div class="small text-muted d-flex align-items-center gap-2">
+                                <i class="fa fa-phone opacity-50"></i>
+                                <span>{{ customerOrder.co_customer_phone }}</span>
+                            </div>
                         </div>
-                        <div class="card-body p-4 pt-0">
-                            <div class="d-flex align-items-start gap-3 mb-4">
-                                <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
-                                    <i class="fa fa-map-marker"></i>
-                                </div>
-                                <div style="min-width: 0;">
-                                    <div class="fw-bold text-dark mb-1">{{ customerOrder.co_customer_name }}</div>
-                                    <div class="text-muted small mb-1"><i class="fa fa-phone me-1"></i> {{ customerOrder.co_customer_phone }}</div>
-                                    <p class="text-muted small mb-0 lh-sm">{{ customerOrder.co_c_address_details }}</p>
-                                </div>
+                        <div class="bg-light p-3 rounded-4 border border-white">
+                            <div class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 9px; letter-spacing: 1px;">Delivery Address</div>
+                            <p class="mb-0 text-dark small lh-base">
+                                {{ customerOrder.co_c_address_details }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAYMENT SUMMARY -->
+                <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-4" style="font-size: 13px;">Payment Summary</h6>
+
+                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                        <span>Item Total <small>(Incl. Tax)</small></span>
+                        <span class="fw-bold">₹ {{ (customerOrder.co_amount + customerOrder.co_discount_amount) | number:'1.2-2' }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center my-3 p-3 rounded-3 bg-white border-start border-success border-4 shadow-sm" 
+                         *ngIf="customerOrder.co_discount_amount > 0">
+                        <div class="d-flex flex-column">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="fa fa-ticket text-success"></i>
+                                <span class="fw-bold text-dark x-small" style="font-size: 11px;">{{customerOrder.co_promo_code}}</span>
+                            </div>
+                            <span class="badge bg-success text-white rounded-pill" style="font-size: 8px; width: fit-content;">{{ customerOrder.co_discount_perc }}% SAVED</span>
+                        </div>
+                        <span class="text-success fw-bold">-₹{{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 small text-muted border-top border-white pt-2" *ngIf="customerOrder.co_discount_amount > 0">
+                        <span>Subtotal <small>(Incl. Tax)</small></span>
+                        <span class="fw-bold text-dark">₹ {{ customerOrder.co_amount | number:'1.2-2' }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                        <span>GST ({{ customerOrder.co_gst_perc }}%) <small>(Included)</small></span>
+                        <span class="fw-bold">₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3 small text-muted">
+                        <span>Delivery Charge</span>
+                        <span class="fw-bold">₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-gray-400">
+                        <span class="fw-bold text-dark">GRAND TOTAL</span>
+                        <span class="fw-bold h4 mb-0 text-success">₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}</span>
+                    </div>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="mt-2">
+                    <!-- DELIVERED ACTIONS -->
+                    <div class="d-flex gap-2 mb-3" *ngIf="isOrderDelivered() && !showReturnForm">
+                        <button (click)="downloadTaxInvoice()"
+                                class="btn btn-warning flex-grow-1 fw-bold rounded-pill py-3 shadow-sm border-0 d-flex align-items-center justify-content-center gap-2" style="font-size: 11px;">
+                            <i class="fa fa-file-pdf-o"></i> DOWNLOAD INVOICE
+                        </button>
+                        <button (click)="returnCustomerOrder()"
+                                class="btn btn-outline-danger bg-white flex-grow-1 fw-bold rounded-pill py-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="font-size: 11px;">
+                            <i class="fa fa-reply"></i> RETURN ITEM
+                        </button>
+                    </div>
+
+                    <!-- RETURN REQUEST FORM MODAL -->
+                    <div class="custom-modal-backdrop" *ngIf="showReturnForm">
+                        <div class="card border-0 rounded-4 shadow-lg p-4" style="width: 100%; max-width: 500px;">
+                            <h6 class="fw-bold mb-3">Raise Return Request</h6>
+                            
+                            <div class="mb-3">
+                                <label class="small fw-bold text-muted mb-2">Reason for Return</label>
+                                <select class="form-select border-0 bg-light rounded-3 shadow-none" [(ngModel)]="returnReason">
+                                    <option value="">Select Reason</option>
+                                    <option value="Wrong Item">Wrong Item Received</option>
+                                    <option value="Damaged">Product Damaged</option>
+                                    <option value="Quality">Quality not as expected</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="small fw-bold text-muted mb-2">Comments</label>
+                                <textarea class="form-control border-0 bg-light rounded-3 py-2 px-3 shadow-none" rows="2" placeholder="Tell us more about the issue..." [(ngModel)]="returnComments"></textarea>
+                            </div>
+
+                            <!-- AUTOMATIC REFUND NOTICE -->
+                            <div class="alert alert-info border-0 rounded-4 d-flex align-items-center gap-3 mb-4" style="background-color: rgba(13, 110, 253, 0.05); color: #0d6efd;">
+                                 <i class="fa fa-info-circle fs-4"></i>
+                                 <div class="small fw-medium">The refund for this return will be automatically credited to your original payment source once inspected.</div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-danger rounded-pill py-2 px-4 fw-bold shadow-sm flex-grow-1" (click)="submitReturnRequest()">
+                                    SUBMIT RETURN REQUEST
+                                </button>
+                                <button class="btn btn-light rounded-pill py-2 px-4 text-dark fw-medium flex-grow-1" (click)="showReturnForm = false">
+                                    CANCEL
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- PAYMENT -->
-                    <div class="card shadow-sm border-0 rounded-4 mb-4">
-                        <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
-                            <h6 class="section-header mb-0">Payment Summary</h6>
-                        </div>
-                        <div class="card-body p-4 pt-0">
-                            <div class="summary-item text-muted">
-                                <span>Sub Total</span>
-                                <span class="fw-bold">₹{{ customerOrder.co_amount | number:'1.2-2' }}</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="text-muted">Discount ({{ customerOrder.co_discount_perc }}%)</span>
-                                <span class="text-success fw-bold text-monospace">-₹{{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
-                            </div>
-                            <div class="summary-item text-muted">
-                                <span>GST ({{ customerOrder.co_gst_perc }}%)</span>
-                                <span class="fw-bold">₹{{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
-                            </div>
-                            <div class="summary-item text-muted">
-                                <span>Delivery</span>
-                                <span class="fw-bold">₹{{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
+                    <!-- PENDING ACTIONS & CANCEL REFUND FORM -->
+                    <div *ngIf="!isOrderDelivered() && !isOrderCanceled() && !isOrderReturned()">
+                        <!-- NORMAL CANCEL BUTTON -->
+                        <button *ngIf="!showCancelRefundForm"
+                                class="btn btn-white w-100 text-danger fw-bold shadow-sm border rounded-pill py-3 px-4 d-flex align-items-center justify-content-center border-danger border-opacity-25" 
+                                (click)="cancelCustomerOrder()" style="font-size: 13px; letter-spacing: 0.5px;">
+                            <i class="fa fa-times-circle me-2"></i> CANCEL THIS ORDER
+                        </button>
+
+                        <!-- CANCEL REFUND FORM (Show if confirmed) -->
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4 mt-2" *ngIf="showCancelRefundForm">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center text-warning">
+                                <i class="fa fa-exclamation-triangle me-2"></i> Refund Details Required
+                            </h6>
+                            <!-- AUTOMATIC REFUND NOTICE -->
+                            <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center gap-3 mb-4" style="background-color: rgba(255, 193, 7, 0.08); color: #856404;">
+                                 <i class="fa fa-shield fs-4"></i>
+                                 <div class="small fw-medium">Your refund will be automatically processed back to your original payment method by Razorpay. No bank details required.</div>
                             </div>
 
-                            <div class="summary-total d-flex justify-content-between align-items-center">
-                                <span class="fw-bold text-dark">GRAND TOTAL</span>
-                                <span class="fw-bold h4 mb-0 text-success">₹{{ customerOrder.co_net_amount | number:'1.2-2' }}</span>
-                            </div>
-
-                            <!-- ACTIONS -->
-                            <div class="mt-4 pt-4 border-top border-light">
-                                <div class="d-flex flex-column gap-2" *ngIf="!isOrderCanceled() && !isOrderReturned()">
-                                    <div class="d-flex gap-2" *ngIf="isOrderDelivered() && !showReturnForm">
-                                        <button class="btn btn-outline-dark btn-action flex-grow-1" (click)="downloadTaxInvoice()">
-                                            <i class="fa fa-download me-2"></i> Invoice
-                                        </button>
-                                        <button class="btn btn-outline-danger btn-action flex-grow-1" (click)="returnCustomerOrder()">
-                                            <i class="fa fa-reply me-2"></i> Return
-                                        </button>
-                                    </div>
-
-                                    <!-- RETURN FORM -->
-                                    <div class="return-form-container mt-2" *ngIf="showReturnForm">
-                                        <div class="card bg-light border-0 rounded-4 overflow-hidden">
-                                            <div class="card-body p-4">
-                                                <h6 class="fw-bold mb-3 d-flex align-items-center"><i class="fa fa-question-circle me-2 text-danger"></i> Return Request</h6>
-                                                
-                                                <div class="mb-3">
-                                                    <label class="small fw-bold text-muted mb-1 ms-1">Reason for return</label>
-                                                    <select class="form-select border-0 shadow-sm rounded-3 py-2 px-3" [(ngModel)]="returnReason">
-                                                        <option value="">Select a reason</option>
-                                                        <option *ngFor="let res of returnReasonsList" [value]="res">{{res}}</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="small fw-bold text-muted mb-1 ms-1">Comments (optional)</label>
-                                                    <textarea class="form-control border-0 shadow-sm rounded-3 py-2 px-3" rows="2" placeholder="Tell us more about the issue..." [(ngModel)]="returnComments"></textarea>
-                                                </div>
-
-                                                <!-- BANK DETAILS -->
-                                                <div class="row g-2 mb-4">
-                                                    <div class="col-12 mt-3">
-                                                        <h6 class="small fw-bold text-dark mb-2 ms-1"><i class="fa fa-university me-2 text-primary"></i> Refund Bank Details:</h6>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <input type="text" class="form-control border-0 shadow-sm rounded-3 py-2 px-3" placeholder="Bank Name" [(ngModel)]="bankName">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <input type="text" class="form-control border-0 shadow-sm rounded-3 py-2 px-3" placeholder="Account Number" [(ngModel)]="accountNo">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <input type="text" class="form-control border-0 shadow-sm rounded-3 py-2 px-3" placeholder="IFSC Code" [(ngModel)]="ifscCode">
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex gap-2">
-                                                    <button class="btn btn-dark btn-action flex-grow-1" (click)="submitReturnRequest()">
-                                                        Submit Request
-                                                    </button>
-                                                    <button class="btn btn-outline-secondary btn-action" (click)="showReturnForm = false">
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <button class="btn btn-link text-danger text-decoration-none fw-bold small py-3" (click)="cancelCustomerOrder()" *ngIf="!isOrderDelivered()">
-                                        Cancel Order
-                                    </button>
-                                </div>
-                                
-                                <!-- RETURNED STATUS -->
-                                <div class="status-alert status-alert-danger mt-2 d-flex align-items-start" *ngIf="isOrderReturned()">
-                                    <i class="fa fa-undo mt-1 me-2"></i>
-                                    <div>
-                                        <div class="fw-bold">Order Returned</div>
-                                        <div class="small opacity-75">A return was processed for this order.</div>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="isOrderCanceled() && !isOrderReturned()">
-                                    <button class="btn btn-success text-white btn-action w-100" (click)="orderAgain()">
-                                        <i class="fa fa-refresh me-2"></i> ORDER AGAIN
-                                    </button>
-                                </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-warning text-white rounded-pill flex-grow-1 fw-bold py-2" (click)="submitCancelRefundRequest()">Confirm Cancellation</button>
+                                <button class="btn btn-light rounded-pill px-4" (click)="showCancelRefundForm = false">Go Back</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- FOOTER INFO -->
-                    <div class="px-4 text-center">
-                        <p class="text-muted" style="font-size: 11px;">
-                           <i class="fa fa-info-circle me-1"></i> Return policy ended on Jan 01, 2024. For more details, please contact our support team.
-                        </p>
-                    </div>
+                </div>
+
+                <!-- FOOTER INFO -->
+                <div class="mt-4 px-2 text-center">
+                    <p class="text-muted" style="font-size: 10px;">
+                       <i class="fa fa-info-circle me-1"></i> Return policy active for 7 days after delivery.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<br/>

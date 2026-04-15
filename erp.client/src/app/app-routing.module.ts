@@ -41,6 +41,8 @@ import { ConstantValuesComponent } from './pages/constant.values/constant.values
 import { OrderReportComponent } from './pages/admin/order.report/order.report.component';
 import { ReturnedOrdersComponent } from './pages/returned.orders/returned-orders.component';
 import { StatusComponent } from './pages/status/status.component';
+import { PromocodeComponent } from './pages/promocode/promocode.component';
+import { RefundManagementComponent } from './pages/admin/refund-management/refund-management.component';
 
 
 
@@ -200,6 +202,14 @@ const routes: Routes = [
       {
         path: 'status',
         component: StatusComponent
+      },
+      {
+        path: 'promocodes',
+        component: PromocodeComponent
+      },
+      {
+        path: 'refund-management',
+        component: RefundManagementComponent
       }
 
     ]

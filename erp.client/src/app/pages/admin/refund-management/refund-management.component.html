@@ -1,0 +1,81 @@
+<div class="right_col" role="main" style="min-height: 99vh;">
+    <!-- BREADCRUMBS -->
+    <div class="row mb-1">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb px-0 mb-2" style="background: transparent;">
+                    <li class="breadcrumb-item"><a href="#/dashboard" class="text-muted small">Home</a></li>
+                    <li class="breadcrumb-item active text-dark fw-bold small">Refund Management</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+
+            <!-- TABS NAVIGATION -->
+            <div class="d-flex mb-0">
+                <button (click)="setTab('pending')"
+                    class="nav-tab px-4 py-3 border-0 transition-all fw-bold d-flex align-items-center"
+                    [ngClass]="activeTab === 'pending' ? 'active-tab shadow-sm' : 'inactive-tab'">
+                    <i class="fa fa-clock-o me-2"></i>
+                    <span>Pending Payouts</span>
+                    <span class="badge bg-danger ms-2"
+                        *ngIf="activeTab === 'pending' && rowCount > 0">{{rowCount}}</span>
+                </button>
+                <button (click)="setTab('completed')"
+                    class="nav-tab px-4 py-3 border-0 transition-all fw-bold d-flex align-items-center"
+                    [ngClass]="activeTab === 'completed' ? 'active-tab shadow-sm' : 'inactive-tab'">
+                    <i class="fa fa-history me-2"></i>
+                    <span>Payout History</span>
+                </button>
+            </div>
+
+            <div class="x_panel shadow-sm border-0 bg-white"
+                style="border-radius: 0 12px 12px 12px; border-top: 4px solid #198754 !important;">
+                <div class="x_title d-flex justify-content-between align-items-center pb-3 mb-0">
+                    <div class="page-header-text d-flex flex-column pt-2">
+
+                        <span class="text-muted small mt-2 d-block" style="padding-left: 38px;">{{ activeTab ===
+                            'pending' ? 'Action required for these online payment orders' : 'Record of automated refunds
+                            processed via Razorpay' }}</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- INFO ICON (Shown only on Pending) -->
+                        <div *ngIf="activeTab === 'pending'"
+                            class="info-badge d-flex align-items-center bg-light px-3 py-2 rounded-pill border shadow-xs"
+                            style="cursor: help;"
+                            [title]="'Processing a refund here will instantly move money from your Razorpay balance to the customer\'s account.'">
+                            <i class="fa fa-info-circle text-primary me-2"></i>
+                            <span class="text-muted small fw-bold">HELP</span>
+                        </div>
+
+                        <button *ngIf="activeTab === 'pending'"
+                            class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-xs"
+                            (click)="loadRefundableOrders()">
+                            <i class="fa fa-refresh me-2"></i> Refresh List
+                        </button>
+                    </div>
+                </div>
+
+                <div class="x_content pt-4">
+                    <!-- INFORMATION LAYOUT REMOVED FROM HERE -->
+
+                    <!-- DATA GRID -->
+                    <div class="grid-card p-0 border rounded shadow-sm overflow-hidden bg-white">
+                        <ag-grid-angular #refundGrid style="width: 100%; height: 500px;"
+                            class="ag-theme-quartz ag-theme-acmecorp" [rowData]="refundableOrders"
+                            [columnDefs]="activeTab === 'pending' ? pendingColDefs : historyColDefs" [pagination]="true"
+                            [paginationPageSize]="10" (gridReady)="onGridReady($event)">
+                        </ag-grid-angular>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

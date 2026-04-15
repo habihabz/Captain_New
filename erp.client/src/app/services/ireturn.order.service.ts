@@ -12,9 +12,9 @@ export interface ReturnOrder {
     ro_status_name?: string;
     ro_reason: string;
     ro_comments?: string;
-    ro_bank_name: string;
-    ro_account_no: string;
-    ro_ifsc_code: string;
+    ro_bank_name?: string;
+    ro_account_no?: string;
+    ro_ifsc_code?: string;
     ro_cre_by: number;
     ro_cre_date?: string;
     
@@ -22,6 +22,8 @@ export interface ReturnOrder {
     co_customer_name?: string;
     p_name?: string;
     co_net_amount?: number;
+    co_payment_id?: string;
+    ro_completed_yn?: string;
 }
 
 @Injectable({

@@ -81,6 +81,33 @@ body {
 
 .select2-results__option--highlighted[aria-selected] {
     background-color: #1abb9c !important;
+    color: #fff !important;
+}
+
+.select2-results__option {
+    padding: 8px 12px !important;
+    color: #000 !important;
+    background-color: #fff !important;
+    font-size: 0.875rem !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #f8f9fa !important;
+    color: #000 !important;
+}
+
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    padding: 8px !important;
+    color: #000 !important;
+    background-color: #fff !important;
+    outline: none !important;
+    width: 100% !important;
 }
 
 table.jambo_table thead {
@@ -210,7 +237,7 @@ textarea.form-control {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important;
+    gap: 10px !important;
 }
 
 .btn:hover, .hover-lift:hover {
@@ -1827,3 +1854,43 @@ body.nav-sm .sidebar-footer {
 .bg-teal { background-color: #1abb9c !important; }
 .bg-teal-soft { background-color: rgba(26, 187, 156, 0.1) !important; }
 .border-teal { border-color: #1abb9c !important; }
+
+/* --- 🔔 SNACKBAR STYLING --- */
+.success-snackbar.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: #198754 !important;
+}
+.success-snackbar .mdc-snackbar__label,
+.success-snackbar .mat-mdc-button {
+  color: white !important;
+}
+
+.danger-snackbar.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: #dc3545 !important;
+}
+.danger-snackbar .mdc-snackbar__label,
+.danger-snackbar .mat-mdc-button {
+  color: white !important;
+}
+
+/* --- 🚀 ENSURE SNACKBAR IS ON TOP --- */
+.cdk-overlay-container {
+  z-index: 99999 !important;
+}
+/* Remove AG Grid Cell Focus Borders */
+.ag-theme-quartz, .ag-theme-acmecorp {
+    --ag-cell-focus-border-color: transparent !important;
+    --ag-cell-focus-box-shadow: none !important;
+}
+
+/* --- 🌐 GLOBAL ICON SPACING SYSTEM --- */
+.nav-link i, .dropdown-item i, .breadcrumb-item i, .nav-tab i, .info-badge i {
+    margin-right: 10px !important;
+    vertical-align: middle;
+}
+
+/* Ensure icons are not squashed */
+.fa, .fas, .far {
+    display: inline-block;
+    min-width: 14px;
+    text-align: center;
+}

@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
-import { ColDef, DomLayoutType, GridReadyEvent } from 'ag-grid-community';
+import { ColDef, DomLayoutType, GridReadyEvent, RowSelectionOptions } from 'ag-grid-community';
 import { User } from '../../models/user.model';
 import { Subscription, forkJoin } from 'rxjs';
 import { DbResult } from '../../models/dbresult.model';
@@ -50,9 +50,13 @@ export class CustomerOrderComponent {
   selectedRowsCount: number = 0;
   bulkUpdateStatuses: Status[] = [];
   isBulkListReady: boolean = true;
+  rowSelectionOptions: RowSelectionOptions = {
+    mode: 'multiRow',
+    checkboxes: true,
+    headerCheckbox: true,
+    enableClickSelection: false,
+  };
   @ViewChild('customerOrderGrid') customerOrderGrid!: AgGridAngular;
-
-
   constructor(
 
     private router: Router,
@@ -72,19 +76,10 @@ export class CustomerOrderComponent {
   }
 
   colDefs: ColDef[] = [
+
     {
-      headerName: "",
-      field: "check",
-      checkboxSelection: true,
-      headerCheckboxSelection: true,
-      width: 50,
-      pinned: 'left',
-      headerClass: 'text-center',
-      cellClass: 'text-center'
-    },
-    { 
-      headerName: "Order ID", 
-      field: "co_id", 
+      headerName: "Order ID",
+      field: "co_id",
       width: 100,
       cellClass: 'text-center fw-bold text-muted',
       headerClass: 'text-center'
@@ -109,20 +104,20 @@ export class CustomerOrderComponent {
         ]
       }
     },
-    { 
-      headerName: "Customer", 
+    {
+      headerName: "Customer",
       field: "co_customer_name",
       flex: 1.5,
       headerClass: 'text-start'
     },
-    { 
-      headerName: "Phone", 
+    {
+      headerName: "Phone",
       field: "co_customer_phone",
       width: 130,
       headerClass: 'text-start'
     },
-    { 
-      headerName: "Product", 
+    {
+      headerName: "Product",
       field: "p_name",
       flex: 1.2,
       headerClass: 'text-start'
@@ -138,8 +133,8 @@ export class CustomerOrderComponent {
       cellClass: 'text-end fw-bold text-success',
       valueFormatter: p => "₹ " + Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })
     },
-    { 
-      headerName: "Status", 
+    {
+      headerName: "Status",
       field: "co_status_name",
       width: 140,
       headerClass: 'text-center',
@@ -216,6 +211,8 @@ export class CustomerOrderComponent {
     this.icustomerOrder.getCustomerOrder(data.co_id).subscribe(
       (data: CustomerOrder) => {
         this.customerOrder = data;
+        // Resolve High-Resolution Variant Image
+        this.resolveOrderItemImage(this.customerOrder);
         $("#customerOrderDetailModal").modal("show");
       },
       (error: any) => {
@@ -259,6 +256,17 @@ export class CustomerOrderComponent {
     this.updateBulkStatusList();
     this.getCustomerOrders();
   }
+
+  setTab(tab: string) {
+    this.requestParms.completedYn = tab;
+    // reset date filters if switching to Active Orders to fetch correctly
+    if (tab === 'N') {
+      this.requestParms.startDate = '';
+      this.requestParms.endDate = '';
+    }
+    this.getCustomerOrders();
+  }
+
   onNewStatusChange(s_id: number) {
     this.requestParms.status = s_id;
   }
@@ -364,5 +372,71 @@ export class CustomerOrderComponent {
         }
 
       });
+  }
+
+  // IMAGE RESOLUTION LOGIC
+  formatImageUrl(url: string | undefined): string {
+    if (!url) return 'assets/placeholder-product.png';
+    if (url.startsWith('http')) {
+      return url.replace(/([^:]\/)\/+/g, "$1");
+    }
+    const cleanUrl = url.replace(/^\/+/, '');
+    return `${this.apiUrl}/${cleanUrl}`.replace(/([^:]\/)\/+/g, "$1");
+  }
+
+  resolveOrderItemImage(order: CustomerOrder) {
+    if (!order.co_product) return;
+
+    this.iproductService.getProductAttachementsByColor({
+      id: order.co_product,
+      color: order.co_color || 0
+    } as RequestParms).subscribe({
+      next: (attachments: any[]) => {
+        if (attachments && attachments.length > 0) {
+          // Priority 1: Exact ID Match
+          let match = attachments.find(a => Number(a.pa_color) === Number(order.co_color));
+
+          // Priority 2: Case-insensitive Name Match (Fallback)
+          if (!match && order.co_color_name) {
+            match = attachments.find(a =>
+              a.pa_color_name?.toLowerCase() === order.co_color_name?.toLowerCase()
+            );
+          }
+
+          if (match) {
+            order.resolvedImageUrl = this.formatImageUrl(match.pa_path);
+          } else {
+            order.resolvedImageUrl = this.formatImageUrl(attachments[0].pa_path);
+          }
+        }
+      },
+      error: () => {
+        // Fallback to basic attachments if specific call fails
+        const basic = this.getAttachementOfaProduct(order.p_attachements || '');
+        if (basic && basic.length > 0) {
+          order.resolvedImageUrl = this.formatImageUrl(basic[0].pa_path);
+        }
+      }
+    });
+  }
+
+  getOrderItemImage(order: CustomerOrder): string {
+    if (order.resolvedImageUrl) return order.resolvedImageUrl;
+    const att = this.getAttachementOfaProduct(order.p_attachements || '');
+    if (att && att.length > 0) {
+      return this.formatImageUrl(att[0].pa_path);
+    }
+    return 'assets/placeholder-product.png';
+  }
+
+  isOrderCanceled(): boolean {
+    return !!(this.customerOrder && (this.customerOrder.co_is_canceled === 'Y' || this.customerOrder.co_status_name === 'Canceled'));
+  }
+
+  closeModal(event: any, modalId: string) {
+    if (event && event.target) {
+        event.target.blur(); // Remove focus
+    }
+    $('#' + modalId).modal('hide');
   }
 }

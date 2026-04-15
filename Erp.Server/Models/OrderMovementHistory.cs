@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Erp.Server.Models
@@ -18,6 +18,9 @@ namespace Erp.Server.Models
        
         [Display(Name = "Status Name")]
         public string? omh_status_name { get; set; } = string.Empty;
+
+        [Display(Name = "Workflow Id")]
+        public int? omh_workflow_id { get; set; }
 
         [Display(Name = "Created By")]
         public int? omh_cre_by { get; set; }

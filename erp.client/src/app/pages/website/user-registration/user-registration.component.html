@@ -1,77 +1,112 @@
-<div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="text-center">
-                    <img src="/images/captain.png" alt="Logo" style="width:150px;height:150px;" />
-                    <h3>Now let's make you a Captain Member.</h3>
+<div class="auth-wrapper d-flex flex-column align-items-center justify-content-center py-5">
+    <div class="auth-container">
+        <!-- Auth Card -->
+        <div class="card auth-card border-0 shadow-lg rounded-5 overflow-hidden">
+            <div class="card-body p-4 p-md-5 text-center">
+                
+                <!-- Brand Header -->
+                <div class="brand-section mb-4">
+                    <img src="/images/captain.png" alt="Captain Logo" class="brand-logo mb-3" />
+                    <h4 class="fw-bold text-dark mb-1">Create Your Account</h4>
+                    <p class="text-muted small">Now let's make you a Captain Member.</p>
                 </div>
-                <form>
-                    <!-- First Name and Last Name -->
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="u_name">Name *</label>
-                            <input type="text" class="form-control" name="u_phone" id="u_name" placeholder="Name" required  [(ngModel)]="this.user.u_name"/>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="u_phone">Phone *</label>
-                            <input type="phone" class="form-control" name="u_phone" id="u_phone" placeholder="Phone" required [(ngModel)]="this.user.u_phone"/>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="u_email">Email *</label>
-                            <input type="email" class="form-control" id="u_email" name="u_email" placeholder="Email" required  [(ngModel)]="this.user.u_email"/>
-                        </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="username">Username*</label>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Username" required [(ngModel)]="this.user.u_username" />
+                <form #regForm="ngForm" class="text-start">
+                    <div class="row g-3">
+                        
+                        <!-- Full Name -->
+                        <div class="col-12 mb-3">
+                            <label class="auth-label">NAME</label>
+                            <div class="input-group-auth">
+                                <span class="input-icon"><i class="fa fa-user-o"></i></span>
+                                <input type="text" class="form-control auth-input" name="u_name" id="u_name" 
+                                       placeholder="Enter your full name" required [(ngModel)]="this.user.u_name" />
+                            </div>
                         </div>
-                    </div>
-                    <!-- Password -->
-                    <div class="form-group mb-3">
-                        <label for="u_password">Password *</label>
-                        <input type="password" class="form-control" id="u_password" name="u_password" placeholder="Enter Password"  required [(ngModel)]="this.user.u_password"
-                            required />
-                        <small class="form-text text-muted">
-                            Minimum of 8 characters Uppercase, lowercase letters, and one number
-                        </small>
-                    </div>
 
-                 
-
-                    <!-- Date of Birth -->
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="u_date_of_birth">Date Of Birth</label>
-                            <input type="date" class="form-control" id="u_date_of_birth" name="u_date_of_birth" placeholder="Username" required [(ngModel)]="this.user.u_date_of_birth" />
+                        <!-- Phone -->
+                        <div class="col-12 mb-3">
+                            <label class="auth-label">PHONE</label>
+                            <div class="input-group-auth">
+                                <span class="input-icon"><i class="fa fa-phone"></i></span>
+                                <input type="tel" class="form-control auth-input" name="u_phone" id="u_phone" 
+                                       placeholder="Enter your phone number" required [(ngModel)]="this.user.u_phone" />
+                            </div>
                         </div>
-                    </div>
-                   <br/>
-                    <!-- Checkboxes -->
-                    <div class="form-check mb-2">
-                        <input type="checkbox" class="form-check-input" name="u_is_get_updates" id="u_is_get_updates"  [(ngModel)]="is_get_updates"/>
-                        <label class="form-check-label" for="u_is_get_updates">
-                            Sign up for emails to get updates from Captain on products, offers and your Member benefits.
-                        </label>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="u_agree_terms" name="u_agree_terms" required  [(ngModel)]="agree_terms"/>
-                        <label class="form-check-label" for="u_agree_terms">
-                            I agree to Captain's <a href="#">Privacy Policy</a> and <a href="#">Terms of Use</a>.
-                        </label>
-                    </div>
 
-                    <!-- Submit Button -->
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-dark btn-block" (click)="registerUser()">Create
-                            Account</button>
+                        <!-- Email -->
+                        <div class="col-12 mb-3">
+                            <label class="auth-label">EMAIL</label>
+                            <div class="input-group-auth">
+                                <span class="input-icon"><i class="fa fa-envelope-o"></i></span>
+                                <input type="email" class="form-control auth-input" id="u_email" name="u_email" 
+                                       placeholder="Enter your email" required [(ngModel)]="this.user.u_email" />
+                            </div>
+                        </div>
+
+                        <!-- Username -->
+                        <div class="col-12 mb-3">
+                            <label class="auth-label">USERNAME</label>
+                            <div class="input-group-auth">
+                                <span class="input-icon"><i class="fa fa-user-circle-o"></i></span>
+                                <input type="text" class="form-control auth-input" id="username" name="username" 
+                                       placeholder="Choose a username" required [(ngModel)]="this.user.u_username" />
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="col-12 mb-3">
+                            <label class="auth-label">PASSWORD</label>
+                            <div class="input-group-auth">
+                                <span class="input-icon"><i class="fa fa-lock"></i></span>
+                                <input type="password" class="form-control auth-input" id="u_password" name="u_password" 
+                                       placeholder="••••••••" required [(ngModel)]="this.user.u_password" />
+                            </div>
+                        </div>
+
+                        <!-- Date of Birth -->
+                        <div class="col-12 mb-3">
+                            <label class="auth-label">DATE OF BIRTH</label>
+                            <div class="input-group-auth">
+                                <span class="input-icon"><i class="fa fa-calendar-o"></i></span>
+                                <input type="date" class="form-control auth-input" id="u_date_of_birth" name="u_date_of_birth" 
+                                       required [(ngModel)]="this.user.u_date_of_birth" />
+                            </div>
+                        </div>
+
+                        <!-- Consents -->
+                        <div class="col-12 mb-4">
+                            <div class="form-check custom-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="u_is_get_updates" id="u_is_get_updates" [(ngModel)]="is_get_updates">
+                                <label class="form-check-label x-small" for="u_is_get_updates" style="font-size: 11px;">
+                                    I want to receive product updates and Captain member benefits.
+                                </label>
+                            </div>
+                            <div class="form-check custom-check">
+                                <input class="form-check-input" type="checkbox" id="u_agree_terms" name="u_agree_terms" required [(ngModel)]="agree_terms">
+                                <label class="form-check-label x-small" for="u_agree_terms" style="font-size: 11px;">
+                                    I agree to the <a href="#" class="text-primary text-decoration-none">Terms & Conditions</a>.
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action -->
+                        <div class="col-12 mb-3">
+                            <button type="submit" class="btn btn-teal btn-auth w-100 py-3 rounded-pill fw-bold text-uppercase shadow-sm" 
+                                    (click)="registerUser()" [disabled]="!regForm.form.valid || !agree_terms">
+                                SECURE SIGNUP <i class="fa fa-arrow-right ms-2 fs-xs"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="col-12 text-center mt-2">
+                            <p class="small text-muted mb-4">Already have an account? <br>
+                                <a routerLink="/login" class="text-dark fw-bold text-decoration-none">Log In Now</a>
+                            </p>
+                            <p class="copyright-text mt-3">© 2026 Captain ERP. All rights reserved.</p>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
+    </div>
 </div>

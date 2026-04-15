@@ -39,6 +39,7 @@ namespace Erp.Server.Models
         public DbSet<Favourite> Favourites { get; set; }
         public DbSet<ConstantValue> ConstantValues { get; set; }
         public DbSet<ReturnOrder> ReturnOrders { get; set; }
+        public DbSet<Promocode> Promocodes { get; set; }
 
 
     }

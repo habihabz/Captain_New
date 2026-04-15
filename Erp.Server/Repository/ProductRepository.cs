@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -41,15 +41,14 @@ namespace Erp.Server.Repository
             var p_active_yn = new SqlParameter("p_active_yn", product.p_active_yn ?? (object)DBNull.Value);
             var p_cre_by = new SqlParameter("p_cre_by", product.p_cre_by ?? (object)DBNull.Value);
             var p_barcodes = new SqlParameter("p_barcodes", product.p_barcodes ?? (object)DBNull.Value);
-            var p_colors = new SqlParameter("p_colors", product.p_colors ?? (object)DBNull.Value);
             var p_sizes = new SqlParameter("p_sizes", product.p_sizes ?? (object)DBNull.Value);
-            var p_attachements = new SqlParameter("p_attachements", product.p_attachements ?? (object)DBNull.Value);
+   
 
             // Call stored procedure with additional parameters
             var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateProduct @p_id, @p_name, @p_short_name, @p_description, @p_category, " +
-                "@p_sub_category, @p_division, @p_sub_division, @p_active_yn, @p_cre_by, @p_barcodes, @p_colors, @p_sizes, @p_attachements;",
+                "@p_sub_category, @p_division, @p_sub_division, @p_active_yn, @p_cre_by, @p_barcodes, @p_sizes;",
                 p_id, p_name, p_short_name, p_description, p_category, p_sub_category, p_division, p_sub_division, p_active_yn, p_cre_by,
-                p_barcodes, p_colors, p_sizes, p_attachements)
+                p_barcodes, p_sizes)
                 .ToList()
                 .FirstOrDefault() ?? new DbResult();
 
@@ -111,11 +110,13 @@ namespace Erp.Server.Repository
             var _id = new SqlParameter("id", productSearchParms.id + "");
             var _categories = new SqlParameter("categories", productSearchParms.categories + "");
             var _subcategories = new SqlParameter("subcategories", productSearchParms.subcategories + "");
+            var _divisions = new SqlParameter("divisions", productSearchParms.divisions + "");
+            var _subdivisions = new SqlParameter("subdivisions", productSearchParms.subdivisions + "");
             var _sizes = new SqlParameter("sizes", productSearchParms.sizes + "");
             var _orderBy = new SqlParameter("orderBy", productSearchParms.orderBy + "");
             var _country = new SqlParameter("country", productSearchParms.country + "");
-            var products = db.Set<Product>().FromSqlRaw("EXEC dbo.getProductsByFilters @id,@categories,@subcategories,@sizes,@orderBy,@country;",
-                _id, _categories, _subcategories, _sizes, _orderBy,_country).ToList();
+            var products = db.Set<Product>().FromSqlRaw("EXEC dbo.getProductsByFilters @id,@categories,@subcategories,@divisions,@subdivisions,@sizes,@orderBy,@country;",
+                _id, _categories, _subcategories, _divisions, _subdivisions, _sizes, _orderBy,_country).ToList();
 
             return products;
         }

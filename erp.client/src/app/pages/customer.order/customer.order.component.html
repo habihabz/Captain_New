@@ -9,11 +9,36 @@
             </nav>
         </div>
     </div>
-    <div class="x_panel">
+    <div class="row mb-0">
+        <div class="col-md-12">
+            <div class="pb-0 border-bottom" style="border-bottom-color: #26b99a !important; border-bottom-width: 2px !important;">
+                <ul class="nav nav-tabs border-0 mb-0 px-3" id="orderTabs" role="tablist" style="background: transparent; margin-bottom: -2px;">
+                    <li class="nav-item me-1" style="position: relative; z-index: 10;">
+                        <button class="nav-link border-0 fw-bold px-4 pt-3 pb-3 transition-all" 
+                            [ngClass]="{'active bg-white text-primary shadow-sm': requestParms.completedYn === 'N', 'text-muted bg-transparent opacity-75': requestParms.completedYn !== 'N'}" 
+                            (click)="setTab('N')" type="button" 
+                            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; outline: none !important; border: none !important; border-bottom: 4px solid white !important; min-height: 50px; border-radius: 12px 12px 0 0 !important;">
+                            <i class="fa fa-circle text-success me-2" style="font-size: 8px; vertical-align: middle; margin-top: -2px;" *ngIf="requestParms.completedYn === 'N'"></i>Active Orders
+                        </button>
+                    </li>
+                    <li class="nav-item" style="position: relative; z-index: 10;">
+                        <button class="nav-link border-0 fw-bold px-4 pt-3 pb-3 transition-all" 
+                            [ngClass]="{'active bg-white text-dark shadow-sm': requestParms.completedYn === 'Y', 'text-muted bg-transparent opacity-75': requestParms.completedYn !== 'Y'}" 
+                            (click)="setTab('Y')" type="button" 
+                            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; outline: none !important; border: none !important; border-bottom: 4px solid white !important; min-height: 50px; border-radius: 12px 12px 0 0 !important;">
+                            <i class="fa fa-archive me-2" style="font-size: 12px; vertical-align: middle; margin-top: -2px;" *ngIf="requestParms.completedYn === 'Y'"></i>Completed Orders
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="x_panel border-top-0 shadow-sm" style="border-radius: 0 0 8px 8px;">
         <div class="x_content" style="display: block;">
-            <div class="row">
+            <div class="row align-items-end mb-3 pt-3">
                 <div class="col-md-3">
-                    <div class="form-group">
+                    <div class="form-group mb-0">
                         <label for="status">Status Filter</label>
                         <select appSelect2 #status id="status" class="form-control" name="status" required
                             (selectionChanged)="onCustomerOrderStatusChange($event);">
@@ -24,25 +49,37 @@
                     </div>
                 </div>
 
-                <div class="col-md-9 border-left" *ngIf="selectedRowsCount > 0">
-                    <div class="row align-items-end">
-                        <div class="col-md-4">
-                            <div class="form-group mb-0">
-                                <label class="text-primary fw-bold"><i class="fa fa-tasks"></i> Bulk Action: Update Status</label>
-                                <select *ngIf="isBulkListReady" appSelect2 class="form-control" #bulkStatusSelect (selectionChanged)="bulkStatusId = +$event">
-                                    <option value="0">Select New Status</option>
-                                    <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-primary shadow-sm" [disabled]="!bulkStatusId" (click)="onBulkUpdate()">
-                                <i class="fa fa-bolt me-1"></i> Bulk Update Selected
-                            </button>
-                        </div>
+                <div class="col-md-2" *ngIf="requestParms.completedYn === 'Y'">
+                    <div class="form-group mb-0">
+                        <label for="startDate" class="small fw-bold">Start Date</label>
+                        <input type="date" id="startDate" class="form-control" [(ngModel)]="requestParms.startDate" (change)="getCustomerOrders()">
+                    </div>
+                </div>
+                
+                <div class="col-md-2" *ngIf="requestParms.completedYn === 'Y'">
+                    <div class="form-group mb-0">
+                        <label for="endDate" class="small fw-bold">End Date</label>
+                        <input type="date" id="endDate" class="form-control" [(ngModel)]="requestParms.endDate" (change)="getCustomerOrders()">
                     </div>
                 </div>
 
+                <div class="col-md-9 d-flex justify-content-end" *ngIf="selectedRowsCount > 0 && requestParms.completedYn === 'N'">
+                    <div class="d-flex align-items-end gap-3">
+                        <div class="form-group mb-0" style="min-width: 200px;">
+                            <label class="text-primary fw-bold small mb-1"><i class="fa fa-tasks"></i> Bulk Action: Update Status</label>
+                            <select *ngIf="isBulkListReady" appSelect2 class="form-control" #bulkStatusSelect
+                                (selectionChanged)="bulkStatusId = +$event">
+                                <option value="0">Select New Status</option>
+                                <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}
+                                </option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary shadow-sm fw-bold px-4" [disabled]="!bulkStatusId"
+                            (click)="onBulkUpdate()" style="height: 38px;">
+                            <i class="fa fa-bolt me-1"></i> Bulk Update Selected
+                        </button>
+                    </div>
+                </div>
             </div>
             <hr />
             <div class="row">
@@ -52,8 +89,8 @@
                         [defaultColDef]="defaultColDef" [enableCellTextSelection]="true"
                         [components]="frameworkComponents" [paginationPageSize]="paginationPageSize10"
                         [domLayout]="domLayout" [paginationPageSizeSelector]="paginationPageSizeSelector10"
-                        rowSelection="multiple" [suppressRowClickSelection]="true"
-                        (gridReady)="onGridReady($event)" (selectionChanged)="onSelectionChanged()">
+                        [rowSelection]="rowSelectionOptions" (gridReady)="onGridReady($event)"
+                        (selectionChanged)="onSelectionChanged()">
                     </ag-grid-angular>
                 </div>
             </div>
@@ -64,130 +101,175 @@
 
 <div class="modal fade" id="customerOrderDetailModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
-        <div class="modal-content">
+        <div class="modal-content border-0 rounded-4 overflow-hidden shadow bg-light">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Customer Order Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+            <div class="modal-header border-0 bg-white pt-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold text-dark">Customer Order Details</h5>
+                <button type="button" class="close" (click)="closeModal($event, 'customerOrderDetailModal')" aria-label="Close">
+                    <span aria-hidden="true" style="font-size: 24px;">&times;</span>
                 </button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body p-4">
 
-                <div class="row">
+                <div class="row gx-4">
+                    <!-- LEFT COLUMN -->
+                    <div class="col-lg-8">
+                        <!-- PRODUCT HERO CARD -->
+                        <div class="card border-0 rounded-4 shadow-sm bg-white mb-4 p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-9">
+                                    <div class="badge bg-light text-muted border px-3 py-1 mb-2 shadow-xs"
+                                        style="font-size: 10px;">ORDER #{{ customerOrder.co_id }}</div>
+                                    <h2 class="fw-bold mb-1 text-dark" style="letter-spacing: -1px;">{{
+                                        customerOrder.p_name }}</h2>
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <h3 class="fw-bold text-success mb-0">₹ {{ customerOrder.co_net_amount |
+                                            number:'1.2-2' }}</h3>
+                                        <span class="badge bg-soft-success text-success px-2 py-1"
+                                            style="font-size: 10px;">{{ customerOrder.co_status_name }}</span>
+                                    </div>
 
-                    <!-- LEFT SIDE -->
-                    <div class="col-md-8">
+                                    <!-- CONSOLIDATED SPEC ROW -->
+                                    <div class="d-flex flex-wrap gap-4 border-top border-light pt-3 mt-1 pb-1 text-muted small text-uppercase fw-bold"
+                                        style="font-size: 10px; letter-spacing: 0.5px;">
+                                        <div>Qty: <span class="text-dark">{{ customerOrder.co_qty }} units</span></div>
+                                        <div>Unit: <span class="text-dark">₹{{ customerOrder.co_unit_price |
+                                                number:'1.2-2' }}</span></div>
+                                        <div>Size: <span class="text-dark">{{ customerOrder.co_size_name }}</span></div>
+                                        <div>Color: <span class="text-dark">{{ customerOrder.co_color_name }}</span>
+                                        </div>
+                                    </div>
 
-                        <div class="card border-0 rounded-3 mb-4 p-3">
-
-                            <h5 class="fw-bold mb-1">
-                                Order Number : {{ customerOrder.co_id }}
-                            </h5>
-
-                            <h3 class="fw-bold mb-1">
-                                <b>{{ customerOrder.p_name }} </b>
-                            </h3>
-
-                            <h4 class="fw-bold text-success mb-2">
-                                <b> ₹ {{ customerOrder.co_net_amount | number:'1.2-2' }} </b>
-                            </h4>
-
-                            <hr />
-
-                            <h5>
-                                Quantity : {{ customerOrder.co_qty }}
-                                {{ customerOrder.co_unit_price ? (' x ₹ ' + customerOrder.co_unit_price.toFixed(2)) : ''
-                                }}
-                            </h5>
-
-                            <h5>
-                                Unit Price : ₹ {{ customerOrder.co_unit_price | number:'1.2-2' }}
-                            </h5>
-
-                            <h5>
-                                Sub Total : ₹ {{ customerOrder.co_amount | number:'1.2-2' }}
-                            </h5>
-
-                            <div class="mt-3 d-flex gap-3 align-items-center flex-wrap">
-                                <div class="px-3 py-2 bg-light border rounded-pill shadow-sm" style="font-size: 13px;">
-                                    <span class="text-muted fw-bold me-1">SIZE : </span>
-                                    <span class="fw-bold text-dark">{{ customerOrder.co_size_name }}</span>
+                                    <!-- CANCELLED ALERT -->
+                                    <div class="mt-4 d-flex align-items-center p-4 rounded-4" 
+                                         style="background-color: rgba(220, 53, 69, 0.05); color: #dc3545; border-left: 5px solid #dc3545; gap: 15px;" 
+                                         *ngIf="isOrderCanceled()">
+                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                            <i class="fa fa-times" style="font-size: 14px;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold mb-0" style="font-size: 15px;">Order Cancelled</div>
+                                            <div class="small opacity-75 fw-medium">This order has been officially cancelled and removed from active processing.</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                &nbsp;
-                                &nbsp;
-                                <div class="px-3 py-2 bg-light border rounded-pill shadow-sm" style="font-size: 13px;">
-                                    <span class="text-muted fw-bold me-1">COLOR : </span>
-                                    <span class="fw-bold text-dark">{{ customerOrder.co_color_name }}</span>
+                                <div class="col-md-3 text-center d-none d-md-block">
+                                    <img [src]="customerOrder.resolvedImageUrl || 'assets/no-product.png'"
+                                        class="img-fluid" style="max-height: 120px; width: 100%; object-fit: contain;"
+                                        onerror="this.onerror=null; this.src='assets/logo/logo.png'">
                                 </div>
                             </div>
+                        </div>
 
-                            <hr />
-
-                            <h5 class="fw-bold"> <b>Order Status</b></h5>
-                            <ul class="tracker">
-                                <li *ngFor="let omh of orderMovementHistories" [ngClass]="{'done': omh.omh_cre_date}">
-                                    <b>{{ omh.omh_status_name }}</b>
-                                    <span>
-                                        {{ omh.omh_cre_date
-                                        ? (omh.omh_cre_date | date:'dd-MM-yyyy hh:mm a')
-                                        : 'Pending' }}
-                                    </span>
+                        <!-- ORDER JOURNEY -->
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold mb-4 d-flex align-items-center text-dark" style="font-size: 13px;">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                    style="width: 24px; height: 24px;">
+                                    <i class="fa fa-map-signs" style="font-size: 11px;"></i>
+                                </div>
+                                &nbsp; Order Status Journey
+                            </h6>
+                            <ul class="tracker ms-2">
+                                <li *ngFor="let omh of orderMovementHistories" 
+                                    [ngClass]="{
+                                        'canceled': (omh.omh_status_name || '').toLowerCase().includes('cancel'),
+                                        'done': omh.omh_cre_date && !(omh.omh_status_name || '').toLowerCase().includes('cancel')
+                                    }">
+                                    <div class="d-flex flex-column">
+                                        <b class="text-dark" style="font-size: 13px;">{{ omh.omh_status_name }}</b>
+                                        <span class="text-muted" style="font-size: 11px;">
+                                            <i class="fa fa-calendar-check-o me-1 opacity-50"></i>
+                                            {{ omh.omh_cre_date ? (omh.omh_cre_date | date:'dd MMM yyyy • hh:mm a') :
+                                            'Awaiting Update' }}
+                                        </span>
+                                    </div>
                                 </li>
                             </ul>
-
                         </div>
-
                     </div>
 
-                    <!-- RIGHT SIDE -->
-                    <div class="col-md-4">
-
-                        <div class="card border-0 rounded-3 mb-4 p-3">
-
-                            <h4 class="fw-bold text-center"> <b>Delivery Details</b></h4>
-                            <hr />
-
-                            <p><i class="fa fa-user"></i> {{ customerOrder.co_customer_name }}</p>
-                            <p><i class="fa fa-phone"></i> {{ customerOrder.co_customer_phone }}</p>
-                            <p><i class="fa fa-envelope"></i> {{ customerOrder.co_customer_email }}</p>
-                            <p><i class="fa fa-home"></i> {{ customerOrder.co_c_address_details }}</p>
-
+                    <!-- RIGHT COLUMN -->
+                    <div class="col-lg-4">
+                        <!-- SHIPPING DESTINATION -->
+                        <div class="card border border-light shadow-sm rounded-4 mb-4 overflow-hidden bg-white">
+                            <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                                <h6 class="fw-bold mb-0 d-flex align-items-center text-dark" style="font-size: 13px;">
+                                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                        style="width: 20px; height: 20px;">
+                                        <i class="fa fa-map-marker" style="font-size: 10px;"></i>
+                                    </div>
+                                    &nbsp;Delivery Details
+                                </h6>
+                            </div>
+                            <div class="card-body p-4 pt-2">
+                                <div class="mb-3">
+                                    <div class="fw-bold text-dark mb-1" style="font-size: 15px;">{{
+                                        customerOrder.co_customer_name }}</div>
+                                    <div class="small text-muted d-flex align-items-center gap-2">
+                                        <i class="fa fa-phone opacity-50"></i>
+                                        <span> &nbsp;{{ customerOrder.co_customer_phone }}</span>
+                                    </div>
+                                </div>
+                                <div class="bg-light p-3 rounded-4 border border-white">
+                                    <div class="small fw-bold text-muted mb-2 text-uppercase"
+                                        style="font-size: 9px; letter-spacing: 1px;">Delivery Address</div>
+                                    <p class="mb-0 text-dark small lh-base">
+                                        {{ customerOrder.co_c_address_details }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="card border-0 rounded-3 mb-4 p-3">
+                        <!-- PAYMENT SUMMARY -->
+                        <div class="card border-0 bg-white shadow-sm rounded-4 p-4 border border-light">
+                            <h6 class="fw-bold mb-4" style="font-size: 13px;">Payment Summary</h6>
 
-                            <h5 class="fw-bold text-center">Payment Summary</h5>
-                            <hr />
-
-                            <div class="d-flex justify-content-between">
-                                <span>Sub Total</span>
-                                <span>₹ {{ customerOrder.co_amount | number:'1.2-2' }}</span>
+                            <div class="d-flex justify-content-between mb-2 small text-muted">
+                                <span>Item Total <small>(Incl. Tax)</small></span>
+                                <span class="fw-bold">₹ {{ (customerOrder.co_amount + customerOrder.co_discount_amount)
+                                    | number:'1.2-2' }}</span>
                             </div>
 
-                            <div class="d-flex justify-content-between">
-                                <span>Discount</span>
-                                <span>₹ {{ customerOrder.co_discount_amount | number:'1.2-2' }}</span>
+                            <div class="d-flex justify-content-between align-items-center my-3 p-3 rounded-3 bg-light border-start border-success border-4 shadow-xs"
+                                *ngIf="customerOrder.co_discount_amount > 0">
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <i class="fa fa-ticket text-success"></i>
+                                        <span class="fw-bold text-dark x-small"
+                                            style="font-size: 11px;">{{customerOrder.co_promo_code}}</span>
+                                    </div>
+                                    <span class="badge bg-success text-white rounded-pill"
+                                        style="font-size: 8px; width: fit-content;">{{ customerOrder.co_discount_perc
+                                        }}% SAVED</span>
+                                </div>
+                                <span class="text-success fw-bold">-₹{{ customerOrder.co_discount_amount |
+                                    number:'1.2-2' }}</span>
                             </div>
 
-                            <div class="d-flex justify-content-between">
-                                <span>GST</span>
-                                <span>₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
+                            <div class="d-flex justify-content-between mb-2 small text-muted border-top border-light pt-2"
+                                *ngIf="customerOrder.co_discount_amount > 0">
+                                <span>Subtotal <small>(Incl. Tax)</small></span>
+                                <span class="fw-bold text-dark">₹ {{ customerOrder.co_amount | number:'1.2-2' }}</span>
                             </div>
 
-                            <div class="d-flex justify-content-between">
-                                <span>Delivery</span>
-                                <span>₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
+                            <div class="d-flex justify-content-between mb-2 small text-muted">
+                                <span>GST ({{ customerOrder.co_gst_perc }}%) <small>(Included)</small></span>
+                                <span class="fw-bold">₹ {{ customerOrder.co_gst_amount | number:'1.2-2' }}</span>
                             </div>
 
-                            <hr />
-
-                            <div class="d-flex justify-content-between fw-bold text-success fs-4">
-                                <span><b>Grand Total </b></span>
-                                <span> <b>₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}</b></span>
+                            <div class="d-flex justify-content-between mb-3 small text-muted">
+                                <span>Delivery Charge</span>
+                                <span class="fw-bold">₹ {{ customerOrder.co_delivery_charge | number:'1.2-2' }}</span>
                             </div>
 
+                            <div
+                                class="d-flex justify-content-between align-items-center pt-3 border-top border-gray-400">
+                                <span class="fw-bold text-dark">GRAND TOTAL</span>
+                                <span class="fw-bold h4 mb-0 text-success">₹ {{ customerOrder.co_net_amount |
+                                    number:'1.2-2' }}</span>
+                            </div>
                         </div>
 
                     </div>
@@ -196,13 +278,14 @@
 
             </div>
 
-            <div class="modal-footer">
-                <button *ngIf="customerOrder.co_status_name === 'Delivered'" class="btn btn-warning text-gray pull-right"
+            <div class="modal-footer border-0 bg-white p-4">
+                <button *ngIf="customerOrder.co_status_name === 'Delivered'"
+                    class="btn btn-warning shadow-sm font-weight-bold"
                     (click)="downloadTaxInvoice(customerOrder.co_id)">
-                    <i class="fa fa-file-pdf-o me-1"></i> Download Tax Invoice
+                    <i class="fa fa-file-pdf-o me-2"></i> Download Invoice
                 </button>
-                <button class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fa fa-times me-1"></i> Close
+                <button class="btn btn-secondary px-4 fw-bold" (click)="closeModal($event, 'customerOrderDetailModal')">
+                    Close
                 </button>
             </div>
 
@@ -216,7 +299,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Change Status</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" (click)="closeModal($event, 'StatusChangeModal')" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -224,8 +307,8 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="status">New Status</label>
-                            <select appSelect2 #status id="status" class="form-control" name="status" required
+                            <label for="newStatus">New Status</label>
+                            <select appSelect2 #newStatus id="newStatus" class="form-control" name="newStatus" required
                                 (selectionChanged)="onNewStatusChange($event);">
                                 <option [value]="0">Select Status</option>
                                 <option *ngFor="let cos of customerOrderStatuses" [value]="cos.s_id">{{ cos.s_name
@@ -238,7 +321,7 @@
             </div>
             <div class="modal-footer d-flex justify-content-end">
                 <button type="button" class="btn btn-success" (click)="updateStatusForCustomerOrder()">Update</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal($event, 'StatusChangeModal')">Close</button>
             </div>
         </div>
     </div>

@@ -1,81 +1,158 @@
-<div class="container-fluid my-4 mt-4" style="min-height: 80vh;">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb bg-light px-3 py-2 rounded">
-      <li class="breadcrumb-item">
-        <a routerLink="/home">Home</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        My Orders
-      </li>
-    </ol>
-  </nav>
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12" *ngFor="let order of pagedOrders">
-        <div class="card order-card shadow-sm border-0 rounded-3 mb-4 p-2" (click)="orderDetails(order.co_id)">
-
-          <div class="row g-3 align-items-center">
-
-            <!-- IMAGE -->
-            <div class="col-md-3 text-center">
-              <img *ngFor="let p_attachement of getAttachementOfaProduct(order.p_attachements).slice(0,1); let i=index"
-                [src]="apiUrl + '/' + p_attachement.pa_image_path" class="product-img img-fluid rounded"
-                alt="product_image">
-            </div>
-
-            <!-- TEXT -->
-            <div class="col-md-9 p-3">
-
-              <div class="d-flex justify-content-between flex-wrap mb-2">
-                <h5 class="fw-bold mb-1">Order #{{ order.co_id }}</h5>
-                <span class="badge fs-6 px-3 py-2" [ngClass]="order.co_status_name === 'Canceled' ? 'bg-danger' : 'bg-success'">
-                  {{ order.co_status_name }}
-                </span>
-              </div>
-
-              <p class="text-muted fs-6 mb-2">
-                <i class="bi bi-geo-alt"></i>
-                {{ order.co_c_address_details }}
-              </p>
-
-              <div class="row text-center text-md-start">
-
-                <div class="col-md-4 mb-2 d-flex gap-2">
-                  <b>Quantity :</b> <span>{{ order.co_qty }}</span>
-                </div>
-
-                <div class="col-md-4 mb-2 d-flex gap-2">
-                  <b>Amount :</b>
-                  <span class="text-success">₹ {{ order.co_net_amount | number:'1.2-2' }}</span>
-                </div>
-
-                <div class="col-md-4 mb-2 d-flex justify-content-md-end gap-2">
-                  <b>Date :</b>
-                  <span>{{ order.co_cre_date | date:'mediumDate' }}</span>
-                </div>
-
-              </div>
-
+<div class="container-fluid py-4 bg-light" style="min-height: 100vh; padding-top: 90px !important;">
+  <div class="row px-lg-5">
+    <!-- SIDEBAR FILTERS -->
+    <div class="col-lg-3 col-xl-2 mb-4">
+      <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden bg-white">
+        <div class="p-4 border-bottom border-light">
+          <h5 class="fw-bold text-dark mb-0">Filters</h5>
+        </div>
+        
+        <div class="p-4">
+          <!-- ORDER STATUS -->
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark small text-uppercase mb-3" style="letter-spacing: 0.5px;">Order Status</h6>
+            <div class="form-check mb-2" *ngFor="let status of availableStatuses">
+              <input class="form-check-input border-gray" type="checkbox" [id]="status" 
+                     (change)="toggleStatus(status)" [checked]="selectedStatuses.has(status)">
+              <label class="form-check-label small text-muted" [for]="status" style="cursor: pointer;">
+                {{ status }}
+              </label>
             </div>
           </div>
 
+          <!-- ORDER TIME -->
+          <div class="mb-2">
+            <h6 class="fw-bold text-dark small text-uppercase mb-3" style="letter-spacing: 0.5px;">Order Time</h6>
+            <div class="form-check mb-2" *ngFor="let year of availableYears">
+              <input class="form-check-input border-gray" type="checkbox" [id]="year" 
+                     (change)="toggleYear(year)" [checked]="selectedYears.has(year)">
+              <label class="form-check-label small text-muted" [for]="year" style="cursor: pointer;">
+                {{ year }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="col-lg-9 col-xl-10">
+      <!-- TOP SEARCH BAR -->
+      <div class="card border-0 rounded-4 shadow-sm mb-4 bg-white overflow-hidden">
+        <div class="d-flex align-items-center p-2">
+          <div class="input-group input-group-lg border-0">
+             <span class="input-group-text bg-white border-0 ps-4 text-muted">
+                <i class="fa fa-search"></i>
+             </span>
+             <input type="text" class="form-control border-0 shadow-none ps-2" 
+                    placeholder="Search your orders here (by Name or Order ID)..." 
+                    [(ngModel)]="searchTerm" (input)="applyFilters()" style="font-size: 15px;">
+          </div>
+          <button class="btn btn-primary btn-lg rounded-3 px-4 shadow-sm fw-bold me-1" (click)="applyFilters()">
+             <i class="fa fa-search me-2"></i> Search Orders
+          </button>
         </div>
       </div>
 
-      <!-- Pagination -->
-      <nav>
-        <ul class="pagination">
+      <!-- BREADCRUMBS & TITLE -->
+      <div class="mb-3 px-1">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 m-0" style="font-size: 11px;">
+              <li class="breadcrumb-item"><a routerLink="/home" class="text-primary text-decoration-none">Home</a></li>
+              <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-muted text-decoration-none">My Account</a></li>
+              <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">My Orders</li>
+            </ol>
+          </nav>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+              <h4 class="fw-bold text-dark mb-0">Showing {{ filteredOrders.length }} Orders</h4>
+              <div class="text-muted small" *ngIf="selectedStatuses.size > 0 || selectedYears.size > 0 || searchTerm">
+                  Filtered Results
+              </div>
+          </div>
+      </div>
+
+      <!-- ORDER LIST -->
+      <div *ngIf="pagedOrders.length > 0; else noOrders">
+        <div class="card order-card border-0 rounded-4 mb-3 shadow-sm bg-white overflow-hidden card-hover" 
+             *ngFor="let order of pagedOrders" (click)="orderDetails(order.co_id)" style="cursor: pointer; transition: all 0.2s ease;">
+          <div class="row g-0 align-items-center">
+            <div class="col-md-2 d-flex align-items-center justify-content-center p-3">
+              <img [src]="order.resolvedImageUrl || 'assets/no-product.png'" 
+                 class="img-fluid"
+                 style="max-height: 80px; width: auto; object-fit: contain;"
+                 onerror="this.onerror=null; this.src='assets/logo/logo.png'"
+                 alt="product_image">
+            </div>
+  
+            <div class="col-md-10 p-3 border-start border-light">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                     <span class="badge bg-primary-soft text-primary rounded-pill px-2 py-1 fw-bold" style="font-size: 9px;">#{{ order.co_id }}</span>
+                     <span class="text-muted" style="font-size: 10px;"><i class="fa fa-calendar-o me-1"></i> {{ order.co_cre_date | date:'dd MMM yyyy' }}</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">{{ (order.p_name || '') | slice:0:60 }}{{ (order.p_name || '').length > 60 ? '...' : '' }}</h6>
+                  
+                  <div class="d-flex flex-wrap gap-3 text-muted" style="font-size: 11px;">
+                    <div>Qty: <strong class="text-dark">{{ order.co_qty }}</strong></div>
+                    <div>Size: <span class="fw-bold text-dark">{{ order.co_size_name }}</span></div>
+                    <div>Color: <span class="fw-bold text-dark">{{ order.co_color_name }}</span></div>
+                  </div>
+                </div>
+  
+                <div class="text-end">
+                   <span class="badge rounded-pill px-3 py-1 border shadow-xs" 
+                        [ngClass]="(order.co_is_canceled === 'Y' || order.co_status_name === 'Canceled' || (order.co_status_name || '').toLowerCase().includes('reject')) ? 'bg-white text-danger border-danger' : 'bg-white text-success border-success'" 
+                        style="font-size: 10px; font-weight: 700; min-width: 120px;">
+                      {{ (order.co_status_name || 'Return Initiated') | uppercase }}
+                    </span>
+                </div>
+              </div>
+  
+              <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-light">
+                <div class="d-flex align-items-center gap-4">
+                  <div class="d-flex flex-column">
+                    <span class="text-muted fw-bold" style="font-size: 8px; letter-spacing: 0.5px;">TOTAL PAID</span>
+                    <h5 class="fw-bold text-dark mb-0">₹ {{ order.co_net_amount | number:'1.2-2' }} <small class="text-muted fw-normal" style="font-size: 9px;">(Incl. Tax)</small></h5>
+                  </div>
+                  
+                  <div class="d-flex align-items-center gap-2 p-1 px-2 rounded-2 bg-success-soft text-success border border-success border-opacity-25" *ngIf="order.co_discount_amount > 0">
+                     <i class="fa fa-ticket" style="font-size: 11px;"></i>
+                     <span class="fw-bold text-uppercase" style="font-size: 9px;">Saved ₹{{ order.co_discount_amount | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+                
+                <div class="text-primary fw-bold" style="font-size: 11px; cursor: pointer;">
+                    View Details <i class="fa fa-chevron-right ms-1" style="font-size: 9px;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noOrders>
+        <div class="card border-0 rounded-4 shadow-sm p-5 text-center bg-white">
+            <div class="mb-3"><i class="fa fa-search text-muted opacity-25" style="font-size: 60px;"></i></div>
+            <h5 class="text-dark fw-bold">No matching orders found</h5>
+            <p class="text-muted">Try adjusting your filters or search term to find what you're looking for.</p>
+            <button class="btn btn-primary rounded-pill px-4 mt-2" (click)="searchTerm=''; selectedStatuses.clear(); selectedYears.clear(); applyFilters()">Clear All Filters</button>
+        </div>
+      </ng-template>
+
+      <!-- PAGINATION -->
+      <nav class="mt-4" *ngIf="filteredOrders.length > ordersPerPage">
+        <ul class="pagination pagination-sm justify-content-center">
           <li class="page-item" [class.disabled]="currentPage === 1">
-            <a class="page-link" (click)="changePage(currentPage - 1)">Previous</a>
+            <a class="page-link border shadow-sm rounded-pill px-3 me-2 text-dark fw-bold" (click)="changePage(currentPage - 1)" style="cursor: pointer;">Prev</a>
           </li>
-
-          <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index"
-            [class.active]="currentPage === i + 1">
-            <a class="page-link" (click)="changePage(i + 1)">{{ i + 1 }}</a>
+          <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="currentPage === i + 1">
+            <a class="page-link border shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center fw-bold" 
+               [ngClass]="currentPage === i + 1 ? 'bg-primary text-white border-primary' : 'bg-white text-dark'"
+               (click)="changePage(i + 1)" style="width: 32px; height: 32px; cursor: pointer;">{{ i + 1 }}</a>
           </li>
-
           <li class="page-item" [class.disabled]="currentPage === totalPages">
-            <a class="page-link" (click)="changePage(currentPage + 1)">Next</a>
+            <a class="page-link border shadow-sm rounded-pill px-3 ms-2 text-dark fw-bold" (click)="changePage(currentPage + 1)" style="cursor: pointer;">Next</a>
           </li>
         </ul>
       </nav>

@@ -1,0 +1,111 @@
+.auth-wrapper {
+    background-color: #172437; /* Navy blue background as seen in login screenshot */
+    min-height: 100vh;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px; /* Narrower container matches the login screenshot */
+    padding: 20px;
+}
+
+.brand-section .brand-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.auth-card {
+    background: #ffffff;
+    border-radius: 2rem !important;
+}
+
+.auth-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #adb5bd;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-group-auth {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: #adb5bd;
+    font-size: 14px;
+    z-index: 5;
+}
+
+.auth-input {
+    background-color: #f8fafd !important; /* Soft grey background */
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 15px 12px 45px !important; /* Extra padding for icon */
+    font-size: 13px;
+    height: 48px;
+    color: #495057;
+    transition: all 0.2s ease;
+}
+
+.auth-input::placeholder {
+    color: #adb5bd;
+    opacity: 0.7;
+}
+
+.auth-input:focus {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(40, 208, 177, 0.1) !important;
+    outline: none;
+}
+
+.btn-teal {
+    background-color: #28d0b1 !important; /* Use the teal color from the login button */
+    border: none;
+    color: white;
+}
+
+.btn-auth {
+    transition: all 0.3s ease;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.btn-auth:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(40, 208, 177, 0.3) !important;
+    opacity: 0.9;
+}
+
+.btn-auth:disabled {
+    opacity: 0.5;
+    background-color: #adb5bd !important;
+}
+
+.copyright-text {
+    font-size: 10px;
+    color: #adb5bd;
+    margin-top: 2rem;
+}
+
+.custom-check .form-check-input {
+    background-color: #f8fafd;
+    border: 1px solid #dee2e6;
+}
+
+.custom-check .form-check-input:checked {
+    background-color: #28d0b1;
+    border-color: #28d0b1;
+}
+
+/* Specific styling for the date input to match the grey look */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+}

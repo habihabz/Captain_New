@@ -10,6 +10,7 @@ import { DbResult } from '../../../models/dbresult.model';
 import { RequestParms } from '../../../models/requestParms';
 import { Favourite } from '../../../models/favourite.model';
 import { IFavouriteService } from '../../../services/ifavourite.service';
+import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
 
 @Component({
   selector: 'app-favourite',
@@ -30,10 +31,12 @@ export class FavouriteComponent implements OnInit {
     private elRef: ElementRef,
     private iproductService: IProductService,
     private snackbarService: SnackBarService,
+     private geolocationService: GeolocationService,
     private ifavouriteService: IFavouriteService,
     private iuser: IuserService
   ) {
     this.currentUser = iuser.getCurrentUser();
+    this.country = this.geolocationService.getCurrentCountry();
   }
 
   ngOnInit(): void {

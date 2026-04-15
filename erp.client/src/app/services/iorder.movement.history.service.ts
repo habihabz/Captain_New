@@ -18,7 +18,7 @@ export class IOrderMovementHistoryService {
   constructor(
     private http: HttpClient,
     private iLoginService: ILoginService
-  ) {}
+  ) { }
 
   getOrderMovementHistories(): Observable<OrderMovementHistory[]> {
     return this.http.post<OrderMovementHistory[]>(`${this.apiUrl}/getOrderMovementHistories`, {});
@@ -30,6 +30,10 @@ export class IOrderMovementHistoryService {
 
   getOrderMovementHistoriesByOrder(orderNo: number): Observable<OrderMovementHistory[]> {
     return this.http.post<OrderMovementHistory[]>(`${this.apiUrl}/getOrderMovementHistoriesByOrder`, orderNo);
+  }
+
+  getOrderMovementHistoriesByReturn(returnNo: number): Observable<OrderMovementHistory[]> {
+    return this.http.post<OrderMovementHistory[]>(`${this.apiUrl}/getOrderMovementHistoriesByReturn`, returnNo);
   }
 
   deleteOrderMovementHistory(id: number): Observable<DbResult> {

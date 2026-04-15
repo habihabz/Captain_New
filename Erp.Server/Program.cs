@@ -17,12 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", p =>
-        p.WithOrigins(
-                "http://localhost:4200",
-                "https://localhost:4200",
-                "https://husicaptain.com",
-                "https://api.husicaptain.com"
-        )
+        p.SetIsOriginAllowed(origin => true)
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()
@@ -112,6 +107,7 @@ builder.Services.AddTransient<IConstantValue, ConstantValueRepository>();
 builder.Services.AddTransient<IReport, ReportRepository>();
 builder.Services.AddTransient<IReturnOrder, ReturnOrderRepository>();
 builder.Services.AddTransient<IGeneratePDF, GenetatePDFRepository>();
+builder.Services.AddTransient<IPromocode, PromocodeRepository>();
 
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");

@@ -9,9 +9,34 @@
             </nav>
         </div>
     </div>
-    <div class="x_panel">
+    <div class="row mb-0">
+        <div class="col-md-12">
+            <div class="pb-0 border-bottom" style="border-bottom-color: #26b99a !important; border-bottom-width: 2px !important;">
+                <ul class="nav nav-tabs border-0 mb-0 px-3" id="orderTabs" role="tablist" style="background: transparent; margin-bottom: -2px;">
+                    <li class="nav-item me-1" style="position: relative; z-index: 10;">
+                        <button class="nav-link border-0 fw-bold px-4 pt-3 pb-3 transition-all" 
+                            [ngClass]="{'active bg-white text-primary shadow-sm': requestParms.completedYn === 'N', 'bg-transparent text-muted opacity-75': requestParms.completedYn !== 'N'}" 
+                            (click)="setTab('N')" type="button" 
+                            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; outline: none !important; border: none !important; border-bottom: 4px solid white !important; min-height: 50px; border-radius: 12px 12px 0 0 !important;">
+                            <i class="fa fa-circle text-success me-2" style="font-size: 8px; vertical-align: middle; margin-top: -2px;" *ngIf="requestParms.completedYn === 'N'"></i>Active Returns
+                        </button>
+                    </li>
+                    <li class="nav-item" style="position: relative; z-index: 10;">
+                        <button class="nav-link border-0 fw-bold px-4 pt-3 pb-3 transition-all" 
+                            [ngClass]="{'active bg-white text-dark shadow-sm': requestParms.completedYn === 'Y', 'bg-transparent text-muted opacity-75': requestParms.completedYn !== 'Y'}" 
+                            (click)="setTab('Y')" type="button" 
+                            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; outline: none !important; border: none !important; border-bottom: 4px solid white !important; min-height: 50px; border-radius: 12px 12px 0 0 !important;">
+                            <i class="fa fa-archive me-2" style="font-size: 12px; vertical-align: middle; margin-top: -2px;" *ngIf="requestParms.completedYn === 'Y'"></i>Completed Returns
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="x_panel border-top-0 shadow-sm" style="border-radius: 0 0 8px 8px;">
         <div class="x_content" style="display: block;">
-            <div class="row">
+            <div class="row align-items-end mb-3 pt-3">
                 <div class="col-md-3">
                     <div class="form-group mb-0">
                         <label for="statusFilter">Status Filter</label>
@@ -22,22 +47,32 @@
                     </div>
                 </div>
 
-                <div class="col-md-9 border-left" *ngIf="selectedRowsCount > 0">
-                    <div class="row align-items-end">
-                        <div class="col-md-4">
-                            <div class="form-group mb-0">
-                                <label class="text-primary fw-bold"><i class="fa fa-tasks"></i> Bulk Action: Update Status</label>
-                                <select *ngIf="isBulkListReady" appSelect2 class="form-control" #bulkStatusSelect (selectionChanged)="bulkStatusId = +$event">
-                                    <option value="0">Select New Status</option>
-                                    <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
-                                </select>
-                            </div>
+                <div class="col-md-2" *ngIf="requestParms.completedYn === 'Y'">
+                    <div class="form-group mb-0">
+                        <label for="startDate" class="small fw-bold">Start Date</label>
+                        <input type="date" id="startDate" class="form-control" [(ngModel)]="requestParms.startDate" (change)="getReturnRequests()">
+                    </div>
+                </div>
+                
+                <div class="col-md-2" *ngIf="requestParms.completedYn === 'Y'">
+                    <div class="form-group mb-0">
+                        <label for="endDate" class="small fw-bold">End Date</label>
+                        <input type="date" id="endDate" class="form-control" [(ngModel)]="requestParms.endDate" (change)="getReturnRequests()">
+                    </div>
+                </div>
+
+                <div class="col-md-9 d-flex justify-content-end" *ngIf="selectedRowsCount > 0 && requestParms.completedYn === 'N'">
+                    <div class="d-flex align-items-end gap-3">
+                        <div class="form-group mb-0" style="min-width: 200px;">
+                            <label class="text-primary fw-bold small mb-1"><i class="fa fa-tasks"></i> Bulk Action: Update Status</label>
+                            <select *ngIf="isBulkListReady" appSelect2 class="form-control" #bulkStatusSelect (selectionChanged)="bulkStatusId = +$event">
+                                <option value="0">Select New Status</option>
+                                <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-primary shadow-sm" [disabled]="!bulkStatusId" (click)="onBulkUpdate()">
-                                <i class="fa fa-bolt me-1"></i> Bulk Update Selected
-                            </button>
-                        </div>
+                        <button class="btn btn-primary shadow-sm fw-bold px-4" [disabled]="!bulkStatusId" (click)="onBulkUpdate()" style="height: 38px;">
+                            <i class="fa fa-bolt me-1"></i> Bulk Update Selected
+                        </button>
                     </div>
                 </div>
             </div>
@@ -52,8 +87,7 @@
                 [domLayout]="domLayout"
                 [defaultColDef]="defaultColDef"
                 [components]="frameworkComponents"
-                rowSelection="multiple"
-                [suppressRowClickSelection]="true"
+                [rowSelection]="rowSelectionOptions"
                 (gridReady)="onGridReady($event)"
                 (selectionChanged)="onSelectionChanged()">
             </ag-grid-angular>
@@ -67,7 +101,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Return Request Details</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" (click)="closeModal($event, 'returnDetailModal')">&times;</button>
             </div>
             <div class="modal-body" *ngIf="selectedReturn">
                 <div class="row">
@@ -84,17 +118,17 @@
                         <p><b>Date:</b> {{ selectedReturn.ro_cre_date | date:'dd-MM-yyyy' }}</p>
                     </div>
                 </div>
-                <hr>
-                <h6><b>Bank Details for Refund</b></h6>
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <p><b>Bank:</b> {{ selectedReturn.ro_bank_name }}</p>
+                <div class="row align-items-center mb-4 mt-3">
+                    <div class="col-md-8">
+                        <h6 class="fw-bold text-primary mb-0"><i class="fa fa-university me-2"></i> Refund Management</h6>
+                        <p class="text-muted small mb-0 mt-1">Process refund directly to the original payment method.</p>
                     </div>
-                    <div class="col-md-4">
-                        <p><b>Account:</b> {{ selectedReturn.ro_account_no }}</p>
-                    </div>
-                    <div class="col-md-4">
-                        <p><b>IFSC:</b> {{ selectedReturn.ro_ifsc_code }}</p>
+                    <div class="col-md-4 text-end">
+                        <button *ngIf="selectedReturn.ro_status_name?.toLowerCase() === 'verified' || selectedReturn.ro_status_name?.toLowerCase() === 'approved' || selectedReturn.ro_status_name?.toLowerCase() === 'item received'"
+                                class="btn btn-success fw-bold shadow-sm"
+                                (click)="issueRefund(selectedReturn)">
+                            <i class="fa fa-money me-1"></i> Issue Refund
+                        </button>
                     </div>
                 </div>
 
@@ -112,7 +146,7 @@
                 </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal($event, 'returnDetailModal')">Close</button>
             </div>
         </div>
     </div>

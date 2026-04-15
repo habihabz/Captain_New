@@ -73,5 +73,17 @@ namespace Erp.Server.Repository
 
             return list;
         }
+
+        public List<OrderMovementHistory> getOrderMovementHistoriesByReturn(int returnNo)
+        {
+            var _returnNo = new SqlParameter("returnNo", returnNo + "");
+
+            var list = db.Set<OrderMovementHistory>().FromSqlRaw(
+                "EXEC dbo.getOrderMovementHistoriesByReturn @returnNo;",
+                _returnNo
+            ).ToList();
+
+            return list;
+        }
     }
 }

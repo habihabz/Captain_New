@@ -73,6 +73,8 @@ import { OrderReportComponent } from './pages/admin/order.report/order.report.co
 import { ReturnedOrdersComponent } from './pages/returned.orders/returned-orders.component';
 import { StatusComponent } from './pages/status/status.component';
 import { ActionRendererComponent } from './directives/action.renderer';
+import { PromocodeComponent } from './pages/promocode/promocode.component';
+import { RefundManagementComponent } from './pages/admin/refund-management/refund-management.component';
 
 
 // Define a function to get the token
@@ -140,7 +142,9 @@ const jwtConfig: JwtModuleOptions = {
     OrderReportComponent,
     ReturnedOrdersComponent,
     StatusComponent,
-    ActionRendererComponent
+    ActionRendererComponent,
+    PromocodeComponent,
+    RefundManagementComponent
   ],
   imports: [
     BrowserModule,

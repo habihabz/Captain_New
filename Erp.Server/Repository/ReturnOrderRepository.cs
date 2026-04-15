@@ -18,13 +18,10 @@ namespace Erp.Server.Repository
             var _order_no = new SqlParameter("order_no", returnOrder.ro_order_no + "");
             var _reason = new SqlParameter("reason", returnOrder.ro_reason ?? "");
             var _comments = new SqlParameter("comments", returnOrder.ro_comments ?? "");
-            var _bank = new SqlParameter("bank", returnOrder.ro_bank_name ?? "");
-            var _account = new SqlParameter("account", returnOrder.ro_account_no ?? "");
-            var _ifsc = new SqlParameter("ifsc", returnOrder.ro_ifsc_code ?? "");
             var _cre_by = new SqlParameter("cre_by", returnOrder.ro_cre_by + "");
 
-            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.raiseReturnRequest @order_no, @reason, @comments, @bank, @account, @ifsc, @cre_by;", 
-                _order_no, _reason, _comments, _bank, _account, _ifsc, _cre_by).ToList().FirstOrDefault() ?? new DbResult();
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.raiseReturnRequest @order_no, @reason, @comments, @cre_by;", 
+                _order_no, _reason, _comments,  _cre_by).ToList().FirstOrDefault() ?? new DbResult();
             return dbresult;
         }
 
@@ -47,6 +44,23 @@ namespace Erp.Server.Repository
 
             var returnOrders = db.Set<ReturnOrder>().FromSqlRaw("EXEC dbo.getReturnRequests @id, @user, @status;", 
                 _id, _user, _status).ToList();
+
+            // Filter Active vs Completed returns
+            if (!string.IsNullOrEmpty(requestParams.completedYn))
+            {
+                returnOrders = returnOrders.Where(x => (x.ro_completed_yn ?? "N") == requestParams.completedYn).ToList();
+            }
+
+            // Filter Date Range for Completed Returns
+            if (!string.IsNullOrEmpty(requestParams.startDate) && DateTime.TryParse(requestParams.startDate, out DateTime sDate))
+            {
+                returnOrders = returnOrders.Where(x => x.ro_cre_date.Date >= sDate.Date).ToList();
+            }
+            if (!string.IsNullOrEmpty(requestParams.endDate) && DateTime.TryParse(requestParams.endDate, out DateTime eDate))
+            {
+                returnOrders = returnOrders.Where(x => x.ro_cre_date.Date <= eDate.Date).ToList();
+            }
+
             return returnOrders;
         }
 

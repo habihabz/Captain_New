@@ -12,6 +12,7 @@ export class Cart extends Product {
   c_cre_by: number;
   c_cre_by_name: string;
   c_cre_date: string;
+  resolvedImageUrl?: string;
 
   constructor() {
     super();

@@ -1,0 +1,140 @@
+.right_col {
+    background: #f1f5f9;
+    padding: 10px 25px !important;
+}
+
+.nav-tab {
+    background: transparent;
+    border-radius: 12px 12px 0 0 !important;
+    font-size: 13px;
+    color: #64748b;
+    outline: none !important;
+    padding: 12px 24px !important;
+    border-bottom: 3px solid transparent !important;
+}
+
+.active-tab {
+    background: #ffffff;
+    color: #198754;
+    border-bottom: 3px solid #198754 !important;
+}
+
+.nav-tab:hover {
+    background: rgba(255,255,255,0.5);
+    color: #1e293b;
+}
+
+.nav-tab i {
+    margin-right: 12px !important;
+    font-size: 14px;
+}
+
+.nav-tab .badge {
+    margin-left: 12px !important;
+}
+
+/* Ensure gap between icon and text for all buttons and badges */
+.btn i, .info-badge i {
+    margin-right: 10px !important;
+}
+
+.breadcrumb {
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.x_panel {
+    background: #ffffff;
+    padding: 25px !important;
+    position: relative;
+}
+
+.x_title {
+    border-bottom: 1px solid #edf2f7;
+    margin-bottom: 0;
+}
+
+.page-header-text h2 {
+    letter-spacing: -0.2px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-header-text span {
+    line-height: 1.4;
+    display: block;
+}
+
+.alert-custom {
+    transition: all 0.3s ease;
+    min-height: 70px;
+}
+
+.alert-custom .icon-holder {
+    width: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.alert-custom p {
+    line-height: 1.5;
+}
+
+.alert-custom:hover {
+    transform: translateX(5px);
+}
+
+.grid-card {
+    border: 1px solid #e2e8f0 !important;
+}
+
+.ag-theme-quartz {
+    --ag-header-background-color: #f8fafc;
+    --ag-header-foreground-color: #475569;
+    --ag-header-height: 48px;
+    --ag-row-hover-color: #f1f5f9;
+    --ag-border-color: #e2e8f0;
+    --ag-font-size: 13px;
+    --ag-font-family: 'Inter', sans-serif;
+}
+
+/* Custom button style for Issue Refund */
+::ng-deep .btn-issue-refund {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white !important;
+    font-weight: 700;
+    font-size: 11px;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px; /* Modern square-ish rounded look instead of pill */
+    box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Fixed gap between icon and text */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+}
+
+::ng-deep .btn-issue-refund:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(5, 150, 105, 0.3);
+    filter: brightness(1.1);
+}
+
+::ng-deep .btn-issue-refund i {
+    font-size: 13px;
+    margin: 0 !important; /* Reset any global margins for this flex child */
+}
+
+.empty-state-icon i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.25; }
+    50% { transform: scale(1.05); opacity: 0.35; }
+    100% { transform: scale(1); opacity: 0.25; }
+}

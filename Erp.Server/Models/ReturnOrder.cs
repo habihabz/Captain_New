@@ -14,10 +14,6 @@ namespace Erp.Server.Models
         public int ro_status { get; set; }
         public string? ro_status_name { get; set; } = string.Empty;
 
-        public string? ro_bank_name { get; set; } = string.Empty;
-        public string? ro_account_no { get; set; } = string.Empty;
-        public string? ro_ifsc_code { get; set; } = string.Empty;
-
         public string? ro_reason { get; set; } = string.Empty;
         public string? ro_comments { get; set; } = string.Empty;
 
@@ -26,9 +22,11 @@ namespace Erp.Server.Models
 
         public DateTime ro_cre_date { get; set; } = DateTime.Now;
 
-        // Joined Data for List View
-        public string? p_name { get; set; } = string.Empty; 
-        public string? co_customer_name { get; set; } = string.Empty;
-        public decimal? co_net_amount { get; set; }
+        public string? ro_prod_name { get; set; } = string.Empty; 
+        public string? ro_customer_name { get; set; } = string.Empty;
+        public decimal? ro_net_amount { get; set; }
+        public string? ro_payment_id { get; set; }
+        public string? ro_completed_yn { get; set; } = "N";
+
     }
 }

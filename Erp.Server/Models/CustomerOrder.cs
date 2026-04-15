@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Erp.Server.Models
@@ -38,7 +38,7 @@ namespace Erp.Server.Models
         [Column(TypeName = "decimal(10,3)")]
         public decimal? co_discount_amount { get; set; }
 
-        [MaxLength(10)]
+        [MaxLength(15)]
         public string? co_promo_code { get; set; } = string.Empty;
 
         [Column(TypeName = "decimal(10,3)")]
@@ -55,10 +55,14 @@ namespace Erp.Server.Models
 
         [Column(TypeName = "decimal(10,3)")]
         public decimal? co_net_amount { get; set; }
+        public string? co_is_canceled { get; set; } = string.Empty;
+        public string? co_completed_yn { get; set; } = string.Empty;
 
         public int? co_cre_by { get; set; }
         public string? co_cre_by_name { get; set; } = string.Empty;
 
+        public string? co_payment_id { get; set; } = string.Empty;
+        public string? co_refund_id { get; set; } = string.Empty;
         public DateTime co_cre_date { get; set; } = DateTime.Now;
     }
 }

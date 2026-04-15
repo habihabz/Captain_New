@@ -35,10 +35,13 @@ export class CustomerOrder extends ProductForExtend {
 
     co_status: number;
     co_status_name: string;
+    co_is_canceled: string;
+    co_completed_yn: string;
 
     co_cre_by: number;
     co_cre_by_name: string;
     co_cre_date: string;
+    resolvedImageUrl?: string;
 
     constructor() {
         super();
@@ -76,6 +79,8 @@ export class CustomerOrder extends ProductForExtend {
 
         this.co_status = 0;
         this.co_status_name = '';
+        this.co_is_canceled = '';
+        this.co_completed_yn = '';
 
         this.co_cre_by = 0;
         this.co_cre_by_name = '';

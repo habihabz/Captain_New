@@ -9,7 +9,7 @@
       </li>
     </ol>
   </nav>
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
       <div class="col-md-12 col-sm-12">
         <div class="filter-container d-flex justify-content-end">
@@ -28,56 +28,96 @@
       </div>
       <div class="row" style="height: 100%;">
         <!-- Filter Sidebar -->
-        <div class="col-md-2 col-sm-4" style="max-height: 80vh; overflow-y: auto; overflow-x: hidden;">
-          <mat-list>
-            <!-- Category Section -->
-            <h4 matSubheader (click)="toggleSection('category')" class="cursor-pointer"> Category &nbsp;
-              <i class="fa" [ngClass]="openSection === 'category' ? 'fa-angle-up' : 'fa-angle-down'"></i>
-            </h4>
-            <div *ngIf="openSection === 'category'">
-              <mat-list-item *ngFor="let category of categories">
-                <input type="checkbox" id="category-{{ category.ct_id }}"
-                  (change)="onCategoryChange($event, category.ct_id)" />&nbsp;
-                <label for="category-{{ category.ct_id }}">
-                  {{ category.ct_name }}
-                </label>
-              </mat-list-item>
+        <div class="col-md-3 col-sm-4 shop-sidebar">
+          <div class="filter-card shadow-sm rounded-4 bg-white p-3 mb-4">
+            <h5 class="fw-bold mb-4 text-dark d-flex align-items-center">
+              <i class="fa fa-filter me-2 text-primary"></i> Filters
+            </h5>
+
+            <!-- HIERARCHICAL TREE -->
+            <div class="hierarchy-container">
+              <div *ngFor="let cat of hierarchy" class="tree-node border-bottom border-light py-2">
+                <div class="d-flex align-items-center gap-2 py-1">
+                  <i class="fa cursor-pointer text-muted" 
+                     [ngClass]="cat.isOpen ? 'fa-chevron-down' : 'fa-chevron-right'"
+                     style="font-size: 10px; width: 12px;"
+                     (click)="toggleNode(cat)"></i>
+                  <div class="custom-control custom-checkbox d-flex align-items-center">
+                    <input type="checkbox" class="custom-control-input" [id]="'cat-'+cat.id"
+                           [checked]="isCategorySelected(cat.id)" (change)="onCategoryChange($event, cat.id)">
+                    <label class="custom-control-label fw-bold small text-dark cursor-pointer ms-2 mb-0" [for]="'cat-'+cat.id" 
+                           (click)="toggleNode(cat)">{{ cat.name }}</label>
+                  </div>
+                </div>
+
+                <!-- LEVEL 2: SUBCATEGORY -->
+                <div class="ms-4 tree-children" *ngIf="cat.isOpen">
+                  <div *ngFor="let sub of cat.children" class="tree-node py-1">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="fa cursor-pointer text-muted" 
+                         [ngClass]="sub.isOpen ? 'fa-minus' : 'fa-plus'"
+                         style="font-size: 8px; width: 12px;"
+                         (click)="toggleNode(sub)"></i>
+                      <div class="custom-control custom-checkbox d-flex align-items-center">
+                        <input type="checkbox" class="custom-control-input" [id]="'sub-'+sub.id"
+                               [checked]="isSubCategorySelected(sub.id)" (change)="onSubCategoryChange($event, sub.id)">
+                        <label class="custom-control-label small text-muted cursor-pointer ms-2 mb-0" [for]="'sub-'+sub.id"
+                               (click)="toggleNode(sub)">{{ sub.name }}</label>
+                      </div>
+                    </div>
+
+                    <!-- LEVEL 3: DIVISION -->
+                    <div class="ms-3 tree-children" *ngIf="sub.isOpen">
+                      <div *ngFor="let div of sub.children" class="tree-node py-1">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="fa cursor-pointer text-muted-extra" 
+                             [ngClass]="div.isOpen ? 'fa-caret-down' : 'fa-caret-right'"
+                             style="font-size: 10px; width: 10px;"
+                             (click)="toggleNode(div)"></i>
+                          <div class="custom-control custom-checkbox d-flex align-items-center">
+                            <input type="checkbox" class="custom-control-input" [id]="'div-'+div.id"
+                                   [checked]="isDivisionSelected(div.id)" (change)="onDivisionChange($event, div.id)">
+                            <label class="custom-control-label x-small text-muted cursor-pointer ms-2 mb-0" [for]="'div-'+div.id" 
+                                   style="font-size: 11px;" (click)="toggleNode(div)">{{ div.name }}</label>
+                          </div>
+                        </div>
+
+                        <!-- LEVEL 4: SUB DIVISION -->
+                        <div class="ms-3 tree-children" *ngIf="div.isOpen">
+                          <div *ngFor="let sdiv of div.children" class="tree-node py-1">
+                            <div class="custom-control custom-checkbox ms-2 d-flex align-items-center">
+                              <input type="checkbox" class="custom-control-input" [id]="'sdiv-'+sdiv.id"
+                                     [checked]="isSubDivisionSelected(sdiv.id)" (change)="onSubDivisionChange($event, sdiv.id)">
+                              <label class="custom-control-label xx-small text-muted cursor-pointer ms-2 mb-0" [for]="'sdiv-'+sdiv.id" 
+                                     style="font-size: 10px;">{{ sdiv.name }}</label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <hr />
-            <!-- Subcategory Section -->
-            <h4 matSubheader (click)="toggleSection('subcategory')" class="cursor-pointer"> Sub Category &nbsp;
-              <i class="fa" [ngClass]="openSection === 'subcategory' ? 'fa-angle-up' : 'fa-angle-down'"></i>
-            </h4>
-            <div *ngIf="openSection === 'subcategory'">
-              <mat-list-item *ngFor="let sc of subcategories">
-                <input type="checkbox" id="subcategory-{{ sc.md_name }}"
-                  (change)="onSubCategoryChange($event, sc.md_id)" />
-                &nbsp;
-                <label for="subcategory-{{ sc.md_name }}">
-                  {{ sc.md_name }}
-                </label>
-              </mat-list-item>
+
+            <!-- SIZE SECTION -->
+            <div class="mt-4 pt-3 border-top">
+              <h6 class="fw-bold mb-3 small text-uppercase" style="letter-spacing: 1px;">By Size</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <div *ngFor="let sz of sizes" class="size-chip" [ngClass]="{'active': selectedSizeIds.includes(sz.md_id)}">
+                  <input type="checkbox" [id]="'sz-'+sz.md_id" class="d-none"
+                         (change)="onSizeChange($event, sz.md_id)">
+                  <label [for]="'sz-'+sz.md_id" class="cursor-pointer px-3 py-1 border rounded-pill small transition-all">
+                    {{ sz.md_name }}
+                  </label>
+                </div>
+              </div>
             </div>
-            <hr />
-            <!-- size Section -->
-            <h4 matSubheader (click)="toggleSection('size')" class="cursor-pointer"> Size &nbsp;
-              <i class="fa" [ngClass]="openSection === 'size' ? 'fa-angle-up' : 'fa-angle-down'"></i>
-            </h4>
-            <div *ngIf="openSection === 'size'">
-              <mat-list-item *ngFor="let sz of sizes">
-                <input type="checkbox" id="size-{{ sz.md_name }}" (change)="onSizeChange($event, sz.md_id)" />
-                &nbsp;
-                <label for="size-{{ sz.md_name }}">
-                  {{ sz.md_name }}
-                </label>
-              </mat-list-item>
-            </div>
-            <hr />
-          </mat-list>
+          </div>
         </div>
 
         <!-- Products Area -->
-        <div class="col-md-10 col-sm-8" style="max-height: 80vh; overflow-y: auto; overflow-x: hidden;">
+        <div class="col-md-9 col-sm-8">
           <div class="row">
             <div *ngFor="let product of this.products" class="col-md-3 col-sm-12">
               <div class="product">

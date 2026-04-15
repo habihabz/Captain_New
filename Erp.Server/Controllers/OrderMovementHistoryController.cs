@@ -25,16 +25,23 @@ namespace Erp.Server.Controllers
 
         [HttpPost("getOrderMovementHistories")]
         [Authorize]
-        public IEnumerable<OrderMovementHistory> getOrderMovementHistories()
+        public List<OrderMovementHistory> getOrderMovementHistories()
         {
             return ihistory.getOrderMovementHistories();
         }
 
         [HttpPost("getOrderMovementHistoriesByOrder")]
         [Authorize]
-        public IEnumerable<OrderMovementHistory> getOrderMovementHistoriesByOrder([FromBody] int orderNo)
+        public List<OrderMovementHistory> getOrderMovementHistoriesByOrder([FromBody] int orderNo)
         {
             return ihistory.getOrderMovementHistoriesByOrder(orderNo);
+        }
+
+        [HttpPost("getOrderMovementHistoriesByReturn")]
+        [Authorize]
+        public List<OrderMovementHistory> getOrderMovementHistoriesByReturn([FromBody] int returnNo)
+        {
+            return ihistory.getOrderMovementHistoriesByReturn(returnNo);
         }
 
         [HttpPost("getOrderMovementHistory")]

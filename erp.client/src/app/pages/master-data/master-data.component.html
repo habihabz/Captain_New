@@ -6,11 +6,10 @@
           <i class="fa fa-plus-circle"></i> Create
         </button>
         <div style="width: 280px;">
-          <select appSelect2 #masterTypeSelect id="masterTypeSelect" class="form-control" 
-                  [(ngModel)]="masterType" name="masterType"
-                  placeholder="Filter by data type..."
-                  (selectionChanged)="onOptionChange($event);">
-            <option *ngFor="let mt of masterTypes" [value]="mt.type">{{ mt.name }}</option>
+          <select appSelect2 #masterTypeSelect id="masterTypeSelect" class="form-control text-black"
+            [(ngModel)]="masterType" name="masterType" placeholder="Filter by data type..."
+            (selectionChanged)="onOptionChange($event);">
+            <option *ngFor="let mt of masterTypes" [value]="mt.type">{{ mt.type }}</option>
           </select>
         </div>
       </div>
@@ -19,17 +18,9 @@
     <div class="x_content">
       <div class="row">
         <div class="col-12">
-          <ag-grid-angular
-            #masterGrid
-            style="width: 100%; height: 75vh;"
-            class="ag-theme-quartz ag-theme-acmecorp"
-            [rowData]="masterDatas"
-            [columnDefs]="colDefs"
-            [pagination]="pagination"
-            [defaultColDef]="defaultColDef"
-            [components]="frameworkComponents"
-            [domLayout]="domLayout"
-            (gridReady)="onGridReady($event)">
+          <ag-grid-angular #masterGrid style="width: 100%; height: 75vh;" class="ag-theme-quartz ag-theme-acmecorp"
+            [rowData]="masterDatas" [columnDefs]="colDefs" [pagination]="pagination" [defaultColDef]="defaultColDef"
+            [components]="frameworkComponents" [domLayout]="domLayout" (gridReady)="onGridReady($event)">
           </ag-grid-angular>
         </div>
       </div>

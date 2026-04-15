@@ -9,5 +9,6 @@ namespace Erp.Server.Services
         OrderMovementHistory getOrderMovementHistory(int id);
         List<OrderMovementHistory> getOrderMovementHistories();
         List<OrderMovementHistory> getOrderMovementHistoriesByOrder(int orderNo);
+        List<OrderMovementHistory> getOrderMovementHistoriesByReturn(int returnNo);
     }
 }

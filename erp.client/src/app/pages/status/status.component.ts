@@ -47,7 +47,10 @@ export class StatusComponent implements OnInit {
       flex: 3,
       cellClass: 'text-muted border-end-0',
       valueFormatter: (params: any) => {
-        return params.value == 1 ? 'ORDER PROCESSING' : 'RETURNS MANAGEMENT';
+        if (params.value == 1) return 'ORDER PROCESSING';
+        if (params.value == 2) return 'RETURNS MANAGEMENT';
+        if (params.value == 3) return 'REFUND PROCESSING';
+        return 'UNKNOWN';
       }
     },
     {

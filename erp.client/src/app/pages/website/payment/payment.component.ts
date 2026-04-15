@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 declare var Razorpay: any;
 
@@ -8,7 +8,7 @@ declare var Razorpay: any;
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.css'
 })
-export class PaymentComponent {
+export class PaymentComponent implements OnDestroy {
     private apiUrl = `${environment.serverHostAddress}/api/payment/create-order`;
     razorpayLoaded = false;
   
@@ -16,13 +16,16 @@ export class PaymentComponent {
 
   loadRazorpay() {
     return new Promise((resolve, reject) => {
-      if (this.razorpayLoaded) {
+      const existing = document.querySelector('script[src*="razorpay"]');
+      if (existing) {
+        this.razorpayLoaded = true;
         resolve(true);
         return;
       }
 
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.id = 'razorpay-checkout-js';
       script.onload = () => {
         this.razorpayLoaded = true;
         resolve(true);
@@ -30,6 +33,24 @@ export class PaymentComponent {
       script.onerror = () => reject(false);
       document.body.appendChild(script);
     });
+  }
+
+  cleanupRazorpay() {
+    const scripts = document.querySelectorAll('script[src*="razorpay"]');
+    scripts.forEach(s => s.remove());
+    
+    const iframes = document.querySelectorAll('iframe[src*="razorpay"]');
+    iframes.forEach(i => i.remove());
+    
+    if ((window as any).Razorpay) {
+      delete (window as any).Razorpay;
+    }
+    
+    this.razorpayLoaded = false;
+  }
+
+  ngOnDestroy() {
+    this.cleanupRazorpay();
   }
 
   async pay() {

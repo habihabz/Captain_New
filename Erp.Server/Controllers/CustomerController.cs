@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Repository;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -15,20 +15,22 @@ namespace Erp.Server.Controllers
         private readonly IUser iuser;
         private readonly ICustomer icustomer;
         private readonly IJwtAuthManager ijwtAuthManager;
+        private readonly ILogin ilogin;
 
-        public CustomerController(ILogger<CustomerController> _logger,IUser _iuser,ICustomer _icustomer, IJwtAuthManager _ijwtAuthManager)
+        public CustomerController(ILogger<CustomerController> _logger, IUser _iuser, ICustomer _icustomer, IJwtAuthManager _ijwtAuthManager, ILogin _ilogin)
         {
             logger = _logger;
             iuser = _iuser;
             icustomer = _icustomer;
             ijwtAuthManager = _ijwtAuthManager;
+            ilogin = _ilogin;
 
         }
         [HttpPost("getCustomers")]
         [Authorize]
         public IEnumerable<Customer> getCustomers()
         {
-            IEnumerable<Customer> customers =Enumerable.Empty<Customer>();
+            IEnumerable<Customer> customers = Enumerable.Empty<Customer>();
             customers = icustomer.getCustomers();
             return customers;
         }
@@ -36,7 +38,7 @@ namespace Erp.Server.Controllers
         [Authorize]
         public DbResult deleteCustomer([FromBody] int id)
         {
-            DbResult dbResult=new DbResult();
+            DbResult dbResult = new DbResult();
             dbResult = icustomer.deleteCustomer(id);
             return dbResult;
         }
@@ -56,8 +58,8 @@ namespace Erp.Server.Controllers
             DbResult dbResult = new DbResult();
             dbResult = icustomer.createOrUpdateCustomer(customer);
             return dbResult;
-        } 
-        
+        }
+
         [HttpPost("registerCustomer")]
         public DbResult registerCustomer([FromBody] Customer customer)
         {
@@ -76,6 +78,7 @@ namespace Erp.Server.Controllers
 
             try
             {
+                // 1. Try Customer Login
                 var dbResult = icustomer.getCustomerLogin(Login.username, Login.password);
                 if (dbResult.message == "Success")
                 {
@@ -92,10 +95,34 @@ namespace Erp.Server.Controllers
                     };
                     return Ok(credentials);
                 }
-                else
+                
+                // 2. Fallback to Admin/User Login if Customer not found
+                var adminLoginResult = ilogin.getlogin(Login.username, Login.password);
+                if (adminLoginResult.message == "Success")
                 {
-                    return Unauthorized(new CustomerCredentials { username = Login.username, message = dbResult.message, customer = null });
+                    User user = iuser.getUserByUsername(Login.username);
+                    
+                    // Map User to a Customer-like object for the Flutter app
+                    Customer tempCustomer = new Customer
+                    {
+                        c_id = user.u_id,
+                        c_name = user.u_name,
+                        c_username = user.u_username,
+                        c_email = user.u_email,
+                        c_phone = user.u_phone ?? ""
+                    };
+                    
+                    var token = ijwtAuthManager.GenerateToken(Login.username);
+                    return Ok(new CustomerCredentials
+                    {
+                        username = Login.username,
+                        token = token,
+                        message = "Success",
+                        customer = tempCustomer
+                    });
                 }
+
+                return Unauthorized(new CustomerCredentials { username = Login.username, message = dbResult.message, customer = null });
             }
             catch (Exception ex)
             {
@@ -103,5 +130,20 @@ namespace Erp.Server.Controllers
             }
         }
 
+        [HttpPost("updatePassword")]
+        [Authorize]
+        public DbResult updatePassword([FromBody] PasswordUpdateRequest request)
+        {
+            DbResult dbResult = new DbResult();
+            dbResult = icustomer.updatePassword(request.userId, request.newPassword);
+            return dbResult;
+        }
+
+    }
+
+    public class PasswordUpdateRequest
+    {
+        public int userId { get; set; }
+        public string newPassword { get; set; }
     }
 }

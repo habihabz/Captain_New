@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ColDef, DomLayoutType, GridReadyEvent } from 'ag-grid-community';
+import { ColDef, DomLayoutType, GridReadyEvent, RowSelectionOptions } from 'ag-grid-community';
 import { User } from '../../models/user.model';
 import { Subscription, forkJoin } from 'rxjs';
 import { DbResult } from '../../models/dbresult.model';
@@ -14,6 +14,8 @@ import { Status } from '../../models/status.model';
 import { RequestParms } from '../../models/requestParms';
 import { IOrderMovementHistoryService } from '../../services/iorder.movement.history.service';
 import { OrderMovementHistory } from '../../models/order.movement.history.model';
+import { IPaymentService, RefundRequest } from '../../services/ipayment.service';
+import { ICustomerOrder } from '../../services/icustomer.order.service';
 declare var $: any;
 
 @Component({
@@ -34,7 +36,13 @@ export class ReturnedOrdersComponent implements OnInit {
   bulkStatusId: number = 0;
   bulkUpdateStatuses: Status[] = [];
   isBulkListReady: boolean = true;
-  
+  rowSelectionOptions: RowSelectionOptions = {
+    mode: 'multiRow',
+    checkboxes: true,
+    headerCheckbox: true,
+    enableClickSelection: false,
+  };
+
   @ViewChild('returnOrderGrid') returnOrderGrid!: AgGridAngular;
 
   constructor(
@@ -43,28 +51,21 @@ export class ReturnedOrdersComponent implements OnInit {
     private ireturnOrder: IReturnOrderService,
     private statusService: StatusService,
     private snackBarService: SnackBarService,
-    private iOrderMovementHistoryService: IOrderMovementHistoryService
+    private iOrderMovementHistoryService: IOrderMovementHistoryService,
+    private paymentService: IPaymentService,
+    private icustomerOrder: ICustomerOrder
   ) {
     this.currentUser = iuser.getCurrentUser();
   }
 
   colDefs: ColDef[] = [
+
     {
-      headerName: "",
-      field: "check",
-      checkboxSelection: true,
-      headerCheckboxSelection: true,
-      width: 50,
-      pinned: 'left',
-      headerClass: 'text-center',
-      cellClass: 'text-center'
-    },
-    { 
-      headerName: "Return ID", 
-      field: "ro_id", 
+      headerName: "Return ID",
+      field: "ro_id",
       width: 100,
       cellClass: 'text-center fw-bold text-muted',
-      headerClass: 'text-center' 
+      headerClass: 'text-center'
     },
     {
       headerName: 'Actions',
@@ -82,56 +83,65 @@ export class ReturnedOrdersComponent implements OnInit {
             icon: 'fa fa-eye',
             action: 'onDetails',
             onDetails: (data: any) => this.onAction('details', data)
+          },
+          {
+            name: '',
+            tooltip: 'Raise Refund Request',
+            cssClass: 'btn btn-outline-warning btn-xs rounded-pill ms-1',
+            icon: 'fa fa-paper-plane',
+            action: 'onRaiseRefund',
+            isVisible: (data: any) => {
+              const status = (data.ro_status_name || '').toLowerCase();
+              return status === 'verified';
+            },
+            onRaiseRefund: (data: any) => this.onAction('raiseRefund', data)
           }
         ]
       }
     },
-    { 
-      headerName: "Customer", 
-      field: "co_customer_name", 
+    {
+      headerName: "Customer",
+      field: "co_customer_name",
       flex: 1.2,
       headerClass: 'text-start'
     },
-    { 
-      headerName: "Product", 
-      field: "p_name", 
+    {
+      headerName: "Product",
+      field: "p_name",
       flex: 1.5,
       headerClass: 'text-start'
     },
-    { 
-        headerName: "Amount", 
-        field: "co_net_amount",
-        width: 120,
-        headerClass: 'text-end',
-        cellClass: 'text-end fw-bold text-success',
-        valueFormatter: p => "₹ " + Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })
+    {
+      headerName: "Amount",
+      field: "co_net_amount",
+      width: 120,
+      headerClass: 'text-end',
+      cellClass: 'text-end fw-bold text-success',
+      valueFormatter: p => "₹ " + Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })
     },
     { headerName: "Return Reason", field: "ro_reason", width: 180, headerClass: 'text-start' },
-    { 
-        headerName: "Status", 
-        field: "ro_status_name", 
-        width: 140,
-        headerClass: 'text-center',
-        cellClass: 'text-center',
-        cellRenderer: (p: any) => {
-          const val = p.data.ro_status_name || p.data.co_status_name;
-          if (!val) return '';
-          const isApproved = val.toLowerCase().includes('approve');
-          const isRejected = val.toLowerCase().includes('reject');
-          const color = isApproved ? '#198754' : (isRejected ? '#dc3545' : '#6c757d');
-          return `<span style="background-color: ${color}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">${val}</span>`;
-        }
+    {
+      headerName: "Status",
+      field: "ro_status_name",
+      width: 140,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const val = p.data.ro_status_name || p.data.co_status_name;
+        if (!val) return '';
+        const isApproved = val.toLowerCase().includes('approve') || val.toLowerCase().includes('verif');
+        const isRejected = val.toLowerCase().includes('reject');
+        const color = isApproved ? '#198754' : (isRejected ? '#dc3545' : '#6c757d');
+        return `<span style="background-color: ${color}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">${val}</span>`;
+      }
     },
-    { headerName: "Bank Name", field: "ro_bank_name", width: 130, headerClass: 'text-start' },
-    { headerName: "A/C No", field: "ro_account_no", width: 140, headerClass: 'text-start' },
-    { headerName: "IFSC", field: "ro_ifsc_code", width: 110, headerClass: 'text-center', cellClass: 'text-center' },
-    { 
-        headerName: "Created On", 
-        field: "ro_cre_date", 
-        width: 130,
-        headerClass: 'text-center',
-        cellClass: 'text-center',
-        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    {
+      headerName: "Created On",
+      field: "ro_cre_date",
+      width: 130,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
     }
   ];
 
@@ -164,8 +174,18 @@ export class ReturnedOrdersComponent implements OnInit {
     this.isBulkListReady = false;
     this.bulkUpdateStatuses = this.statuses.filter(x => Number(x.s_id) !== Number(this.requestParms.status));
     setTimeout(() => {
-        this.isBulkListReady = true;
+      this.isBulkListReady = true;
     }, 50);
+  }
+
+  setTab(tab: string) {
+    this.requestParms.completedYn = tab;
+    // reset date filters if switching to Active Returns
+    if (tab === 'N') {
+      this.requestParms.startDate = '';
+      this.requestParms.endDate = '';
+    }
+    this.getReturnRequests();
   }
 
   onStatusFilterChange(event: any) {
@@ -190,17 +210,67 @@ export class ReturnedOrdersComponent implements OnInit {
       $("#returnDetailModal").modal("show");
     } else if (action === 'statusChange') {
       $("#ReturnStatusModal").modal("show");
+    } else if (action === 'raiseRefund') {
+      if (confirm('Move this order to "Payment Initiated" for the accounts team?')) {
+        this.updateReturnStatus(14); // 14: Payment Initiated
+      }
     }
   }
 
   getOrderMovementHistory(orderId: number) {
-    this.iOrderMovementHistoryService.getOrderMovementHistoriesByOrder(orderId).subscribe(
+    this.iOrderMovementHistoryService.getOrderMovementHistoriesByReturn(orderId).subscribe(
       (data: OrderMovementHistory[]) => {
         this.orderMovementHistories = data;
       },
       (error: any) => {
       }
     );
+  }
+
+  issueRefund(order: ReturnOrder) {
+    this.selectedReturn = order;
+
+    // Fetch the customer order to get the payment reference explicitly
+    this.icustomerOrder.getCustomerOrder(order.ro_order_no).subscribe({
+      next: (orderData: any) => {
+        const paymentId = orderData?.co_payment_id;
+
+        if (!paymentId) {
+          this.snackBarService.showError("No payment reference found for this order. Cannot process automatic refund.");
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to issue a refund of ₹${order.co_net_amount} for this order via Razorpay?`)) {
+          return;
+        }
+
+        const refundRequest: RefundRequest = {
+          paymentId: paymentId,
+          amount: order.co_net_amount || 0,
+          orderId: order.ro_order_no
+        };
+
+        this.paymentService.processRefund(refundRequest).subscribe({
+          next: (res) => {
+            if (res.status === 'success') {
+              this.snackBarService.showSuccess("Refund processed successfully!");
+              // Update status to Refund Completed (ID 15)
+              this.updateReturnStatus(15);
+              $("#returnDetailModal").modal("hide");
+            } else {
+              this.snackBarService.showError(res.message || "Failed to process refund.");
+            }
+          },
+          error: (err) => {
+            const errorMsg = err.error?.message || err.error || err.message;
+            this.snackBarService.showError("An error occurred while processing the refund: " + errorMsg);
+          }
+        });
+      },
+      error: (err) => {
+        this.snackBarService.showError("Failed to fetch order details to process refund.");
+      }
+    });
   }
 
   updateReturnStatus(newStatus: number) {
@@ -257,15 +327,22 @@ export class ReturnedOrdersComponent implements OnInit {
     });
 
     forkJoin(updates).subscribe({
-        next: (results) => {
-            const successes = results.filter(r => r.message === "Success").length;
-            this.snackBarService.showSuccess(`Batch process completed: ${successes} returns updated successfully.`);
-            this.getReturnRequests();
-            this.bulkStatusId = 0;
-        },
-        error: (err) => {
-            this.snackBarService.showError("Batch update failed. Please try again.");
-        }
+      next: (results) => {
+        const successes = results.filter(r => r.message === "Success").length;
+        this.snackBarService.showSuccess(`Batch process completed: ${successes} returns updated successfully.`);
+        this.getReturnRequests();
+        this.bulkStatusId = 0;
+      },
+      error: (err) => {
+        this.snackBarService.showError("Batch update failed. Please try again.");
+      }
     });
+  }
+
+  closeModal(event: any, modalId: string) {
+    if (event && event.target) {
+      event.target.blur(); // Remove focus to fix aria-hidden descendant focus warning
+    }
+    $('#' + modalId).modal('hide');
   }
 }

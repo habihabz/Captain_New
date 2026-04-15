@@ -30,12 +30,22 @@ export class ShopComponent implements OnInit {
   product: Product = new Product();
   products: Product[] = [];
   filteredProducts: Product[] = [];
+  
+  // Flat filters for selections
   categories: Category[] = [];
   selectedCategoryIds: number[] = [];
   subcategories: MasterData[] = [];
   selectedSubCategoryIds: number[] = [];
+  divisions: MasterData[] = [];
+  selectedDivisionIds: number[] = [];
+  subdivisions: MasterData[] = [];
+  selectedSubDivisionIds: number[] = [];
   sizes: MasterData[] = [];
   selectedSizeIds: number[] = [];
+
+  // Hierarchical structure
+  hierarchy: any[] = [];
+  
   requestParms: RequestParms = new RequestParms();
   subscription: Subscription = new Subscription();
   attachments: ProdAttachement[] = [];
@@ -69,6 +79,8 @@ export class ShopComponent implements OnInit {
     this.loadCategories();
     this.getProductsByCountry();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
+    this.getMasterDatasByType("Division", (data) => { this.divisions = data; });
+    this.getMasterDatasByType("SubDivision", (data) => { this.subdivisions = data; });
     this.getMasterDatasByType("ProductSize", (data) => { this.sizes = data; });
 
   }
@@ -76,6 +88,7 @@ export class ShopComponent implements OnInit {
     this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
       (data: Product[]) => {
         this.products = data;
+        this.buildHierarchy();
       },
       (error: any) => {
       }
@@ -145,6 +158,26 @@ export class ShopComponent implements OnInit {
 
   }
 
+  onDivisionChange(event: Event, divisionId: number): void {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedDivisionIds.push(divisionId);
+    } else {
+      this.selectedDivisionIds = this.selectedDivisionIds.filter(id => id !== divisionId);
+    }
+    this.getProductsByFilters();
+  }
+
+  onSubDivisionChange(event: Event, subDivisionId: number): void {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedSubDivisionIds.push(subDivisionId);
+    } else {
+      this.selectedSubDivisionIds = this.selectedSubDivisionIds.filter(id => id !== subDivisionId);
+    }
+    this.getProductsByFilters();
+  }
+
 
   onSizeChange(event: Event, sizeId: number) {
 
@@ -168,16 +201,71 @@ export class ShopComponent implements OnInit {
     this.productSearchParms.sizes = this.selectedSizeIds + '';
     this.productSearchParms.categories = this.selectedCategoryIds + '';
     this.productSearchParms.subcategories = this.selectedSubCategoryIds + '';
+    this.productSearchParms.divisions = this.selectedDivisionIds + '';
+    this.productSearchParms.subdivisions = this.selectedSubDivisionIds + '';
     this.productSearchParms.country = this.country.md_id;
     this.iproductService.getProductsByFilters(this.productSearchParms).subscribe(
       (data: Product[]) => {
         this.products = data;
+        // Optimization: only build hierarchy if no filters are applied, 
+        // OR build it but preserve open states. 
+        // For simplicity, we re-build it.
+        this.buildHierarchy();
       },
       (error: any) => {
       }
     );
 
   }
+  buildHierarchy() {
+    if (!this.products || this.products.length === 0) return;
+
+    const root: any[] = [];
+    this.products.forEach(p => {
+      // 1. Category
+      let cat = root.find((c: any) => c.id === p.p_category);
+      if (!cat && p.p_category) {
+        cat = { id: p.p_category, name: p.p_category_name, type: 'category', children: [], isOpen: false };
+        root.push(cat);
+      }
+      if (!cat) return;
+
+      // 2. Subcategory
+      let sub = cat.children.find((s: any) => s.id === p.p_sub_category);
+      if (!sub && p.p_sub_category) {
+        sub = { id: p.p_sub_category, name: p.p_sub_category_name, type: 'subcategory', children: [], isOpen: false };
+        cat.children.push(sub);
+      }
+      if (!sub) return;
+
+      // 3. Division
+      let div = sub.children.find((d: any) => d.id === p.p_division);
+      if (!div && p.p_division) {
+        div = { id: p.p_division, name: p.p_division_name, type: 'division', children: [], isOpen: false };
+        sub.children.push(div);
+      }
+      if (!div) return;
+
+      // 4. SubDivision
+      let sdiv = div.children.find((sd: any) => sd.id === p.p_sub_division);
+      if (!sdiv && p.p_sub_division) {
+        sdiv = { id: p.p_sub_division, name: p.p_sub_division_name, type: 'subdivision', children: [], isOpen: false };
+        div.children.push(sdiv);
+      }
+    });
+
+    this.hierarchy = root;
+  }
+
+  toggleNode(node: any) {
+    node.isOpen = !node.isOpen;
+  }
+
+  isCategorySelected(id: number) { return this.selectedCategoryIds.includes(id); }
+  isSubCategorySelected(id: number) { return this.selectedSubCategoryIds.includes(id); }
+  isDivisionSelected(id: number) { return this.selectedDivisionIds.includes(id); }
+  isSubDivisionSelected(id: number) { return this.selectedSubDivisionIds.includes(id); }
+
   addToFavourites(productId: number) {
 
     if (productId && this.currentUser && this.currentUser.u_id) {
