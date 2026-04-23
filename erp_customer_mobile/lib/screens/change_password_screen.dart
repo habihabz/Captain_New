@@ -32,7 +32,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isLoading = true);
     
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    final result = await _authService.updatePassword(auth.customer!.id, _newPasswordController.text);
+    final result = await _authService.updatePassword(auth.customer!.u_id, _newPasswordController.text);
 
     if (!mounted) return;
     setState(() => _isLoading = false);

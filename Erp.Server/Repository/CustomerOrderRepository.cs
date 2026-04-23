@@ -45,8 +45,13 @@ namespace Erp.Server.Repository
         {
             var _id = new SqlParameter("id", id + "");
             var customerorder = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCustomerOrder @id;", _id).ToList().FirstOrDefault() ?? new CustomerOrder();
+            if (customerorder.co_id > 0)
+            {
+                customerorder.details = getCustomerOrderDetails(customerorder.co_id);
+            }
             return customerorder;
         }
+
 
         public List<CustomerOrderDetail> getCustomerOrderDetails(int id)
         {
@@ -57,28 +62,20 @@ namespace Erp.Server.Repository
 
         public List<CustomerOrder> getCustomerOrders(RequestParams requestParms)
         {
-            var _id = new SqlParameter("id", requestParms.id + "");
-            var _user = new SqlParameter("user", requestParms.user + "");
-            var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCustomerOrders @id,@user;", _id, _user).ToList();
+            var _id = new SqlParameter("id", requestParms.id == 0 ? (object)DBNull.Value : requestParms.id);
+            var _user = new SqlParameter("user", requestParms.user == 0 ? (object)DBNull.Value : requestParms.user);
+            var _completedYn = new SqlParameter("completedYn", string.IsNullOrEmpty(requestParms.completedYn) ? (object)DBNull.Value : requestParms.completedYn);
+            var _startDate = new SqlParameter("startDate", string.IsNullOrEmpty(requestParms.startDate) ? (object)DBNull.Value : requestParms.startDate);
+            var _endDate = new SqlParameter("endDate", string.IsNullOrEmpty(requestParms.endDate) ? (object)DBNull.Value : requestParms.endDate);
+            var _status = new SqlParameter("status", requestParms.status == 0 ? (object)DBNull.Value : requestParms.status);
 
-            // Filter Active vs Completed orders
-            if (!string.IsNullOrEmpty(requestParms.completedYn))
-            {
-                customerorders = customerorders.Where(x => (x.co_completed_yn ?? "N") == requestParms.completedYn).ToList();
-            }
-
-            // Filter Date Range for Completed Orders (or generally if parsed)
-            if (!string.IsNullOrEmpty(requestParms.startDate) && DateTime.TryParse(requestParms.startDate, out DateTime sDate))
-            {
-                customerorders = customerorders.Where(x => x.co_cre_date.Date >= sDate.Date).ToList();
-            }
-            if (!string.IsNullOrEmpty(requestParms.endDate) && DateTime.TryParse(requestParms.endDate, out DateTime eDate))
-            {
-                customerorders = customerorders.Where(x => x.co_cre_date.Date <= eDate.Date).ToList();
-            }
+            var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCustomerOrders @id, @user, @completedYn, @startDate, @endDate, @status;", 
+                _id, _user, _completedYn, _startDate, _endDate, _status).ToList();
 
             return customerorders;
         }
+
+
 
         public List<CustomerOrder> getMyOrders(RequestParams requestParms)
         {

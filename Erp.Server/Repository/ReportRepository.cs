@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -37,5 +37,10 @@ namespace Erp.Server.Repository
             return dataTable;
         }
 
+        public DashboardStats getDashboardStats()
+        {
+            var stats = db.Set<DashboardStats>().FromSqlRaw("EXEC dbo.getDashboardStats;").ToList().FirstOrDefault() ?? new DashboardStats();
+            return stats;
+        }
     }
 }

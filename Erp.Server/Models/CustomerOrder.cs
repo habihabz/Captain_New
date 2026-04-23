@@ -56,6 +56,8 @@ namespace Erp.Server.Models
         [Column(TypeName = "decimal(10,3)")]
         public decimal? co_net_amount { get; set; }
         public string? co_is_canceled { get; set; } = string.Empty;
+        public string? co_is_returned { get; set; } = string.Empty;
+        public int? co_return_id { get; set; }
         public string? co_completed_yn { get; set; } = string.Empty;
 
         public int? co_cre_by { get; set; }
@@ -64,5 +66,8 @@ namespace Erp.Server.Models
         public string? co_payment_id { get; set; } = string.Empty;
         public string? co_refund_id { get; set; } = string.Empty;
         public DateTime co_cre_date { get; set; } = DateTime.Now;
+
+        [NotMapped]
+        public List<CustomerOrderDetail>? details { get; set; } = new List<CustomerOrderDetail>();
     }
 }

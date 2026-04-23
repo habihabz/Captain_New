@@ -21,7 +21,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
       if (auth.isAuthenticated) {
-        Provider.of<FavouriteProvider>(context, listen: false).fetchFavourites(auth.customer!.id);
+        Provider.of<FavouriteProvider>(context, listen: false).fetchFavourites(auth.customer!.u_id);
       }
     });
   }
@@ -44,7 +44,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
           ? const Center(child: CircularProgressIndicator())
           : favProvider.favourites.isEmpty
               ? _buildEmptyState()
-              : _buildFavouritesList(favProvider, auth.customer!.id),
+              : _buildFavouritesList(favProvider, auth.customer!.u_id),
     );
   }
 
@@ -95,7 +95,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.grey[100]!),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
               ],
             ),
             child: Row(
@@ -118,25 +118,25 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product.name,
+                        product.p_name,
                         style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        product.categoryName,
+                        product.p_category_name,
                         style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 12),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '₹${product.price.toStringAsFixed(2)}',
+                        '₹${product.p_price.toStringAsFixed(2)}',
                         style: GoogleFonts.outfit(color: AppConstants.primaryColor, fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  onPressed: () => provider.removeFavourite(fav.id, customerId),
+                  onPressed: () => provider.removeFavourite(fav.f_id, customerId),
                   icon: Icon(Icons.delete_outline_rounded, color: Colors.grey[400], size: 20),
                 ),
               ],

@@ -1,7 +1,8 @@
 <div class="body" style="overflow-x: hidden;">
-    <div class="web_main_container">
+    <div class="web_main_container" [ngClass]="{'website-content-padding': !isHomePage()}">
         <app-website-top></app-website-top>
         <router-outlet></router-outlet>
     </div>
+
 </div>
 <app-website-footer></app-website-footer>

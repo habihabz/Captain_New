@@ -25,29 +25,29 @@ class FavouriteProvider with ChangeNotifier {
   }
 
   bool isFavourite(int productId) {
-    return _favourites.any((f) => f.productId == productId);
+    return _favourites.any((f) => f.f_product == productId);
   }
 
   Future<DbResult> toggleFavourite(int productId, int customerId, String customerName) async {
     final existing = _favourites.firstWhere(
-      (f) => f.productId == productId, 
-      orElse: () => Favourite(id: 0, productId: productId)
+      (f) => f.f_product == productId, 
+      orElse: () => Favourite(f_id: 0, f_product: productId)
     );
 
-    if (existing.id != 0) {
+    if (existing.f_id != 0) {
       // It exists, so we delete it (standard toggle behavior)
-      final result = await _favouriteService.deleteFavourite(existing.id);
+      final result = await _favouriteService.deleteFavourite(existing.f_id);
       if (result.status) {
-        _favourites.removeWhere((f) => f.id == existing.id);
+        _favourites.removeWhere((f) => f.f_id == existing.f_id);
         notifyListeners();
       }
       return result;
     } else {
       // It doesn't exist, so create it
       final newFav = Favourite(
-        productId: productId,
-        createdBy: customerId,
-        createdByName: customerName,
+        f_product: productId,
+        f_cre_by: customerId,
+        f_cre_by_name: customerName,
       );
       final result = await _favouriteService.toggleFavourite(newFav);
       if (result.status) {
@@ -60,7 +60,7 @@ class FavouriteProvider with ChangeNotifier {
   Future<void> removeFavourite(int id, int customerId) async {
     final result = await _favouriteService.deleteFavourite(id);
     if (result.status) {
-      _favourites.removeWhere((f) => f.id == id);
+      _favourites.removeWhere((f) => f.f_id == id);
       notifyListeners();
     }
   }

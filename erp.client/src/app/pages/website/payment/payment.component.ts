@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 declare var Razorpay: any;
 
@@ -12,7 +13,7 @@ export class PaymentComponent implements OnDestroy {
     private apiUrl = `${environment.serverHostAddress}/api/payment/create-order`;
     razorpayLoaded = false;
   
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private router: Router) {}
 
   loadRazorpay() {
     return new Promise((resolve, reject) => {
@@ -71,7 +72,7 @@ export class PaymentComponent implements OnDestroy {
             upi: true
           },
           handler: (response: any) => {
-            alert('Payment successful. Payment ID: ' + response.razorpay_payment_id);
+            this.router.navigate(['/payment-success']);
           },
           prefill: {
             email: 'abimanjeri@gmail.com',

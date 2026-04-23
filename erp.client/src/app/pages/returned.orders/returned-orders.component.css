@@ -23,3 +23,45 @@
 .border-right {
     border-right: 1px solid #eee;
 }
+
+/* AG Grid Overrides: Remove focus borders and column line */
+:host ::ng-deep .ag-cell-focus, 
+:host ::ng-deep .ag-cell-no-focus {
+    border: none !important;
+    outline: none !important;
+}
+
+:host ::ng-deep .ag-header-cell::after,
+:host ::ng-deep .ag-cell::after {
+    display: none !important;
+}
+
+:host ::ng-deep .ag-header-cell,
+:host ::ng-deep .ag-cell {
+    border-right: none !important;
+}
+
+/* Timeline Connecting Line - Refined for Perfection */
+.timeline-item {
+    position: relative;
+    padding-bottom: 24px;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 9.5px; /* Precision centered with 19px icon */
+    top: 22px;
+    bottom: -8px;
+    width: 1px;
+    background-color: #e2e8f0;
+    z-index: 1;
+}
+
+.timeline-icon {
+    position: relative;
+    z-index: 2;
+    background: #fff;
+    display: inline-block;
+    height: 19px;
+}

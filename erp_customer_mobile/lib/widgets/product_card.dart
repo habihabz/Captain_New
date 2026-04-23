@@ -17,7 +17,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final favProvider = Provider.of<FavouriteProvider>(context);
     final auth = Provider.of<AuthProvider>(context);
-    final isFav = favProvider.isFavourite(product.id);
+    final isFav = favProvider.isFavourite(product.p_id);
 
     final imageUrl = product.imageList.isNotEmpty 
         ? '${AppConstants.baseUrl}/${product.imageList[0]}' 
@@ -38,7 +38,7 @@ class ProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -54,7 +54,7 @@ class ProductCard extends StatelessWidget {
                    ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Hero(
-                      tag: 'product-${product.id}',
+                      tag: 'product-${product.p_id}',
                       child: imageUrl.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: imageUrl,
@@ -75,7 +75,7 @@ class ProductCard extends StatelessWidget {
                           Navigator.pushNamed(context, '/login');
                           return;
                         }
-                        favProvider.toggleFavourite(product.id, auth.customer!.id, auth.customer!.name);
+                        favProvider.toggleFavourite(product.p_id, auth.customer!.u_id, auth.customer!.u_name);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(6),
@@ -88,21 +88,21 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (product.rating > 0)
+                  if (product.p_overall_rating > 0)
                     Positioned(
                       bottom: 8,
                       left: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              product.rating.toStringAsFixed(1),
+                              product.p_overall_rating.toStringAsFixed(1),
                               style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.black),
                             ),
                             const SizedBox(width: 2),
@@ -126,14 +126,14 @@ class ProductCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          product.name,
+                          product.p_name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11),
                         ),
                         const SizedBox(height: 1),
                         Text(
-                          product.categoryName,
+                          product.p_category_name,
                           style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 8),
                         ),
                         const SizedBox(height: 4),
@@ -147,10 +147,10 @@ class ProductCard extends StatelessWidget {
                                   width: 6,
                                   height: 6,
                                   decoration: BoxDecoration(
-                                    color: _parseColor(color.hex),
+                                    color: _parseColor(color.pc_code),
                                     shape: BoxShape.circle,
                                   ),
-                                )).toList(),
+                                )),
                                 if (product.availableColors.length > 3)
                                   Text(' +${product.availableColors.length - 3}', style: const TextStyle(fontSize: 7, color: Colors.grey))
                               ],
@@ -163,7 +163,7 @@ class ProductCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '₹${product.price.toStringAsFixed(2)}',
+                          '₹${product.p_price.toStringAsFixed(2)}',
                           style: GoogleFonts.outfit(
                             color: AppConstants.primaryColor,
                             fontWeight: FontWeight.bold,

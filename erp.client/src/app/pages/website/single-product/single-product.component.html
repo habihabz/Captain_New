@@ -52,7 +52,7 @@
 
         <div class="col-md-5 col-sm-12">
             <div class="product__details">
-                <h3><a href="shop.html" class="text-dark text-decoration-none">{{this.product.p_name}}</a></h3>
+                <h1 class="main-product-title">{{this.product.p_name}}</h1>
                 <h5 class="text-muted">{{this.product.p_short_name}}</h5>
                 <br />
                 <div class="d-flex justify-content-between mt-3">
@@ -87,8 +87,11 @@
                     <div class="row text-center mb-3">
                         <div class="col-auto mb-2"
                             *ngFor="let color of getListFromJSON(product.p_colors); let i = index">
-                            <button class="btn btn-outline-secondary shadow-none px-3 py-1 size-button"
-                                style="font-size: 13px;" [class.selected]="color.pc_color === selectedColor"
+                            <button class="btn shadow-none px-3 py-1 rounded-pill color-swatch"
+                                [style.background-color]="color.pc_color_name"
+                                [style.color]="isDarkColor(color.pc_color_name) ? '#fff' : '#000'"
+                                [style.border]="color.pc_color_name.toLowerCase().includes('white') ? '1px solid #ddd' : 'none'"
+                                [class.selected-color]="color.pc_color === selectedColor"
                                 (click)="selectColor(color.pc_color)">
                                 {{ color.pc_color_name }}
                             </button>
@@ -113,7 +116,8 @@
                 <button class="btn btn-success px-4 py-2" style="font-size: 14px;" (click)="addToCart()"><i
                         class="fa fa-shopping-bag me-1"></i> Add to Bag</button>
                 <button class="btn btn-white border px-4 py-2 ms-2 shadow-sm" style="font-size: 14px;"
-                    (click)="addToFavourites(product.p_id)"><i class="fa fa-heart text-muted me-1"></i>
+                    (click)="addToFavourites(product.p_id)">
+                    <i class="fa me-1" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o text-muted'"></i>
                     Favourite</button>
 
 
@@ -139,43 +143,47 @@
             </h3>
         </div>
         <div class="col-12">
-            <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-3 col-sm-12">
-                <div class="product">
-                    <div class="product__thumb">
-                        <a>
-                            <img *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 4); let i = index"
-                                [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
-                                [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                                style="height: 200px; width: auto; max-width: 100%; object-fit: contain;">
-                        </a>
-                        <div class="product-info mb-10">
-                            <div class="product_category">
-                                <span>{{ product.p_sub_category_name + ', ' + product.p_division_name }}</span>
+            <div class="row g-4 mt-2">
+                <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
+                        <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center"
+                             [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
+                            <ng-container *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
+                                <img [src]="apiUrl + '/' + p_attachement.pa_image_path"
+                                     alt="{{product.p_name}}" 
+                                     class="img-fluid" 
+                                     [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+                            </ng-container>
+                            
+                            <!-- Favorite Button -->
+                            <div class="product-actions position-absolute top-0 end-0 m-3">
+                                <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                                    <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                                </button>
                             </div>
-                            <div class="product_rating">
-                                <a href="#"><i class="fa fa-star start-color"></i></a>
-                                <a href="#"><i class="fa fa-star start-color"></i></a>
-                                <a href="#"><i class="fa fa-star start-color"></i></a>
-                                <a href="#"><i class="fa fa-star"></i></a>
-                                <a href="#"><i class="fa fa-star"></i></a>
-                            </div>
-                        </div>
-                        <div class="product__name">
-                            <h4><a href="shop.html">{{product.p_name}}</a></h4>
-                            <div class="pro-price">
-                                <p class="p-absoulute pr-1"><span>&#x20B9;</span>{{ product.p_price }}</p>
-                                <a class="p-absoulute pr-2" (click)="navigateToProduct(product.p_id)">View</a>
-                            </div>
-                        </div>
-                        <div class="product__action">
-                            <div class="inner__action">
-                                <div class="wishlist">
-                                    <a (click)="addToFavourites(product.p_id)"><i class="fa fa-heart"></i></a>
-                                </div>
-                                <div class="view">
-                                    <a (click)="navigateToProduct(product.p_id)"><i class="fa fa-eye"></i></a>
-                                </div>
 
+                            <div class="product-badge position-absolute top-0 start-0 m-3" *ngIf="product.p_price > 5000">
+                                <span class="badge bg-dark text-white rounded-0 px-2 py-1 small">PREMIUM</span>
+                            </div>
+                        </div>
+
+                        <div class="product-details text-center p-3">
+                            <span class="product-category">{{ product.p_sub_category_name }}</span>
+                            <a class="product-name small fw-bold">{{product.p_name}}</a>
+                            
+                            <!-- Rating Display -->
+                            <div class="product-rating mb-2">
+                                <div class="stars">
+                                    <i class="fa fa-star text-warning small" [ngClass]="{'opacity-25': product.p_overall_rating < 1}"></i>
+                                    <i class="fa fa-star text-warning small" [ngClass]="{'opacity-25': product.p_overall_rating < 2}"></i>
+                                    <i class="fa fa-star text-warning small" [ngClass]="{'opacity-25': product.p_overall_rating < 3}"></i>
+                                    <i class="fa fa-star text-warning small" [ngClass]="{'opacity-25': product.p_overall_rating < 4}"></i>
+                                    <i class="fa fa-star text-warning small" [ngClass]="{'opacity-25': product.p_overall_rating < 5}"></i>
+                                </div>
+                            </div>
+
+                            <div class="product-price small fw-bold">
+                                <span>&#x20B9;</span> {{ product.p_price | number }}
                             </div>
                         </div>
                     </div>

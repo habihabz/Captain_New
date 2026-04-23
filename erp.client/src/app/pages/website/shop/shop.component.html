@@ -27,8 +27,8 @@
 
       </div>
       <div class="row" style="height: 100%;">
-        <!-- Filter Sidebar -->
-        <div class="col-md-3 col-sm-4 shop-sidebar">
+        <!-- Filter Sidebar (Reduced width to 20%) -->
+        <div class="shop-sidebar" style="width: 20%;">
           <div class="filter-card shadow-sm rounded-4 bg-white p-3 mb-4">
             <h5 class="fw-bold mb-4 text-dark d-flex align-items-center">
               <i class="fa fa-filter me-2 text-primary"></i> Filters
@@ -116,48 +116,50 @@
           </div>
         </div>
 
-        <!-- Products Area -->
-        <div class="col-md-9 col-sm-8">
-          <div class="row">
-            <div *ngFor="let product of this.products" class="col-md-3 col-sm-12">
-              <div class="product">
-                <div class="product__thumb">
-                  <a>
-                    <img
-                      *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index"
-                      [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'"
-                      [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="product_image"
-                      style="height: 200px; width: auto;">
-                  </a>
-                  <div class="product-info mb-10">
-                    <div class="product_category">
-                      <span>{{ product.p_sub_category_name + ', ' + product.p_division_name
-                        }}</span>
-                    </div>
-                    <div class="product_rating">
-                      <a href="#"><i class="fa fa-star start-color"></i></a>
-                      <a href="#"><i class="fa fa-star start-color"></i></a>
-                      <a href="#"><i class="fa fa-star start-color"></i></a>
-                      <a href="#"><i class="fa fa-star"></i></a>
-                      <a href="#"><i class="fa fa-star"></i></a>
-                    </div>
+        <!-- Products Area (Expanded to 80%) -->
+        <div class="products-area" style="width: 80%;">
+          <div class="row g-4">
+            <div *ngFor="let product of this.products" class="col-lg-3 col-md-6">
+              <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
+                <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center" 
+                     [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
+                  <ng-container *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
+                    <img [src]="apiUrl + '/' + p_attachement.pa_image_path"
+                         alt="{{product.p_name}}" 
+                         class="img-fluid" 
+                         [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+                  </ng-container>
+                  
+                  <!-- Favorite Button -->
+                  <div class="product-actions position-absolute top-0 end-0 m-3">
+                    <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                      <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                    </button>
                   </div>
-                  <div class="product__name">
-                    <h4><a href="shop.html">{{product.p_name}}</a></h4>
-                    <div class="pro-price">
-                      <p class="p-absoulute pr-1"><span>&#x20B9;</span>{{product.p_price}}</p>
-                      <a class="p-absoulute pr-2" (click)="navigateToProduct(product.p_id)">View</a>
-                    </div>
+
+                  <div class="product-badge position-absolute top-0 start-0 m-3" *ngIf="product.p_price > 5000">
+                    <span class="badge bg-dark text-white rounded-0 px-3 py-2">PREMIUM</span>
                   </div>
-                  <div class="product__action">
-                    <div class="inner__action">
-                      <div class="wishlist">
-                        <a (click)="addToFavourites(product.p_id)"><i class="fa fa-heart"></i></a>
-                      </div>
-                      <div class="view">
-                        <a (click)="navigateToProduct(product.p_id)"><i class="fa fa-eye"></i></a>
-                      </div>
+                </div>
+
+                <div class="product-details text-center p-3">
+                  <span class="product-category">{{ product.p_sub_category_name }}</span>
+                  <a class="product-name">{{product.p_name}}</a>
+                  
+                  <!-- Rating Display -->
+                  <div class="product-rating mb-3">
+                    <div class="stars">
+                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 1}"></i>
+                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 2}"></i>
+                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 3}"></i>
+                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 4}"></i>
+                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 5}"></i>
                     </div>
+                    <span class="ms-1 small text-muted">({{ product.p_overall_rating | number:'1.1-1' }})</span>
+                  </div>
+
+                  <div class="product-price">
+                    <span>&#x20B9;</span> {{ product.p_price | number }}
                   </div>
                 </div>
               </div>

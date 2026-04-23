@@ -1,0 +1,76 @@
+.right_col {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tile_stats_count {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.tile_stats_count:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+.count_top i {
+    font-size: 1.2rem;
+}
+
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+
+.bg-soft-success { background-color: rgba(25, 135, 84, 0.1); }
+.bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); }
+.bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
+.bg-soft-danger { background-color: rgba(220, 53, 69, 0.1); }
+
+.hover-bg-light:hover {
+    background-color: #f8f9fa !important;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.custom-table thead th {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    padding: 15px 10px;
+}
+
+.custom-table tbody td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dashboard_graph {
+    min-height: 400px;
+}
+
+.section-title {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Luxury scrollbar for table-responsive */
+.table-responsive::-webkit-scrollbar {
+    height: 5px;
+}
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}

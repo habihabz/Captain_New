@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Repository;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +37,13 @@ namespace Erp.Server.Controllers
             var list = dataTableConvert.ConvertDataTableToList(vatReport);
 
             return Ok(list);
+        }
+
+        [HttpPost("getDashboardStats")]
+        public ActionResult getDashboardStats()
+        {
+            var stats = ireport.getDashboardStats();
+            return Ok(stats);
         }
 
     }

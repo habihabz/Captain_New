@@ -188,21 +188,25 @@
                             <h6 class="small fw-bold text-muted mb-3 text-uppercase"
                                 style="letter-spacing: 1.5px; font-size: 10px;">PROMOTIONAL CODE</h6>
 
-                            <!-- Input State (Not Applied) -->
-                            <div *ngIf="!appliedPromo"
-                                class="input-group shadow-none rounded-pill overflow-hidden bg-white border">
-                                <span class="input-group-text bg-white border-0 ps-3">
-                                    <i class="fa fa-ticket text-teal"></i>
-                                </span>
-                                <input type="text" class="form-control border-0 shadow-none px-2"
-                                    placeholder="Enter Code" [(ngModel)]="promoCode"
-                                    style="height: 46px; font-size: 14px; font-weight: 500;">
-                                <button class="btn bg-teal text-white fw-bold px-4 hover-lift border-0 rounded-0"
-                                    (click)="applyPromoCode()" [disabled]="!promoCode"
-                                    style="font-size: 12px; border-radius: 0 50px 50px 0 !important;">
-                                    APPLY
-                                </button>
-                            </div>
+                             <!-- Input State (Not Applied) -->
+                             <div *ngIf="!appliedPromo"
+                                 class="input-group shadow-none rounded-pill overflow-hidden bg-white border"
+                                 style="border-color: #e2e8f0 !important; height: 48px;">
+                                 <span class="input-group-text bg-white border-0 ps-3 pe-0">
+                                     <i class="fa fa-ticket text-teal" style="font-size: 16px;"></i>
+                                 </span>
+                                 <input type="text" class="form-control border-0 shadow-none px-3"
+                                     placeholder="Enter Code" [(ngModel)]="promoCode" [disabled]="applyingPromo"
+                                     style="height: 100%; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">
+                                 <button class="btn bg-teal text-white fw-bold px-4 border-0 d-flex align-items-center justify-content-center"
+                                     (click)="applyPromoCode()" [disabled]="!promoCode || applyingPromo"
+                                     style="font-size: 11px; height: calc(100% + 2px); margin: -1px; border-radius: 0 50px 50px 0 !important; min-width: 90px; letter-spacing: 1px; transition: all 0.3s ease;">
+                                     <span *ngIf="!applyingPromo">APPLY</span>
+                                     <div *ngIf="applyingPromo" class="spinner-border spinner-border-sm text-white" role="status">
+                                         <span class="visually-hidden">Loading...</span>
+                                     </div>
+                                 </button>
+                             </div>
 
                             <!-- Success State (Applied) -->
                             <div *ngIf="appliedPromo"

@@ -11,22 +11,41 @@
     </div>
     <div class="row mb-0">
         <div class="col-md-12">
-            <div class="pb-0 border-bottom" style="border-bottom-color: #26b99a !important; border-bottom-width: 2px !important;">
-                <ul class="nav nav-tabs border-0 mb-0 px-3" id="orderTabs" role="tablist" style="background: transparent; margin-bottom: -2px;">
-                    <li class="nav-item me-1" style="position: relative; z-index: 10;">
-                        <button class="nav-link border-0 fw-bold px-4 pt-3 pb-3 transition-all" 
-                            [ngClass]="{'active bg-white text-primary shadow-sm': requestParms.completedYn === 'N', 'text-muted bg-transparent opacity-75': requestParms.completedYn !== 'N'}" 
-                            (click)="setTab('N')" type="button" 
-                            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; outline: none !important; border: none !important; border-bottom: 4px solid white !important; min-height: 50px; border-radius: 12px 12px 0 0 !important;">
-                            <i class="fa fa-circle text-success me-2" style="font-size: 8px; vertical-align: middle; margin-top: -2px;" *ngIf="requestParms.completedYn === 'N'"></i>Active Orders
+            <div class="pb-0">
+                <ul class="nav nav-tabs border-0 mb-0 px-1" id="orderTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link" 
+                            [ngClass]="{'active': requestParms.completedYn === 'A'}" 
+                            (click)="setTab('A')" type="button">
+                            <i class="fa fa-th-list me-2"></i>All Orders
                         </button>
                     </li>
-                    <li class="nav-item" style="position: relative; z-index: 10;">
-                        <button class="nav-link border-0 fw-bold px-4 pt-3 pb-3 transition-all" 
-                            [ngClass]="{'active bg-white text-dark shadow-sm': requestParms.completedYn === 'Y', 'text-muted bg-transparent opacity-75': requestParms.completedYn !== 'Y'}" 
-                            (click)="setTab('Y')" type="button" 
-                            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; outline: none !important; border: none !important; border-bottom: 4px solid white !important; min-height: 50px; border-radius: 12px 12px 0 0 !important;">
-                            <i class="fa fa-archive me-2" style="font-size: 12px; vertical-align: middle; margin-top: -2px;" *ngIf="requestParms.completedYn === 'Y'"></i>Completed Orders
+                    <li class="nav-item">
+                        <button class="nav-link" 
+                            [ngClass]="{'active': requestParms.completedYn === 'N'}" 
+                            (click)="setTab('N')" type="button">
+                            <i class="fa fa-bolt text-warning me-2"></i>Active
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" 
+                            [ngClass]="{'active': requestParms.completedYn === 'Y'}" 
+                            (click)="setTab('Y')" type="button">
+                            <i class="fa fa-check-circle text-success me-2"></i>Completed
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" 
+                            [ngClass]="{'active': requestParms.completedYn === 'C'}" 
+                            (click)="setTab('C')" type="button">
+                            <i class="fa fa-times-circle text-danger me-2"></i>Canceled
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" 
+                            [ngClass]="{'active': requestParms.completedYn === 'R'}" 
+                            (click)="setTab('R')" type="button">
+                            <i class="fa fa-reply text-info me-2"></i>Returned
                         </button>
                     </li>
                 </ul>
@@ -34,68 +53,94 @@
         </div>
     </div>
 
-    <div class="x_panel border-top-0 shadow-sm" style="border-radius: 0 0 8px 8px;">
-        <div class="x_content" style="display: block;">
-            <div class="row align-items-end mb-3 pt-3">
-                <div class="col-md-3">
-                    <div class="form-group mb-0">
-                        <label for="status">Status Filter</label>
-                        <select appSelect2 #status id="status" class="form-control" name="status" required
-                            (selectionChanged)="onCustomerOrderStatusChange($event);">
-                            <option [value]="0">Select Status (All)</option>
-                            <option *ngFor="let cos of customerOrderStatuses" [value]="cos.s_id">{{ cos.s_name }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-2" *ngIf="requestParms.completedYn === 'Y'">
-                    <div class="form-group mb-0">
-                        <label for="startDate" class="small fw-bold">Start Date</label>
-                        <input type="date" id="startDate" class="form-control" [(ngModel)]="requestParms.startDate" (change)="getCustomerOrders()">
-                    </div>
-                </div>
-                
-                <div class="col-md-2" *ngIf="requestParms.completedYn === 'Y'">
-                    <div class="form-group mb-0">
-                        <label for="endDate" class="small fw-bold">End Date</label>
-                        <input type="date" id="endDate" class="form-control" [(ngModel)]="requestParms.endDate" (change)="getCustomerOrders()">
-                    </div>
-                </div>
-
-                <div class="col-md-9 d-flex justify-content-end" *ngIf="selectedRowsCount > 0 && requestParms.completedYn === 'N'">
-                    <div class="d-flex align-items-end gap-3">
-                        <div class="form-group mb-0" style="min-width: 200px;">
-                            <label class="text-primary fw-bold small mb-1"><i class="fa fa-tasks"></i> Bulk Action: Update Status</label>
-                            <select *ngIf="isBulkListReady" appSelect2 class="form-control" #bulkStatusSelect
-                                (selectionChanged)="bulkStatusId = +$event">
-                                <option value="0">Select New Status</option>
-                                <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}
-                                </option>
+    <div class="x_panel">
+        <div class="x_content">
+            <!-- Filter Section -->
+            <div class="filter-row shadow-xs">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-4" *ngIf="requestParms.completedYn !== 'C' && requestParms.completedYn !== 'Y' && requestParms.completedYn !== 'R'">
+                        <div class="form-group mb-0">
+                            <label><i class="fa fa-filter me-1"></i> Filter by Order Status</label>
+                            <select appSelect2 #status id="status" class="form-control" name="status"
+                                (selectionChanged)="onCustomerOrderStatusChange($event);">
+                                <option [value]="0">All System Statuses</option>
+                                <option *ngFor="let cos of customerOrderStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
                             </select>
                         </div>
-                        <button class="btn btn-primary shadow-sm fw-bold px-4" [disabled]="!bulkStatusId"
-                            (click)="onBulkUpdate()" style="height: 38px;">
-                            <i class="fa fa-bolt me-1"></i> Bulk Update Selected
+                    </div>
+
+                    <div class="col-md-4" *ngIf="requestParms.completedYn === 'Y' || requestParms.completedYn === 'C' || requestParms.completedYn === 'R'">
+                        <div class="form-group mb-0">
+                            <label class="small fw-bold text-muted mb-1"><i class="fa fa-calendar me-1"></i> Filter by Date Range</label>
+                            <div class="input-group input-group-sm shadow-xs">
+                                <input type="text" class="form-control" appDateRange 
+                                    [startDate]="requestParms.startDate" 
+                                    [endDate]="requestParms.endDate"
+                                    (rangeChanged)="onDateRangeChange($event)"
+                                    placeholder="Select Date Range">
+                                <span class="input-group-text bg-white border-start-0 text-muted">
+                                    <i class="fa fa-calendar small"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group mb-0">
+                            <label class="small fw-bold text-muted mb-1">ORDER NO.</label>
+                            <input type="number" class="form-control form-control-sm shadow-xs" [(ngModel)]="requestParms.id">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-dark btn-sm fw-bold shadow-sm px-4 w-100" style="height: 31px;" (click)="getCustomerOrders()">
+                            <i class="fa fa-search me-2"></i> SEARCH
                         </button>
                     </div>
                 </div>
             </div>
-            <hr />
+
+            <!-- Grid Container -->
             <div class="row">
                 <div class="col-md-12">
-                    <ag-grid-angular #customerOrderGrid class="ag-theme-quartz ag-theme-acmecorp" style=" width: 100%;"
+                    <ag-grid-angular #customerOrderGrid class="ag-theme-quartz ag-theme-acmecorp" style="width: 100%; height: 65vh;"
                         [rowData]="customerOrders" [columnDefs]="colDefs" [pagination]="pagination"
                         [defaultColDef]="defaultColDef" [enableCellTextSelection]="true"
                         [components]="frameworkComponents" [paginationPageSize]="paginationPageSize10"
-                        [domLayout]="domLayout" [paginationPageSizeSelector]="paginationPageSizeSelector10"
+                        [domLayout]="'normal'" [paginationPageSizeSelector]="paginationPageSizeSelector10"
                         [rowSelection]="rowSelectionOptions" (gridReady)="onGridReady($event)"
                         (selectionChanged)="onSelectionChanged()">
                     </ag-grid-angular>
                 </div>
             </div>
+
+            <!-- Bulk Action Bar (Floating at bottom) -->
+            <div class="bulk-action-bar shadow-lg" *ngIf="selectedRowsCount > 0 && (requestParms.completedYn === 'N' || requestParms.completedYn === 'A')">
+                <div class="d-flex align-items-center gap-5">
+                    <div class="badge-selected px-4 py-2 me-2">
+                        <i class="fa fa-shopping-basket me-2"></i>
+                        <span>{{ selectedRowsCount }} Orders Selected</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-4">
+                        <label class="bulk-label">UPDATE STATUS TO:</label>
+                        <div style="width: 280px;">
+                            <select *ngIf="isBulkListReady" appSelect2 class="form-control bulk-select" #bulkStatusSelect
+                                (selectionChanged)="bulkStatusId = +$event">
+                                <option value="0">Select New Status</option>
+                                <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-bulk-execute px-4 ms-4" [disabled]="!bulkStatusId" (click)="onBulkUpdate()">
+                    <i class="fa fa-bolt me-2"></i> EXECUTE BULK UPDATE
+                </button>
+            </div>
         </div>
     </div>
+
 </div>
 
 

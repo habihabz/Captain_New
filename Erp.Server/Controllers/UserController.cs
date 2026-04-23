@@ -76,9 +76,4 @@ namespace Erp.Server.Controllers
         }
     }
 
-    public class PasswordUpdateRequest
-    {
-        public int userId { get; set; }
-        public string newPassword { get; set; }
-    }
 }

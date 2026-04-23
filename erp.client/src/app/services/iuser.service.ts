@@ -61,6 +61,21 @@ export class IuserService {
     return this.http.post<DbResult>(`${this.apiUrl}/updatePassword`, { userId, newPassword }, { headers });
   }
 
+  uploadProfileImage(userId: number, image: File): Observable<DbResult> {
+    const formData: FormData = new FormData();
+    formData.append('id', userId.toString());
+    formData.append('image', image, image.name);
+    
+    // We can call the Customer endpoint as it has the User fallback logic
+    const customerApiUrl = `${environment.serverHostAddress}/api/Customer/uploadProfileImage`;
+    const token = this.iLoginService.getToken();
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.post<DbResult>(customerApiUrl, formData, { headers });
+  }
+
   getCurrentUser(): User  {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {

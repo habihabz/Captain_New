@@ -57,6 +57,7 @@ export class MycartComponent implements OnInit, OnDestroy {
   promoCode: string = '';
   appliedPromo: Promocode | null = null;
   promoDiscount: number = 0;
+  applyingPromo: boolean = false;
 
 
   constructor(
@@ -318,26 +319,40 @@ export class MycartComponent implements OnInit, OnDestroy {
       this.snackbarService.showError("Please enter a promo code");
       return;
     }
-    this.ipromocodeService.validatePromocode(this.promoCode).subscribe((res: DbResult) => {
-      if (res.message === "Success") {
-        this.ipromocodeService.getPromocodeByCode(this.promoCode).subscribe((pc: Promocode) => {
-          // Check eligibility before applying
-          const minAmt = Number(pc.pc_min_order_amount || 0);
+    
+    this.applyingPromo = true;
+    
+    // Simulate brief network delay for animation effect
+    setTimeout(() => {
+      this.ipromocodeService.validatePromocode(this.promoCode).subscribe({
+        next: (res: DbResult) => {
+          if (res.message === "Success") {
+            this.ipromocodeService.getPromocodeByCode(this.promoCode).subscribe((pc: Promocode) => {
+              const minAmt = Number(pc.pc_min_order_amount || 0);
 
-          if (this.totalPrice < minAmt) {
-            this.snackbarService.showError(`This promo requires a minimum order of ₹${minAmt}`);
-            this.appliedPromo = null;
-            return;
+              if (this.totalPrice < minAmt) {
+                this.snackbarService.showError(`This promo requires a minimum order of ₹${minAmt}`);
+                this.appliedPromo = null;
+                this.applyingPromo = false;
+                return;
+              }
+
+              this.appliedPromo = pc;
+              this.getCartTotal();
+              this.applyingPromo = false;
+              this.snackbarService.showSuccess(`Promo "${pc.pc_code}" applied correctly!`);
+            });
+          } else {
+            this.applyingPromo = false;
+            this.snackbarService.showError(res.message);
           }
-
-          this.appliedPromo = pc;
-          this.getCartTotal();
-          this.snackbarService.showSuccess(`Promo "${pc.pc_code}" applied correctly!`);
-        });
-      } else {
-        this.snackbarService.showError(res.message);
-      }
-    });
+        },
+        error: (err) => {
+          this.applyingPromo = false;
+          this.snackbarService.showError("Failed to validate promo code");
+        }
+      });
+    }, 800); 
   }
 
   removePromo() {
@@ -370,7 +385,7 @@ export class MycartComponent implements OnInit, OnDestroy {
           this.carts = [];
           this.getCartTotal();
           this.snackbarService.showSuccess("Success");
-          window.location.href = '/myorders';
+          this.router.navigate(['/payment-success']);
 
         } else {
           alert(data.message);

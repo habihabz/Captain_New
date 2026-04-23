@@ -7,6 +7,7 @@ import '../providers/cart_provider.dart';
 import '../services/master_data_service.dart';
 import '../models/master_data.dart';
 import '../utils/constants.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,15 +19,45 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final MasterDataService _masterDataService = MasterDataService();
   List<MasterData> _countries = [];
-  bool _isLoadingCountries = false;
 
-  Future<void> _showCountryPicker(BuildContext context) async {
-    setState(() => _isLoadingCountries = true);
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    
+    try {
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
+
+      if (image != null) {
+        final success = await auth.uploadProfileImage(image.path);
+        if (mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Profile picture updated successfully'))
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(auth.errorMessage ?? 'Failed to upload image'), backgroundColor: Colors.red)
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e'), backgroundColor: Colors.red)
+        );
+      }
+    }
+  }
+
+  Future<void> _showCountryPicker() async {
     final countries = await _masterDataService.getMasterDatasByType('Country');
     if (!mounted) return;
     setState(() {
       _countries = countries;
-      _isLoadingCountries = false;
     });
 
     showModalBottomSheet(
@@ -47,22 +78,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   itemBuilder: (context, index) {
                     final country = _countries[index];
                     final productProvider = Provider.of<ProductProvider>(context, listen: false);
-                    final isSelected = productProvider.selectedCountryId == country.id;
+                    final isSelected = productProvider.selectedCountryId == country.md_id;
 
                     return ListTile(
                       leading: const Icon(Icons.public),
-                      title: Text(country.name, style: GoogleFonts.inter(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                      title: Text(country.md_name, style: GoogleFonts.inter(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                       trailing: isSelected ? const Icon(Icons.check_circle, color: AppConstants.primaryColor) : null,
                       onTap: () async {
-                        productProvider.setCountryId(country.id);
-                        Provider.of<CartProvider>(context, listen: false).setCountryId(country.id);
+                        productProvider.setCountryId(country.md_id);
+                        Provider.of<CartProvider>(context, listen: false).setCountryId(country.md_id);
                         
                         // Force refresh home data for new pricing
                         productProvider.fetchHomeData();
                         
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Region updated to ${country.name}'))
+                          SnackBar(content: Text('Region updated to ${country.md_name}'))
                         );
                       },
                     );
@@ -83,11 +114,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final customer = auth.customer;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
         title: Text('My Profile', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8F9FB),
         elevation: 0,
         foregroundColor: Colors.black,
       ),
@@ -99,31 +130,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Center(
               child: Column(
                 children: [
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: AppConstants.primaryColor.withOpacity(0.05),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        customer?.name.isNotEmpty == true ? customer!.name[0].toUpperCase() : '?',
-                        style: GoogleFonts.outfit(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: AppConstants.primaryColor,
+                  GestureDetector(
+                    onTap: _pickAndUploadImage,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: AppConstants.primaryColor.withValues(alpha: 0.05),
+                            shape: BoxShape.circle,
+                            image: customer?.u_image_url != null && customer!.u_image_url!.isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage('${AppConstants.baseUrl}${customer.u_image_url}'),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: (customer?.u_image_url == null || customer!.u_image_url!.isEmpty)
+                              ? Center(
+                                  child: Text(
+                                    customer?.u_name.isNotEmpty == true ? customer!.u_name[0].toUpperCase() : '?',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppConstants.primaryColor,
+                                    ),
+                                  ),
+                                )
+                              : null,
                         ),
-                      ),
+                        if (auth.isLoading)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.black26,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                ),
+                              ),
+                            ),
+                          ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: AppConstants.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    customer?.name ?? 'Guest User',
+                    customer?.u_name ?? 'Guest User',
                     style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    customer?.email ?? 'No contact info',
+                    customer?.u_email ?? 'No contact info',
                     style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 13),
                   ),
                 ],
@@ -150,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.public_rounded,
               title: 'Country / Region',
               subtitle: 'Current Region ID: ${productProvider.selectedCountryId}',
-              onTap: () => _showCountryPicker(context),
+              onTap: () => _showCountryPicker(),
             ),
             _buildMenuItem(
               icon: Icons.person_outline_rounded,

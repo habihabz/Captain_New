@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.husicaptain" "\0"
-            VALUE "FileDescription", "erp_customer_mobile" "\0"
+            VALUE "CompanyName", "Captain" "\0"
+            VALUE "FileDescription", "Captain" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "erp_customer_mobile" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.husicaptain. All rights reserved." "\0"
-            VALUE "OriginalFilename", "erp_customer_mobile.exe" "\0"
-            VALUE "ProductName", "erp_customer_mobile" "\0"
+            VALUE "InternalName", "Captain" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 Captain. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Captain.exe" "\0"
+            VALUE "ProductName", "Captain" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

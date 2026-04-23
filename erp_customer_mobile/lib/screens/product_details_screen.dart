@@ -30,13 +30,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   ProductSize? _selectedSize;
   List<String> _currentImages = [];
   List<ProductReview> _reviews = [];
-  bool _isLoadingImages = false;
+  final bool _isLoadingImages = false;
   bool _isRefreshingProduct = false;
   bool _isLoadingReviews = false;
   
   final ProductService _productService = ProductService();
   final ProductReviewService _reviewService = ProductReviewService();
   final PageController _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _reviewsKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -49,7 +58,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     if (_currentProduct.availableColors.isNotEmpty) {
       _selectedColor = _currentProduct.availableColors.first;
-      _updateImagesForColor(_selectedColor!.id);
+      _updateImagesForColor(_selectedColor!.pc_id);
     }
     if (_currentProduct.availableSizes.isNotEmpty) {
       _selectedSize = _currentProduct.availableSizes.first;
@@ -59,13 +68,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Future<void> _refreshProductData() async {
     setState(() => _isRefreshingProduct = true);
     final countryId = Provider.of<ProductProvider>(context, listen: false).selectedCountryId;
-    final updatedProduct = await _productService.getProductByCountry(_currentProduct.id, countryId);
+    final updatedProduct = await _productService.getProductByCountry(_currentProduct.p_id, countryId);
     if (updatedProduct != null && mounted) {
       setState(() {
         _currentProduct = updatedProduct;
         _isRefreshingProduct = false;
         if (_selectedColor != null) {
-          _updateImagesForColor(_selectedColor!.id);
+          _updateImagesForColor(_selectedColor!.pc_id);
         }
       });
     }
@@ -73,7 +82,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Future<void> _fetchReviews() async {
     setState(() => _isLoadingReviews = true);
-    final reviews = await _reviewService.getProductReviews(_currentProduct.id);
+    final reviews = await _reviewService.getProductReviews(_currentProduct.p_id);
     if (mounted) {
       setState(() {
         _reviews = reviews;
@@ -95,11 +104,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _loadColorImagesFromApi(int colorId) async {
-    final attachments = await _productService.getProductAttachmentsByColor(_currentProduct.id, colorId);
+    final attachments = await _productService.getProductAttachmentsByColor(_currentProduct.p_id, colorId);
     if (mounted && attachments.isNotEmpty) {
       setState(() {
         _currentImages = attachments.map((a) => a.imagePath).toList();
       });
+    }
+  }
+
+  void _scrollToReviews() {
+    final context = _reviewsKey.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -108,6 +128,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverAppBar(
             expandedHeight: MediaQuery.of(context).size.height * 0.45,
@@ -128,7 +149,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Consumer<FavouriteProvider>(
                 builder: (context, favProvider, _) {
                   final auth = Provider.of<AuthProvider>(context, listen: false);
-                  final isFav = favProvider.isFavourite(_currentProduct.id);
+                  final isFav = favProvider.isFavourite(_currentProduct.p_id);
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CircleAvatar(
@@ -143,7 +164,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             Navigator.pushNamed(context, '/login');
                             return;
                           }
-                          favProvider.toggleFavourite(_currentProduct.id, auth.customer!.id, auth.customer!.name);
+                          favProvider.toggleFavourite(_currentProduct.p_id, auth.customer!.u_id, auth.customer!.u_name);
                         },
                       ),
                     ),
@@ -165,7 +186,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             itemBuilder: (context, index) {
                               final imageUrl = '${AppConstants.baseUrl}/${_currentImages[index]}';
                               return Hero(
-                                tag: 'product-${_currentProduct.id}',
+                                tag: 'product-${_currentProduct.p_id}',
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
                                   child: CachedNetworkImage(
@@ -220,41 +241,44 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _currentProduct.name,
+                              _currentProduct.p_name,
                               style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                            if (_currentProduct.rating > 0) ...[
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber[50], 
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.star_rounded, size: 14, color: Colors.amber[700]),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _currentProduct.rating.toStringAsFixed(1),
-                                          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.amber[900]),
+                              if (_currentProduct.p_overall_rating > 0) ...[
+                                const SizedBox(height: 6),
+                                GestureDetector(
+                                  onTap: _scrollToReviews,
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber[50], 
+                                          borderRadius: BorderRadius.circular(6),
                                         ),
-                                      ],
-                                    ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.star_rounded, size: 14, color: Colors.amber[700]),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              _currentProduct.p_overall_rating.toStringAsFixed(1),
+                                              style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.amber[900]),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '(${_reviews.length} reviews)',
+                                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[400]),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '(${_reviews.length} reviews)',
-                                    style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[400]),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
                             const SizedBox(height: 4),
                             Text(
-                              _currentProduct.categoryName,
+                              _currentProduct.p_category_name,
                               style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500], fontWeight: FontWeight.w500),
                             ),
                           ],
@@ -264,7 +288,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                             _isRefreshingProduct ? '...' : '₹${_currentProduct.price.toStringAsFixed(2)}',
+                             _isRefreshingProduct ? '...' : '₹${_currentProduct.p_price.toStringAsFixed(2)}',
                             style: GoogleFonts.outfit(
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
@@ -285,7 +309,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         Text('Select Color', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 8),
                         Text(
-                          _selectedColor?.name ?? '',
+                          _selectedColor?.pc_name ?? '',
                           style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -298,13 +322,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         itemCount: _currentProduct.availableColors.length,
                         itemBuilder: (context, index) {
                           final color = _currentProduct.availableColors[index];
-                          final isSelected = _selectedColor?.id == color.id;
-                          final colorObj = _parseColor(color.hex);
+                          final isSelected = _selectedColor?.pc_id == color.pc_id;
+                          // Check both code and name for the color value
+                          var colorObj = _parseColor(color.pc_code);
+                          if (colorObj == Colors.grey[300]!) {
+                            colorObj = _parseColor(color.pc_name);
+                          }
                           
                           return GestureDetector(
                             onTap: () {
                               setState(() => _selectedColor = color);
-                              _updateImagesForColor(color.id);
+                              _updateImagesForColor(color.pc_id);
                             },
                             child: Container(
                               margin: const EdgeInsets.only(right: 12),
@@ -353,9 +381,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     Wrap(
                       spacing: 12,
                       children: _currentProduct.availableSizes.map((size) {
-                        final isSelected = _selectedSize?.id == size.id;
+                        final isSelected = _selectedSize?.ps_id == size.ps_id;
                         return ChoiceChip(
-                          label: Text(size.name),
+                          label: Text(size.ps_name),
                           selected: isSelected,
                           onSelected: (val) => setState(() => _selectedSize = size),
                           selectedColor: AppConstants.primaryColor.withOpacity(0.1),
@@ -376,10 +404,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Text('Description', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   Text(
-                    _currentProduct.description.isEmpty 
+                    _currentProduct.p_description.isEmpty 
                         ? 'Premium quality gear designed for maximum performance and comfort during sports and training.' 
-                        : _currentProduct.description,
-                    style: GoogleFonts.inter(fontSize: 14, height: 1.6, color: Colors.grey[700]),
+                        : _currentProduct.p_description,
+                    style: GoogleFonts.inter(
+                      fontSize: 13, 
+                      height: 1.5, 
+                      color: Colors.grey[700],
+                      letterSpacing: 0.2
+                    ),
                   ),
                   
                   const SizedBox(height: 30),
@@ -387,7 +420,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   const SizedBox(height: 30),
 
                   // Reviews Section
-                  _buildReviewsSection(),
+                  _buildReviewsSection(key: _reviewsKey),
 
                   const SizedBox(height: 140), 
                 ],
@@ -432,7 +465,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: Text(
-                    'Add to Cart  •  ₹${(_currentProduct.price * _quantity).toStringAsFixed(0)}',
+                    'Add to Cart  •  ₹${(_currentProduct.p_price * _quantity).toStringAsFixed(0)}',
                     style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -444,8 +477,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildReviewsSection() {
+  Widget _buildReviewsSection({Key? key}) {
     return Column(
+      key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -486,9 +520,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       child: const Icon(Icons.person, size: 16, color: Colors.grey),
                     ),
                     const SizedBox(width: 10),
-                    Text(review.createdByName, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text(review.pr_cre_by_name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
                     const Spacer(),
-                    Text(DateFormat('MMM dd, yyyy').format(review.createdOn), style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 11)),
+                    Text(DateFormat('MMM dd, yyyy').format(review.pr_created_on), style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 11)),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -496,13 +530,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   children: List.generate(5, (i) => Icon(
                     Icons.star_rounded, 
                     size: 16, 
-                    color: i < review.rating ? Colors.amber[600] : Colors.grey[200]
+                    color: i < review.pr_overall_rating ? Colors.amber[600] : Colors.grey[200]
                   )),
                 ),
                 const SizedBox(height: 8),
-                Text(review.headline, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(review.pr_head_line, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text(review.review, style: GoogleFonts.inter(fontSize: 13, height: 1.5, color: Colors.black87)),
+                Text(review.pr_review, style: GoogleFonts.inter(fontSize: 13, height: 1.5, color: Colors.black87)),
               ],
             );
           },
@@ -578,12 +612,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         final review = ProductReview(
-                          productId: _currentProduct.id,
-                          rating: rating,
-                          headline: headlineController.text,
-                          review: reviewController.text,
-                          createdBy: auth.customer!.id,
-                          createdByName: auth.customer!.name,
+                          pr_prod_id: _currentProduct.p_id,
+                          pr_overall_rating: rating,
+                          pr_head_line: headlineController.text,
+                          pr_review: reviewController.text,
+                          pr_cre_by: auth.customer!.u_id,
+                          pr_cre_by_name: auth.customer!.u_name,
                         );
                         final result = await _reviewService.submitReview(review);
                         if (mounted) {
@@ -611,11 +645,51 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Color _parseColor(String hex) {
-    try {
-      return Color(int.parse(hex.replaceFirst('#', '0xFF')));
-    } catch (_) {
-      return Colors.grey;
+  Color _parseColor(String colorStr) {
+    if (colorStr.isEmpty) return Colors.grey[200]!;
+    
+    final cleanColor = colorStr.trim().toLowerCase();
+
+    // Handle hex codes
+    if (cleanColor.startsWith('#')) {
+      try {
+        return Color(int.parse(cleanColor.replaceFirst('#', '0xFF')));
+      } catch (_) {
+        return Colors.grey[300]!;
+      }
+    }
+
+    // Comprehensive standard color mapping
+    switch (cleanColor) {
+      case 'white': return Colors.white;
+      case 'black': return Colors.black;
+      case 'red': return Colors.red;
+      case 'blue': return Colors.blue;
+      case 'green': return Colors.green;
+      case 'yellow': return Colors.yellow;
+      case 'orange': return Colors.orange;
+      case 'grey': case 'gray': return Colors.grey;
+      case 'pink': return Colors.pink;
+      case 'purple': return Colors.purple;
+      case 'amber': return Colors.amber;
+      case 'brown': return Colors.brown;
+      case 'cyan': return Colors.cyan;
+      case 'indigo': return Colors.indigo;
+      case 'lime': return Colors.lime;
+      case 'teal': return Colors.teal;
+      case 'gold': return const Color(0xFFFFD700);
+      case 'silver': return const Color(0xFFC0C0C0);
+      case 'navy': return const Color(0xFF000080);
+      case 'olive': return const Color(0xFF808000);
+      case 'maroon': return const Color(0xFF800000);
+      case 'aqua': return const Color(0xFF00FFFF);
+      case 'magenta': return const Color(0xFFFF00FF);
+      case 'beige': return const Color(0xFFF5F5DC);
+      case 'ivory': return const Color(0xFFFFFFF0);
+      case 'khaki': return const Color(0xFFF0E68C);
+      case 'coral': return const Color(0xFFFF7F50);
+      case 'crimson': return const Color(0xFFDC143C);
+      default: return Colors.grey[300]!;
     }
   }
 
@@ -633,15 +707,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     cartProvider.setCountryId(productProvider.selectedCountryId);
 
     final cartItem = Cart(
-      productId: _currentProduct.id,
-      qty: _quantity,
-      creBy: auth.customer!.id,
-      price: _currentProduct.price,
-      country: productProvider.selectedCountryId,
-      color: _selectedColor?.id ?? 0,
-      size: _selectedSize?.id ?? 0,
-      sizeName: _selectedSize?.name ?? '',
-      colorName: _selectedColor?.name ?? '',
+      c_product: _currentProduct.p_id,
+      c_qty: _quantity,
+      c_cre_by: auth.customer!.u_id,
+      c_price: _currentProduct.p_price * _quantity,
+      c_country: productProvider.selectedCountryId,
+      c_color: _selectedColor?.pc_id ?? 0,
+      c_size: _selectedSize?.ps_id ?? 0,
+      c_size_name: _selectedSize?.ps_name ?? '',
+      c_color_name: _selectedColor?.pc_name ?? '',
     );
 
     final result = await cartProvider.addToCart(cartItem);
@@ -654,8 +728,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           backgroundColor: Colors.black87,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 1),
         ),
       );
+      
+      // Navigate to cart
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+           Navigator.pushNamed(context, '/cart');
+        }
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add to cart: ${result.message}')),

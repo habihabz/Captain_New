@@ -58,6 +58,7 @@ export class ShopComponent implements OnInit {
   country: MasterData = new MasterData();
   favourite: Favourite = new Favourite();
   currentUser: User = new User();
+  userFavourites: Favourite[] = [];
 
   constructor(
     private elRef: ElementRef,
@@ -82,7 +83,7 @@ export class ShopComponent implements OnInit {
     this.getMasterDatasByType("Division", (data) => { this.divisions = data; });
     this.getMasterDatasByType("SubDivision", (data) => { this.subdivisions = data; });
     this.getMasterDatasByType("ProductSize", (data) => { this.sizes = data; });
-
+    this.loadUserFavourites();
   }
   getProductsByCountry() {
     this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
@@ -261,14 +262,42 @@ export class ShopComponent implements OnInit {
     node.isOpen = !node.isOpen;
   }
 
+  loadUserFavourites() {
+    if (this.currentUser && this.currentUser.u_id) {
+      const params = new RequestParms();
+      params.id = this.currentUser.u_id;
+      this.ifavouriteService.getFavourites(params).subscribe(res => {
+        this.userFavourites = res;
+      });
+    }
+  }
+
+  isFavourite(productId: number): boolean {
+    return this.userFavourites.some(x => x.f_product == productId);
+  }
+
   isCategorySelected(id: number) { return this.selectedCategoryIds.includes(id); }
   isSubCategorySelected(id: number) { return this.selectedSubCategoryIds.includes(id); }
   isDivisionSelected(id: number) { return this.selectedDivisionIds.includes(id); }
   isSubDivisionSelected(id: number) { return this.selectedSubDivisionIds.includes(id); }
 
   addToFavourites(productId: number) {
+    if (!this.currentUser || !this.currentUser.u_id) {
+      this.router.navigate(['/customer-login']);
+      return;
+    }
 
-    if (productId && this.currentUser && this.currentUser.u_id) {
+    const existingFav = this.userFavourites.find(x => x.f_product == productId);
+
+    if (existingFav) {
+      this.ifavouriteService.deleteFavourite(existingFav.f_id).subscribe((data: DbResult) => {
+        if (data.message == "Success") {
+          this.snackbarService.showSuccess("Removed from favourites");
+          this.loadUserFavourites();
+        }
+      });
+    } else {
+      this.favourite = new Favourite();
       this.favourite.f_cre_by = this.currentUser.u_id;
       this.favourite.f_product = productId;
 
@@ -276,7 +305,7 @@ export class ShopComponent implements OnInit {
         (data: DbResult) => {
           if (data.message == "Success") {
             this.snackbarService.showSuccess("Added to favourites");
-            this.router.navigate(['/favourites']);
+            this.loadUserFavourites();
           }
           else {
             this.snackbarService.showError(data.message);
@@ -285,10 +314,6 @@ export class ShopComponent implements OnInit {
         (error: any) => {
         }
       );
-
-    } else {
-      this.router.navigate(['/login']);
     }
-
   }
 }

@@ -42,6 +42,14 @@ export class StatusComponent implements OnInit {
       cellClass: 'fw-bold text-dark border-end-0'
     },
     {
+      headerName: "Priority",
+      field: "cos_priority",
+      width: 100,
+      cellClass: 'text-center fw-bold text-primary',
+      headerClass: 'text-center',
+      valueGetter: params => params.data.cos_priority || 0
+    },
+    {
       headerName: "Workflow Context",
       field: "s_workflow_id",
       flex: 3,
@@ -65,6 +73,19 @@ export class StatusComponent implements OnInit {
       field: "s_cre_date",
       width: 140,
       valueFormatter: params => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
+    },
+    {
+      headerName: "State",
+      field: "s_active_yn",
+      width: 120,
+      cellClass: 'text-center',
+      headerClass: 'text-center',
+      cellRenderer: (params: any) => {
+        const isActive = params.value !== 'N'; // Treat NULL or 'Y' as ACTIVE
+        const color = isActive ? '#2dce89' : '#f5365c';
+        const bg = isActive ? 'rgba(45, 206, 137, 0.15)' : 'rgba(245, 54, 92, 0.15)';
+        return `<span class="badge rounded-pill fw-bold" style="background-color: ${bg}; color: ${color}; padding: 6px 12px; font-size: 10px; letter-spacing: 0.5px;">${isActive ? 'ACTIVE' : 'INACTIVE'}</span>`;
+      }
     },
     {
       headerName: 'Actions',
@@ -117,7 +138,7 @@ export class StatusComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    this.getStatuses();
     this.statusService.refresh$.subscribe(() => {
       this.getStatuses();
     });
@@ -132,10 +153,8 @@ export class StatusComponent implements OnInit {
   }
 
   onWorkflowFilterChange(workflowId: any) {
-    this.getStatuses();
     this.selectedWorkflow = Number(workflowId);
-
-    this.applyFilter();
+    this.getStatuses();
   }
 
   applyFilter() {

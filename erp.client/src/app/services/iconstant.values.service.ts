@@ -5,6 +5,7 @@ import { ConstantValue } from '../models/constant.value.model';
 import { DbResult } from '../models/dbresult.model';
 import { environment } from '../../environments/environment';
 import { ILoginService } from './ilogin.service';
+import { RequestParms } from '../models/requestParms';
 
 @Injectable({
   providedIn: 'root'
@@ -24,11 +25,11 @@ export class IConstantValueService {
   }
 
   getConstantValue(id: number): Observable<ConstantValue> {
-    return this.http.post<ConstantValue>(`${this.apiUrl}/getConstantValue`, id);
+    return this.http.post<ConstantValue>(`${this.apiUrl}/getConstantValue`, { id });
   }
 
   deleteConstantValue(id: number): Observable<DbResult> {
-    return this.http.post<DbResult>(`${this.apiUrl}/deleteConstantValue`, id);
+    return this.http.post<DbResult>(`${this.apiUrl}/deleteConstantValue`, { id });
   }
 
   createOrUpdateConstantValue(data: ConstantValue): Observable<DbResult> {
@@ -36,7 +37,9 @@ export class IConstantValueService {
     return this.http.post<DbResult>(`${this.apiUrl}/createOrUpdateConstantValue`, data);
   }
   getConstantValueByName(name: string): Observable<ConstantValue> {
-    return this.http.post<ConstantValue>(`${this.apiUrl}/getConstantValueByName`, name);
+    const params = new RequestParms();
+    params.name = name;
+    return this.http.post<ConstantValue>(`${this.apiUrl}/getConstantValueByName`, params);
   }
 
   get refreshConstants$() {

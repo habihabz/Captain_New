@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Repository;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -67,14 +67,7 @@ namespace Erp.Server.Controllers
         }
 
         
-        [HttpPost("getCustomerOrderDetails")]
-        [Authorize]
-        public List<CustomerOrderDetail> getCustomerOrderDetails([FromBody] int id)
-        {
-            List<CustomerOrderDetail> customerOrderDetails = new List<CustomerOrderDetail>();
-            customerOrderDetails = icustomerOrder.getCustomerOrderDetails(id);
-            return customerOrderDetails;
-        }
+
 
         [HttpPost("getMyOrders")]
         [Authorize]

@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using System.Data;
 
 namespace Erp.Server.Services
@@ -7,6 +7,7 @@ namespace Erp.Server.Services
     {
       
         DataTable getOrderReport(ReportParms reportParms);
+        DashboardStats getDashboardStats();
       
     }
 }

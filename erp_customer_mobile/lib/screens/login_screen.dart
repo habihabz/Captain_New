@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../providers/favourite_provider.dart';
 import '../providers/cart_provider.dart';
-import '../utils/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +18,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool _isPasswordVisible = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+
+  final Color _accentColor = const Color(0xFF81E3D2);
 
   @override
   void initState() {
@@ -50,13 +51,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
     if (mounted) {
       if (success) {
-        // Fetch data immediately after login
-        if (mounted) {
-          final customerId = auth.customer!.id;
-          Provider.of<FavouriteProvider>(context, listen: false).fetchFavourites(customerId);
-          Provider.of<CartProvider>(context, listen: false).fetchCart(customerId);
-          Navigator.pushReplacementNamed(context, '/home');
-        }
+        final customerId = auth.customer!.u_id;
+        Provider.of<FavouriteProvider>(context, listen: false).fetchFavourites(customerId);
+        Provider.of<CartProvider>(context, listen: false).fetchCart(customerId);
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -67,9 +65,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             ),
             backgroundColor: Colors.black87,
             behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.only(bottom: 50, left: 50, right: 50),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -83,123 +79,172 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Column(
-              children: [
-                const SizedBox(height: 80),
-                // Logo Container
-                Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  child: Image.asset(
-                    'assets/logo.png',
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.shopping_bag_outlined, size: 50),
-                  ),
+        child: LayoutBuilder(
+          builder: (context, viewportConstraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
                 ),
-                const SizedBox(height: 30),
-                Text(
-                  'CAPTAIN',
-                  style: GoogleFonts.outfit(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    letterSpacing: 4,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Exclusive Shopping Experience',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.grey[400],
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 60),
-                
-                // Login Form
-                Column(
-                  children: [
-                    _buildTextField(
-                      controller: _usernameController,
-                      label: 'Username',
-                      icon: Icons.person_outline_rounded,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      icon: Icons.lock_outline_rounded,
-                      isPassword: true,
-                      isPasswordVisible: _isPasswordVisible,
-                      onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                    ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Forgot Password?',
-                          style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 13, fontWeight: FontWeight.w600),
+                child: IntrinsicHeight(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 500),
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 30),
+                            // Logo
+                            Image.asset('assets/logo.png', height: 90),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Welcome Back',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Log in to continue your Captain experience.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            
+                            // Form
+                            _buildFieldLabel('USERNAME'),
+                            _buildTextField(
+                              controller: _usernameController,
+                              hint: 'Enter your username',
+                              icon: Icons.person_outline,
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            _buildFieldLabel('PASSWORD'),
+                            _buildTextField(
+                              controller: _passwordController,
+                              hint: '••••••••',
+                              icon: Icons.lock_outline,
+                              isPassword: true,
+                              isPasswordVisible: _isPasswordVisible,
+                              onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                            ),
+                            
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero, 
+                                  alignment: Alignment.centerRight,
+                                  minimumSize: const Size(0, 30)
+                                ),
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFF94A3B8), 
+                                    fontSize: 12, 
+                                    fontWeight: FontWeight.w600
+                                  ),
+                                ),
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 20),
+                            
+                            // Login Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton(
+                                onPressed: authProvider.isLoading ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _accentColor,
+                                  foregroundColor: const Color(0xFF1E293B),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                                  elevation: 0,
+                                ),
+                                child: authProvider.isLoading
+                                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1E293B)))
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'SECURE LOGIN',
+                                            style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 1),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_forward, size: 18),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 25),
+                            
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account? ",
+                                  style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 13),
+                                ),
+                                GestureDetector(
+                                  onTap: () => Navigator.pushNamed(context, '/signup'),
+                                  child: Text(
+                                    'Sign Up Now',
+                                    style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 13),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 50),
+                            // Copyright
+                            Text(
+                              '© 2026 Captain. All Rights Reserved.',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: const Color(0xFF94A3B8),
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: authProvider.isLoading ? null : _handleLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: authProvider.isLoading
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : Text('Login', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account? ",
-                      style: GoogleFonts.inter(color: Colors.grey[500]),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/signup'),
-                      child: Text(
-                        'Sign Up',
-                        style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 8),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF94A3B8),
+            letterSpacing: 1,
           ),
         ),
       ),
@@ -208,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Widget _buildTextField({
     required TextEditingController controller,
-    required String label,
+    required String hint,
     required IconData icon,
     bool isPassword = false,
     bool isPasswordVisible = false,
@@ -216,30 +261,29 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword && !isPasswordVisible,
-        style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.w500),
+        style: GoogleFonts.inter(color: const Color(0xFF1E293B), fontWeight: FontWeight.w600),
         decoration: InputDecoration(
-          labelText: label,
-          labelStyle: GoogleFonts.inter(color: Colors.grey[400]),
-          prefixIcon: Icon(icon, color: Colors.black, size: 22),
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 14),
+          prefixIcon: Icon(icon, color: const Color(0xFF94A3B8), size: 18),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
                     isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                    color: Colors.grey[400],
-                    size: 20,
+                    color: const Color(0xFF94A3B8),
+                    size: 18,
                   ),
                   onPressed: onToggleVisibility,
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
         ),
       ),
     );

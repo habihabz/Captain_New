@@ -35,6 +35,28 @@ class ApiClient {
     );
   }
 
+  Future<http.Response> multipartPost(String endpoint, Map<String, String> fields, String filePath, String fileKey) async {
+    final url = Uri.parse('${AppConstants.baseApiUrl}$endpoint');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(AppConstants.tokenKey);
+    
+    var request = http.MultipartRequest('POST', url);
+    
+    // Add headers
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+    
+    // Add fields
+    request.fields.addAll(fields);
+    
+    // Add file
+    request.files.add(await http.MultipartFile.fromPath(fileKey, filePath));
+    
+    final streamedResponse = await request.send();
+    return await http.Response.fromStream(streamedResponse);
+  }
+
   // Handle Response
   dynamic processResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {

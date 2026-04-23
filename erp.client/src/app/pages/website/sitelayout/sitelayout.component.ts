@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
-import { MasterData } from '../../../models/master.data.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sitelayout',
@@ -8,5 +7,10 @@ import { MasterData } from '../../../models/master.data.model';
   styleUrl: './sitelayout.component.css'
 })
 export class SitelayoutComponent {
+  constructor(private router: Router) {}
 
+  isHomePage(): boolean {
+    return this.router.url.includes('web-home') || this.router.url === '/';
+  }
 }
+

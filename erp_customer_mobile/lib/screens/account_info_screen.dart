@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
-import '../models/customer.dart';
 import '../utils/constants.dart';
 
 class AccountInfoScreen extends StatefulWidget {
@@ -22,9 +21,9 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   void initState() {
     super.initState();
     final customer = Provider.of<AuthProvider>(context, listen: false).customer;
-    _nameController = TextEditingController(text: customer?.name ?? '');
-    _emailController = TextEditingController(text: customer?.email ?? '');
-    _phoneController = TextEditingController(text: customer?.phone ?? '');
+    _nameController = TextEditingController(text: customer?.u_name ?? '');
+    _emailController = TextEditingController(text: customer?.u_email ?? '');
+    _phoneController = TextEditingController(text: customer?.u_phone ?? '');
   }
 
   @override

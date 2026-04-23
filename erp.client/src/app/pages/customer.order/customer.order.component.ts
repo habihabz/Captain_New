@@ -100,6 +100,14 @@ export class CustomerOrderComponent {
             icon: 'fa fa-eye',
             action: 'onDetails',
             onDetails: (data: any) => this.onAction('details', data)
+          },
+          {
+            name: '',
+            tooltip: 'Change Status',
+            cssClass: 'btn btn-outline-success btn-xs rounded-pill ms-1',
+            icon: 'fa fa-refresh',
+            action: 'statusChange',
+            statusChange: (data: any) => this.onAction('statusChange', data)
           }
         ]
       }
@@ -141,9 +149,11 @@ export class CustomerOrderComponent {
       cellClass: 'text-center',
       cellRenderer: (p: any) => {
         if (!p.value) return '';
-        const isCanceled = p.value.toLowerCase().includes('cancel');
-        const isDelivered = p.value.toLowerCase().includes('deliver');
-        const color = isCanceled ? '#dc3545' : (isDelivered ? '#198754' : '#6c757d');
+        const val = p.value.toLowerCase();
+        const isCanceled = val.includes('cancel');
+        const isDelivered = val.includes('deliver');
+        const isReturned = val.includes('return');
+        const color = isCanceled ? '#dc3545' : (isDelivered ? '#198754' : (isReturned ? '#fd7e14' : '#6c757d'));
         return `<span style="background-color: ${color}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">${p.value}</span>`;
       }
     },
@@ -154,6 +164,7 @@ export class CustomerOrderComponent {
 
 
   ngOnInit(): void {
+    this.requestParms.id = null as any;
     this.getStatuses();
     this.getCustomerOrders();
     this.subscription.add(
@@ -178,7 +189,7 @@ export class CustomerOrderComponent {
 
   updateBulkStatusList() {
     this.isBulkListReady = false;
-    this.bulkUpdateStatuses = this.customerOrderStatuses.filter(x => Number(x.s_id) !== Number(this.requestParms.id));
+    this.bulkUpdateStatuses = this.customerOrderStatuses.filter(x => Number(x.s_id) !== Number(this.requestParms.status));
     setTimeout(() => {
       this.isBulkListReady = true;
     }, 50);
@@ -236,9 +247,19 @@ export class CustomerOrderComponent {
     this.selectedRowsCount = this.customerOrderGrid.api.getSelectedRows().length;
   }
 
+  onDateRangeChange(range: { startDate: string, endDate: string }) {
+    this.requestParms.startDate = range.startDate;
+    this.requestParms.endDate = range.endDate;
+  }
+
   getCustomerOrders() {
-    this.requestParms.user = this.currentUser.u_id;
-    this.icustomerOrder.getCustomerOrders(this.requestParms).subscribe(
+    // Convert to number for API, default to 0 if empty/null
+    const searchId = this.requestParms.id ? +this.requestParms.id : 0;
+    
+    // Create a temporary object to send to API so we don't overwrite the UI's empty state with '0'
+    const params = { ...this.requestParms, id: searchId, user: this.currentUser.u_id };
+    
+    this.icustomerOrder.getCustomerOrders(params).subscribe(
       (data: CustomerOrder[]) => {
         this.customerOrders = data;
         setTimeout(() => {
@@ -252,20 +273,22 @@ export class CustomerOrderComponent {
 
   }
   onCustomerOrderStatusChange(s_id: number) {
-    this.requestParms.id = s_id;
+    this.requestParms.status = s_id;
+    this.requestParms.id = 0; // Ensure Order ID filter is cleared when changing status filter
     this.updateBulkStatusList();
     this.getCustomerOrders();
   }
 
   setTab(tab: string) {
     this.requestParms.completedYn = tab;
-    // reset date filters if switching to Active Orders to fetch correctly
-    if (tab === 'N') {
+    // reset date filters if switching to Active Orders or All Orders to fetch correctly
+    if (tab === 'N' || tab === 'A') {
       this.requestParms.startDate = '';
       this.requestParms.endDate = '';
     }
     this.getCustomerOrders();
   }
+
 
   onNewStatusChange(s_id: number) {
     this.requestParms.status = s_id;
@@ -404,9 +427,9 @@ export class CustomerOrderComponent {
           }
 
           if (match) {
-            order.resolvedImageUrl = this.formatImageUrl(match.pa_path);
+            order.resolvedImageUrl = this.formatImageUrl(match.pa_image_path);
           } else {
-            order.resolvedImageUrl = this.formatImageUrl(attachments[0].pa_path);
+            order.resolvedImageUrl = this.formatImageUrl(attachments[0].pa_image_path);
           }
         }
       },
@@ -414,7 +437,7 @@ export class CustomerOrderComponent {
         // Fallback to basic attachments if specific call fails
         const basic = this.getAttachementOfaProduct(order.p_attachements || '');
         if (basic && basic.length > 0) {
-          order.resolvedImageUrl = this.formatImageUrl(basic[0].pa_path);
+          order.resolvedImageUrl = this.formatImageUrl(basic[0].pa_image_path);
         }
       }
     });
@@ -424,7 +447,7 @@ export class CustomerOrderComponent {
     if (order.resolvedImageUrl) return order.resolvedImageUrl;
     const att = this.getAttachementOfaProduct(order.p_attachements || '');
     if (att && att.length > 0) {
-      return this.formatImageUrl(att[0].pa_path);
+      return this.formatImageUrl(att[0].pa_image_path);
     }
     return 'assets/placeholder-product.png';
   }

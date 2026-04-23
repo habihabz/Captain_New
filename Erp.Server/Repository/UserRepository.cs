@@ -87,5 +87,20 @@ namespace Erp.Server.Repository
             var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.updateUserPassword @userId, @newPassword;", _userId, _newPassword).ToList().FirstOrDefault() ?? new DbResult();
             return dbresult;
         }
+
+        public DbResult updateProfileImage(int userId, string imageUrl)
+        {
+            try
+            {
+                var _id = new SqlParameter("id", userId);
+                var _image = new SqlParameter("image", imageUrl);
+                var rows = db.Database.ExecuteSqlRaw("UPDATE dbo.Users SET u_image_url = @image WHERE u_id = @id", _image, _id);
+                return new DbResult { id = rows, message = rows > 0 ? "Success" : "User not found" };
+            }
+            catch (Exception ex)
+            {
+                return new DbResult { id = 0, message = ex.Message };
+            }
+        }
     }
 }

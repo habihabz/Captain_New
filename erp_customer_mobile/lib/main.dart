@@ -6,11 +6,13 @@ import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/order_provider.dart';
 import 'providers/favourite_provider.dart';
+import 'providers/address_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/order_history_screen.dart';
+import 'screens/order_details_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/favourite_screen.dart';
 import 'screens/account_info_screen.dart';
@@ -28,6 +30,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => FavouriteProvider()),
+        ChangeNotifierProvider(create: (_) => AddressProvider()),
       ],
       child: const MyApp(),
     ),
@@ -40,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Captain Customer',
+      title: 'Captain',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -65,6 +68,10 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/cart': (context) => const CartScreen(),
         '/orders': (context) => const MyOrdersScreen(),
+        '/order-details': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as int;
+          return OrderDetailsScreen(orderId: args);
+        },
         '/profile': (context) => const ProfileScreen(),
         '/favorites': (context) => const FavouritesScreen(),
         '/account': (context) => const AccountInfoScreen(),

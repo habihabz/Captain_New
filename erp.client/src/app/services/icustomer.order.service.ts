@@ -32,9 +32,6 @@ export class ICustomerOrder {
     return this.http.post<DbResult>(this.apiUrl + "/createOrUpdateCustomerOrder", requestParms);
   }
 
-  getCustomerOrderDetails(id: number): Observable<CustomerOrderDetail[]> {
-    return this.http.post<CustomerOrderDetail[]>(this.apiUrl + "/getCustomerOrderDetails", id);
-  }
 
   getMyOrders(requestParms: RequestParms): Observable<any[]> {
     return this.http.post<any[]>(this.apiUrl + "/getMyOrders", requestParms);

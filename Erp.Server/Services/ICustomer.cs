@@ -12,5 +12,6 @@ namespace Erp.Server.Services
         public IEnumerable<Customer> getCustomers();
         DbResult registerCustomer(Customer customer);
         DbResult updatePassword(int userId, string newPassword);
+        DbResult updateProfileImage(int customerId, string imageUrl);
     }
 }

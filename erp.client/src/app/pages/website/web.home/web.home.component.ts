@@ -45,6 +45,7 @@ export class WebHomeComponent implements OnInit {
   latestBlog: Blog = new Blog();
   favourite: Favourite = new Favourite();
   currentUser: User = new User();
+  userFavourites: Favourite[] = [];
 
   constructor(
     private elRef: ElementRef,
@@ -65,6 +66,10 @@ export class WebHomeComponent implements OnInit {
   }
 
 
+  navigateTo(route: string) {
+    this.router.navigate(['/' + route]);
+  }
+
   ngOnInit(): void {
     this.loadUserCountry();
     this.loadCategories();
@@ -72,6 +77,7 @@ export class WebHomeComponent implements OnInit {
     this.getProductsByCountry();
     this.getBlogsForHomePage();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
+    this.loadUserFavourites();
   }
 
   getSliders() {
@@ -142,9 +148,37 @@ export class WebHomeComponent implements OnInit {
     }
   }
 
-  addToFavourites(productId: number) {
+  loadUserFavourites() {
+    if (this.currentUser && this.currentUser.u_id) {
+      const params = new RequestParms();
+      params.id = this.currentUser.u_id;
+      this.ifavouriteService.getFavourites(params).subscribe(res => {
+        this.userFavourites = res;
+      });
+    }
+  }
 
-    if (productId && this.currentUser && this.currentUser.u_id) {
+  isFavourite(productId: number): boolean {
+    return this.userFavourites.some(x => x.f_product == productId);
+  }
+
+  addToFavourites(productId: number) {
+    if (!this.currentUser || !this.currentUser.u_id) {
+      this.router.navigate(['/customer-login']);
+      return;
+    }
+
+    const existingFav = this.userFavourites.find(x => x.f_product == productId);
+
+    if (existingFav) {
+      this.ifavouriteService.deleteFavourite(existingFav.f_id).subscribe((data: DbResult) => {
+        if (data.message == "Success") {
+          this.snackbarService.showSuccess("Removed from favourites");
+          this.loadUserFavourites();
+        }
+      });
+    } else {
+      this.favourite = new Favourite();
       this.favourite.f_cre_by = this.currentUser.u_id;
       this.favourite.f_product = productId;
 
@@ -152,7 +186,7 @@ export class WebHomeComponent implements OnInit {
         (data: DbResult) => {
           if (data.message == "Success") {
             this.snackbarService.showSuccess("Added to favourites");
-            this.router.navigate(['/favourites']);
+            this.loadUserFavourites();
           }
           else {
             this.snackbarService.showError(data.message);
@@ -161,11 +195,6 @@ export class WebHomeComponent implements OnInit {
         (error: any) => {
         }
       );
-
-    } else {
-      this.router.navigate(['/login']);
     }
-
-
   }
 }

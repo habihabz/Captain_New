@@ -1,75 +1,58 @@
 import 'dart:convert';
 
 class ProductColor {
-  final int id;
-  final String name;
-  final String hex;
+  final int pc_id;
+  final String pc_name;
+  final String pc_code;
 
-  ProductColor({required this.id, required this.name, required this.hex});
+  ProductColor({required this.pc_id, required this.pc_name, required this.pc_code});
 
   factory ProductColor.fromJson(Map<String, dynamic> json) {
-    final name = json['pc_color_name'] ?? json['pc_name'] ?? '';
     return ProductColor(
-      id: json['pc_color'] ?? json['pc_id'] ?? 0,
-      name: name,
-      hex: json['pc_code'] ?? json['pc_hex'] ?? _getColorHex(name),
+      pc_id: json['pc_color'] ?? json['pc_id'] ?? 0,
+      pc_name: json['pc_color_name'] ?? json['pc_name'] ?? '',
+      pc_code: json['pc_code'] ?? json['pc_hex'] ?? '#E0E0E0',
     );
-  }
-
-  static String _getColorHex(String name) {
-    final lowerName = name.toLowerCase();
-    if (lowerName.contains('black')) return '#000000';
-    if (lowerName.contains('white')) return '#FFFFFF';
-    if (lowerName.contains('blue')) return '#2196F3';
-    if (lowerName.contains('navy')) return '#1A237E';
-    if (lowerName.contains('red')) return '#F44336';
-    if (lowerName.contains('grey') || lowerName.contains('gray')) return '#9E9E9E';
-    if (lowerName.contains('yellow')) return '#FFEB3B';
-    if (lowerName.contains('green')) return '#4CAF50';
-    if (lowerName.contains('orange')) return '#FF9800';
-    if (lowerName.contains('pink')) return '#E91E63';
-    if (lowerName.contains('purple')) return '#9C27B0';
-    return '#E0E0E0'; // Default light grey
   }
 }
 
 class ProductSize {
-  final int id;
-  final String name;
+  final int ps_id;
+  final String ps_name;
 
-  ProductSize({required this.id, required this.name});
+  ProductSize({required this.ps_id, required this.ps_name});
 
   factory ProductSize.fromJson(Map<String, dynamic> json) {
     return ProductSize(
-      id: json['ps_size'] ?? json['ps_id'] ?? 0,
-      name: json['ps_size_name'] ?? json['ps_name'] ?? '',
+      ps_id: json['ps_size'] ?? json['ps_id'] ?? 0,
+      ps_name: json['ps_size_name'] ?? json['ps_name'] ?? '',
     );
   }
 }
 
 class Product {
-  final int id;
-  final String name;
-  final String shortName;
-  final String description;
-  final int category;
-  final String categoryName;
-  final double price;
-  final double rating;
-  final String attachments; 
+  final int p_id;
+  final String p_name;
+  final String p_short_name;
+  final String p_description;
+  final int p_category;
+  final String p_category_name;
+  final double p_price;
+  final double p_overall_rating;
+  final String p_attachements; 
   final List<ProductColor> availableColors;
   final List<ProductSize> availableSizes;
 
   Product({
-    this.id = 0,
-    this.name = '',
-    this.shortName = '',
-    this.description = '',
-    this.category = 0,
-    this.categoryName = '',
-    this.price = 0.0,
-    this.rating = 0.0,
-    this.attachments = '',
+    this.p_id = 0,
+    this.p_name = '',
+    this.p_short_name = '',
+    this.p_description = '',
+    this.p_category = 0,
+    this.p_category_name = '',
+    this.p_price = 0.0,
+    this.p_overall_rating = 0.0,
+    this.p_attachements = '',
     this.availableColors = const [],
     this.availableSizes = const [],
   });
@@ -92,35 +75,34 @@ class Product {
     }
 
     return Product(
-      id: json['p_id'] ?? 0,
-      name: json['p_name'] ?? '',
-      shortName: json['p_short_name'] ?? '',
-      description: json['p_description'] ?? '',
-      category: json['p_category'] ?? 0,
-      categoryName: json['p_category_name'] ?? '',
-      price: (json['p_price'] ?? 0).toDouble(),
-      rating: (json['p_overall_rating'] ?? 0).toDouble(),
-      attachments: json['p_attachements'] ?? '',
+      p_id: json['p_id'] ?? 0,
+      p_name: json['p_name'] ?? '',
+      p_short_name: json['p_short_name'] ?? '',
+      p_description: json['p_description'] ?? '',
+      p_category: json['p_category'] ?? 0,
+      p_category_name: json['p_category_name'] ?? '',
+      p_price: (json['p_price'] ?? 0).toDouble(),
+      p_overall_rating: (json['p_overall_rating'] ?? 0).toDouble(),
+      p_attachements: json['p_attachements'] ?? '',
       availableColors: colors,
       availableSizes: sizes,
     );
   }
 
   List<String> get imageList {
-    if (attachments.isEmpty) return [];
+    if (p_attachements.isEmpty) return [];
     try {
-      final List<dynamic> parsed = jsonDecode(attachments);
+      final List<dynamic> parsed = jsonDecode(p_attachements);
       return parsed.map((e) => e['pa_image_path'].toString()).toList();
     } catch (_) {
-      return attachments.split(',');
+      return p_attachements.split(',');
     }
   }
 
   List<String> getImagesForColor(int colorId) {
-    if (attachments.isEmpty) return [];
+    if (p_attachements.isEmpty) return [];
     try {
-      final List<dynamic> parsed = jsonDecode(attachments);
-      // Filter by color ID or show general images (color 0)
+      final List<dynamic> parsed = jsonDecode(p_attachements);
       final filtered = parsed.where((e) {
         final paColor = e['pa_color'] ?? 0;
         return paColor == colorId || paColor == 0;

@@ -1,34 +1,34 @@
 class ProductReview {
-  final int id;
-  final int productId;
-  final int rating;
-  final String headline;
-  final String review;
-  final int createdBy;
-  final String createdByName;
-  final DateTime createdOn;
+  final int pr_id;
+  final int pr_prod_id;
+  final int pr_overall_rating;
+  final String pr_head_line;
+  final String pr_review;
+  final int pr_cre_by;
+  final String pr_cre_by_name;
+  final DateTime pr_created_on;
 
   ProductReview({
-    this.id = 0,
-    required this.productId,
-    this.rating = 5,
-    this.headline = '',
-    this.review = '',
-    this.createdBy = 0,
-    this.createdByName = '',
-    DateTime? createdOn,
-  }) : createdOn = createdOn ?? DateTime.now();
+    this.pr_id = 0,
+    required this.pr_prod_id,
+    this.pr_overall_rating = 5,
+    this.pr_head_line = '',
+    this.pr_review = '',
+    this.pr_cre_by = 0,
+    this.pr_cre_by_name = '',
+    DateTime? pr_created_on,
+  }) : pr_created_on = pr_created_on ?? DateTime.now();
 
   factory ProductReview.fromJson(Map<String, dynamic> json) {
     return ProductReview(
-      id: json['pr_id'] ?? 0,
-      productId: json['pr_prod_id'] ?? 0,
-      rating: json['pr_overall_rating'] ?? 5,
-      headline: json['pr_head_line'] ?? '',
-      review: json['pr_review'] ?? '',
-      createdBy: json['pr_cre_by'] ?? 0,
-      createdByName: json['pr_cre_by_name'] ?? '',
-      createdOn: json['pr_created_on'] != null 
+      pr_id: json['pr_id'] ?? 0,
+      pr_prod_id: json['pr_prod_id'] ?? 0,
+      pr_overall_rating: json['pr_overall_rating'] ?? 5,
+      pr_head_line: json['pr_head_line'] ?? '',
+      pr_review: json['pr_review'] ?? '',
+      pr_cre_by: json['pr_cre_by'] ?? 0,
+      pr_cre_by_name: json['pr_cre_by_name'] ?? '',
+      pr_created_on: json['pr_created_on'] != null 
           ? DateTime.parse(json['pr_created_on']) 
           : DateTime.now(),
     );
@@ -36,13 +36,13 @@ class ProductReview {
 
   Map<String, dynamic> toJson() {
     return {
-      'pr_id': id,
-      'pr_prod_id': productId,
-      'pr_overall_rating': rating,
-      'pr_head_line': headline,
-      'pr_review': review,
-      'pr_cre_by': createdBy,
-      'pr_cre_by_name': createdByName,
+      'pr_id': pr_id,
+      'pr_prod_id': pr_prod_id,
+      'pr_overall_rating': pr_overall_rating,
+      'pr_head_line': pr_head_line,
+      'pr_review': pr_review,
+      'pr_cre_by': pr_cre_by,
+      'pr_cre_by_name': pr_cre_by_name,
     };
   }
 }

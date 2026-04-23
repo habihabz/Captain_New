@@ -17,10 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", p =>
-        p.SetIsOriginAllowed(origin => true)
+        p.WithOrigins("http://localhost:65448", "http://localhost:65449", "http://localhost:4200")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()
+        .SetIsOriginAllowed(origin => true)
     );
 });
 
@@ -133,7 +134,9 @@ app.UseSwaggerUI(c =>
 app.UseDeveloperExceptionPage();
 
 app.UseRouting();
+
 app.UseCors("AllowSpecificOrigin");
+
 app.UseStaticFiles();
 
 app.UseAuthentication();

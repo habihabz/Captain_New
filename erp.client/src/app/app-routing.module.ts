@@ -43,6 +43,8 @@ import { ReturnedOrdersComponent } from './pages/returned.orders/returned-orders
 import { StatusComponent } from './pages/status/status.component';
 import { PromocodeComponent } from './pages/promocode/promocode.component';
 import { RefundManagementComponent } from './pages/admin/refund-management/refund-management.component';
+import { PaymentSuccessComponent } from './pages/website/payment.success/payment.success.component';
+import { PaymentFailureComponent } from './pages/website/payment.failure/payment.failure.component';
 
 
 
@@ -89,6 +91,8 @@ const routes: Routes = [
 
       },
       { path: 'order-details/:id', component: OrderDetailsComponent },
+      { path: 'payment-success', component: PaymentSuccessComponent },
+      { path: 'payment-failure', component: PaymentFailureComponent },
     ]
   },
   {
@@ -220,7 +224,7 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-      scrollPositionRestoration: 'enabled',
+      scrollPositionRestoration: 'top',
       anchorScrolling: 'enabled'
     })
   ],

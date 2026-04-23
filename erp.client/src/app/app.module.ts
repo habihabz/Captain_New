@@ -21,6 +21,7 @@ import { environment } from '../environments/environment';
 import { MenuComponent } from './pages/menu/menu.component';
 import { MenuAllocationComponent } from './pages/menu.allocation/menu.allocation.component';
 import { Select2Directive } from './directives/select2.directive';
+import { DateRangeDirective } from './directives/daterange.directive';
 import { DataTablesModule} from 'angular-datatables';
 import { CustomerComponent } from './pages/customer/customer.component';
 import { SupplierComponent } from './pages/supplier/supplier.component';
@@ -107,6 +108,7 @@ const jwtConfig: JwtModuleOptions = {
     MenuComponent,
     MenuAllocationComponent,
     Select2Directive,
+    DateRangeDirective,
     CustomerComponent,
     SupplierComponent,
     CategoryComponent,

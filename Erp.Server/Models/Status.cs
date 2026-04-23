@@ -24,5 +24,7 @@ namespace Erp.Server.Models
         public DateTime s_cre_date { get; set; } = DateTime.Now;
 
         public int? s_workflow_id { get; set; }
+        public int? cos_priority { get; set; }
+        public string? s_active_yn { get; set; } = "Y";
     }
 }

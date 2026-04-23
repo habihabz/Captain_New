@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
-import '../providers/cart_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/product_card.dart';
 
@@ -48,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FB),
       endDrawer: _buildFilterDrawer(productProvider),
       body: RefreshIndicator(
         onRefresh: () => productProvider.fetchHomeData(),
@@ -58,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(
               child: Container(
                 padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 10),
-                color: Colors.white,
+                color: const Color(0xFFF8F9FB),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -71,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               onTap: () => Navigator.pushNamed(context, '/profile'),
                               child: CircleAvatar(
                                 radius: 22,
-                                backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
+                                backgroundColor: AppConstants.primaryColor.withValues(alpha: 0.1),
                                 child: const Icon(Icons.person, color: AppConstants.primaryColor, size: 20),
                               ),
                             ),
@@ -84,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 13, fontWeight: FontWeight.w500),
                                 ),
                                 Text(
-                                  auth.customer?.name ?? 'Guest User',
+                                  auth.customer?.u_name ?? 'Guest User',
                                   style: GoogleFonts.outfit(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -158,15 +157,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 20),
                 child: SizedBox(
-                  height: 44,
+                  height: 50,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: 20),
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: productProvider.categories.length + 1,
                     itemBuilder: (context, index) {
-                      final catId = index == 0 ? 0 : productProvider.categories[index - 1].id;
+                      final catId = index == 0 ? 0 : productProvider.categories[index - 1].ct_id;
                       final isSelected = productProvider.selectedCategoryId == catId;
-                      final label = index == 0 ? 'All' : productProvider.categories[index - 1].name;
+                      final label = index == 0 ? 'All' : productProvider.categories[index - 1].ct_name;
                       
                       return Padding(
                         padding: const EdgeInsets.only(right: 12),
@@ -295,9 +295,9 @@ class _HomeScreenState extends State<HomeScreen> {
           spacing: 8,
           runSpacing: 8,
           children: items.map((item) {
-            final isSelected = selectedItems.contains(item.id);
+            final isSelected = selectedItems.contains(item.md_id);
             return GestureDetector(
-              onTap: () => onToggle(item.id),
+              onTap: () => onToggle(item.md_id),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
@@ -306,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   border: Border.all(color: isSelected ? AppConstants.primaryColor : Colors.grey[200]!),
                 ),
                 child: Text(
-                  item.name,
+                  item.md_name,
                   style: GoogleFonts.inter(
                     color: isSelected ? Colors.white : Colors.black87,
                     fontSize: 13,
@@ -329,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Row(

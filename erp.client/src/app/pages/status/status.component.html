@@ -31,7 +31,7 @@
           <div class="input-group search-container-premium">
 
             <select appSelect2 class="form-select select2-primary border-0 bg-light py-2 rounded-end-pill shadow-none"
-              (change)="onWorkflowFilterChange($any($event.target).value)"
+              (selectionChanged)="onWorkflowFilterChange($event)"
               style="font-size: 14px; font-weight: 600; cursor: pointer; height: 42px;">
               <option value="0">Show All Active Workflows</option>
               <option value="1">Customer Order Workflow</option>
@@ -92,6 +92,33 @@
               </select>
             </div>
             <p class="mt-2 text-muted x-small italic">Determines where this status will be available for selection.</p>
+          </div>
+
+          <!-- Priority and Active Flag - Only for Edit -->
+          <div *ngIf="status.s_id" class="row mt-4 pt-4 border-top">
+            <div class="col-6">
+              <label for="s_priority" class="form-label fw-bold text-muted small uppercase mb-2">Display Priority</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="fa fa-sort-numeric-asc text-muted"></i></span>
+                <input type="number" id="s_priority" class="form-control bg-light border-start-0 ps-0" 
+                  [(ngModel)]="status.cos_priority" name="s_priority" placeholder="0" style="height: 45px; font-weight: 600;">
+              </div>
+            </div>
+            <div class="col-6">
+              <label for="s_is_active" class="form-label fw-bold text-muted small uppercase mb-2">Availability State</label>
+              <div class="d-flex align-items-center" style="height: 45px;">
+                <div class="form-check form-switch custom-switch-premium">
+                  <input class="form-check-input mt-0" type="checkbox" id="s_is_active" 
+                    [checked]="status.s_active_yn === 'Y'" 
+                    (change)="status.s_active_yn = $any($event.target).checked ? 'Y' : 'N'"
+                    name="s_active_yn" style="cursor: pointer; width: 2.5em; height: 1.25em;">
+                  <label class="form-check-label ms-3 fw-bold mb-0" [ngClass]="status.s_active_yn === 'Y' ? 'text-success' : 'text-danger'" 
+                    style="font-size: 13px; cursor: pointer; letter-spacing: 0.5px;">
+                    {{ status.s_active_yn === 'Y' ? 'ACTIVE' : 'INACTIVE' }}
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>

@@ -13,5 +13,8 @@ export class IReportService {
     getOrderReport(reportParms: ReportParm): Observable<any[]> {
         return this.http.post<any[]>(`${this.reportUrl}/getOrderReport`, reportParms);
     }
+    getDashboardStats(): Observable<any> {
+        return this.http.post<any>(`${this.reportUrl}/getDashboardStats`, {});
+    }
    
 }

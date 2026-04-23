@@ -35,7 +35,7 @@ class AuthProvider with ChangeNotifier {
     try {
       final result = await _authService.login(username, password);
       if (result['message'] == 'Success') {
-        _customer = Customer.fromJson(result['customer']);
+        _customer = Customer.fromJson(result['user']);
         _isLoading = false;
         notifyListeners();
         return true;
@@ -65,5 +65,34 @@ class AuthProvider with ChangeNotifier {
     await _authService.logout();
     _customer = null;
     notifyListeners();
+  }
+
+  Future<bool> uploadProfileImage(String filePath) async {
+    if (_customer == null) return false;
+    
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await _authService.uploadProfileImage(_customer!.u_id, filePath);
+      if (result.status) {
+        // Refresh customer data
+        _customer = await _authService.getStoredCustomer();
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = _cleanErrorMessage(result.message);
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }

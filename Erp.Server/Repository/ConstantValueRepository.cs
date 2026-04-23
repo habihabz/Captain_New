@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +69,7 @@ namespace Erp.Server.Repository
             var _name = new SqlParameter("name", requestParams.name + "");
 
             var constant = db.Set<ConstantValue>().FromSqlRaw(
-                "EXEC dbo.getConstantValueByName @_name;",_name
+                "EXEC dbo.getConstantValueByName {0};", requestParams.name
             ).ToList().FirstOrDefault() ?? new ConstantValue();
 
             return constant;

@@ -172,7 +172,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             const SizedBox(height: 12),
             // Tagline
             Opacity(
-              opacity: _controller.value > 0.7 ? (_controller.value - 0.7) / 0.3 : 0.0,
+              opacity: (_controller.value > 0.7 ? (_controller.value - 0.7) / 0.3 : 0.0).clamp(0.0, 1.0),
               child: Text(
                 'EXCLUSIVE SHOPPING',
                 style: GoogleFonts.inter(

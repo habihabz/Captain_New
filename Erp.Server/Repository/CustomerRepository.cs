@@ -97,5 +97,23 @@ namespace Erp.Server.Repository
             var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.updateCustomerPassword @userId, @newPassword;", _userId, _newPassword).ToList().FirstOrDefault() ?? new DbResult();
             return dbresult;
         }
+
+        public DbResult updateProfileImage(int customerId, string imageUrl)
+        {
+            try
+            {
+                var _id = new SqlParameter("id", customerId);
+                var _image = new SqlParameter("image", imageUrl);
+                
+                // Using raw SQL update as we may not have a stored procedure for this yet
+                var rows = db.Database.ExecuteSqlRaw("UPDATE dbo.Customers SET c_image_url = @image WHERE c_id = @id", _image, _id);
+                
+                return new DbResult { id = rows, message = rows > 0 ? "Success" : "Customer not found" };
+            }
+            catch (Exception ex)
+            {
+                return new DbResult { id = 0, message = ex.Message };
+            }
+        }
     }
 }

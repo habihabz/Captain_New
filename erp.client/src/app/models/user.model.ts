@@ -15,6 +15,7 @@ export class User {
   u_cre_by: number;
   u_cre_by_name: string;
   u_cre_date: string;
+  u_image_url: string;
   constructor() {
     this.u_id = 0;
     this.u_name='',
@@ -33,6 +34,7 @@ export class User {
     this.u_cre_by = 0;
     this.u_cre_by_name = '';
     this.u_cre_date = '';
+    this.u_image_url = '';
   }
 
 }

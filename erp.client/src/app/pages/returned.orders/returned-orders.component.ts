@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ColDef, DomLayoutType, GridReadyEvent, RowSelectionOptions } from 'ag-grid-community';
+import { ColDef, DomLayoutType, GridApi, GridReadyEvent, RowSelectionOptions } from 'ag-grid-community';
 import { User } from '../../models/user.model';
 import { Subscription, forkJoin } from 'rxjs';
 import { DbResult } from '../../models/dbresult.model';
@@ -13,22 +13,31 @@ import { StatusService } from '../../services/status.service';
 import { Status } from '../../models/status.model';
 import { RequestParms } from '../../models/requestParms';
 import { IOrderMovementHistoryService } from '../../services/iorder.movement.history.service';
+import { IProductService } from '../../services/iproduct.service';
 import { OrderMovementHistory } from '../../models/order.movement.history.model';
 import { IPaymentService, RefundRequest } from '../../services/ipayment.service';
 import { ICustomerOrder } from '../../services/icustomer.order.service';
+import { IAddressService } from '../../services/iaddress.service';
+import { Address } from '../../models/address.model';
 declare var $: any;
+
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-returned-orders',
   templateUrl: './returned-orders.component.html',
-  styleUrl: './returned-orders.component.css'
+  styleUrls: ['./returned-orders.component.css']
 })
 export class ReturnedOrdersComponent implements OnInit {
+  environment = environment;
+  private gridApi!: GridApi;
   pagination = true;
   domLayout: DomLayoutType = 'autoHeight';
   currentUser: User = new User();
   returnOrders: ReturnOrder[] = [];
+  activeDetailTab: string = 'summary';
   selectedReturn: ReturnOrder = {} as ReturnOrder;
+  selectedOrder: any = null;
   statuses: Status[] = [];
   requestParms: RequestParms = new RequestParms();
   orderMovementHistories: OrderMovementHistory[] = [];
@@ -53,7 +62,9 @@ export class ReturnedOrdersComponent implements OnInit {
     private snackBarService: SnackBarService,
     private iOrderMovementHistoryService: IOrderMovementHistoryService,
     private paymentService: IPaymentService,
-    private icustomerOrder: ICustomerOrder
+    private icustomerOrder: ICustomerOrder,
+    private iProductService: IProductService,
+    private iAddressService: IAddressService
   ) {
     this.currentUser = iuser.getCurrentUser();
   }
@@ -63,6 +74,13 @@ export class ReturnedOrdersComponent implements OnInit {
     {
       headerName: "Return ID",
       field: "ro_id",
+      width: 100,
+      cellClass: 'text-center fw-bold text-muted',
+      headerClass: 'text-center'
+    },
+     {
+      headerName: "Order ID",
+      field: "ro_order_no",
       width: 100,
       cellClass: 'text-center fw-bold text-muted',
       headerClass: 'text-center'
@@ -83,37 +101,25 @@ export class ReturnedOrdersComponent implements OnInit {
             icon: 'fa fa-eye',
             action: 'onDetails',
             onDetails: (data: any) => this.onAction('details', data)
-          },
-          {
-            name: '',
-            tooltip: 'Raise Refund Request',
-            cssClass: 'btn btn-outline-warning btn-xs rounded-pill ms-1',
-            icon: 'fa fa-paper-plane',
-            action: 'onRaiseRefund',
-            isVisible: (data: any) => {
-              const status = (data.ro_status_name || '').toLowerCase();
-              return status === 'verified';
-            },
-            onRaiseRefund: (data: any) => this.onAction('raiseRefund', data)
           }
         ]
       }
     },
     {
       headerName: "Customer",
-      field: "co_customer_name",
+      field: "ro_customer_name",
       flex: 1.2,
       headerClass: 'text-start'
     },
     {
       headerName: "Product",
-      field: "p_name",
+      field: "ro_prod_name",
       flex: 1.5,
       headerClass: 'text-start'
     },
     {
       headerName: "Amount",
-      field: "co_net_amount",
+      field: "ro_net_amount",
       width: 120,
       headerClass: 'text-end',
       cellClass: 'text-end fw-bold text-success',
@@ -203,10 +209,28 @@ export class ReturnedOrdersComponent implements OnInit {
     );
   }
 
+  setDetailTab(tab: string) {
+    this.activeDetailTab = tab;
+  }
+
   onAction(action: string, data: any) {
     this.selectedReturn = data;
     if (action === 'details') {
+      this.activeDetailTab = 'summary'; // Reset to summary when opening
       this.getOrderMovementHistory(data.ro_order_no);
+      this.icustomerOrder.getCustomerOrder(data.ro_order_no).subscribe(order => {
+        this.selectedOrder = order;
+        this.resolveOrderItemImage(this.selectedOrder);
+        
+        // If address details is just an ID or empty, fetch from master
+        if (order.co_c_address && (!order.co_c_address_details || !isNaN(Number(order.co_c_address_details)))) {
+          this.iAddressService.getAddress(order.co_c_address).subscribe((addresses: Address[]) => {
+            if (addresses && addresses.length > 0) {
+              this.selectedOrder.co_c_address_details = addresses[0].ad_address + ', ' + (addresses[0].ad_pincode || '');
+            }
+          });
+        }
+      });
       $("#returnDetailModal").modal("show");
     } else if (action === 'statusChange') {
       $("#ReturnStatusModal").modal("show");
@@ -240,13 +264,13 @@ export class ReturnedOrdersComponent implements OnInit {
           return;
         }
 
-        if (!confirm(`Are you sure you want to issue a refund of ₹${order.co_net_amount} for this order via Razorpay?`)) {
+        if (!confirm(`Are you sure you want to issue a refund of ₹${order.ro_net_amount} for this order via Razorpay?`)) {
           return;
         }
 
         const refundRequest: RefundRequest = {
           paymentId: paymentId,
-          amount: order.co_net_amount || 0,
+          amount: order.ro_net_amount || 0,
           orderId: order.ro_order_no
         };
 
@@ -344,5 +368,53 @@ export class ReturnedOrdersComponent implements OnInit {
       event.target.blur(); // Remove focus to fix aria-hidden descendant focus warning
     }
     $('#' + modalId).modal('hide');
+  }
+
+  getAttachementOfaProduct(p_attachements: string) {
+    if (p_attachements) {
+      try {
+        return JSON.parse(p_attachements);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  }
+
+  resolveOrderItemImage(order: any) {
+    this.iProductService.getProductAttachementsByColor({
+      id: order.co_product,
+      color: order.co_color
+    } as RequestParms).subscribe((attachments: any[]) => {
+      if (attachments && attachments.length > 0) {
+        const image =
+          attachments.find(x => String(x.pa_color).trim() === String(order.co_color).trim())?.pa_image_path ||
+          attachments[0]?.pa_image_path || '';
+        
+        order.resolvedImageUrl = this.formatImageUrl(image);
+      } else {
+        order.resolvedImageUrl = this.getOrderItemImage(order);
+      }
+    });
+  }
+
+  getOrderItemImage(order: any): string {
+    const attachments = this.getAttachementOfaProduct(order.p_attachements);
+    if (!attachments || attachments.length === 0) return '';
+    const cartColor = String(order.co_color || '').trim();
+    const cartColorName = String(order.co_color_name || '').toLowerCase().trim();
+    let matchingImage = attachments.find((x: any) => String(x.pa_color || '').trim() === cartColor);
+    if (!matchingImage && cartColorName) {
+        matchingImage = attachments.find((x: any) => String(x.pa_color_name || x.pa_color || '').toLowerCase().trim() === cartColorName);
+    }
+    return this.formatImageUrl(matchingImage ? matchingImage.pa_image_path : attachments[0].pa_image_path);
+  }
+
+  private formatImageUrl(path: string): string {
+    if (!path) return '';
+    let cleanPath = path.trim();
+    while (cleanPath.startsWith('/')) { cleanPath = cleanPath.substring(1); }
+    if (cleanPath.startsWith('http')) return cleanPath;
+    return `${this.environment.serverHostAddress}/${cleanPath}`;
   }
 }

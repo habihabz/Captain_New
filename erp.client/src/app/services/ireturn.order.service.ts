@@ -19,10 +19,10 @@ export interface ReturnOrder {
     ro_cre_date?: string;
     
     // Joined View Data
-    co_customer_name?: string;
-    p_name?: string;
-    co_net_amount?: number;
-    co_payment_id?: string;
+    ro_customer_name?: string;
+    ro_prod_name?: string;
+    ro_net_amount?: number;
+    ro_payment_id?: string;
     ro_completed_yn?: string;
 }
 

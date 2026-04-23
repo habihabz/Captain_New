@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { Select2Directive } from '../../directives/select2.directive';
 import { ColDef, DomLayoutType } from 'ag-grid-community';
 import { ActionRendererComponent } from '../../directives/action.renderer';
+import { environment as Env } from '../../../environments/environment';
 declare var $: any;
 
 @Component({
@@ -240,5 +241,30 @@ export class UsersComponent implements OnInit {
         }
       }
     );
+  }
+
+  // Image Management
+  isUploading = false;
+  serverUrl = Env.serverHostAddress;
+
+  onFileSelected(event: any, userId: number) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.isUploading = true;
+      this.iuserService.uploadProfileImage(userId, file).subscribe(
+        (data: DbResult) => {
+          this.isUploading = false;
+          if (data.message === 'Success') {
+            this.iuserService.refreshUsers();
+          } else {
+            alert(data.message);
+          }
+        },
+        (error) => {
+          this.isUploading = false;
+          console.error('Upload failed', error);
+        }
+      );
+    }
   }
 }

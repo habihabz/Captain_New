@@ -1,61 +1,107 @@
-  .navbar-collapse {
-      transition: height 0.3s ease;
-      overflow: hidden;
-  }
+.navbar-collapse {
+    transition: height 0.3s ease;
+    overflow: hidden;
+}
 
-  .navbar-collapse.show {
-      overflow: visible;
-  }
+.navbar-collapse.show {
+    overflow: visible;
+}
 
-  /* Optional: force it to show over background layers */
-  @media (max-width: 991.98px) {
-      .navbar-collapse {
-          position: absolute;
-          top: 90px;
-          /* Height of navbar */
-          left: 0;
-          width: 100%;
-          background-color: #fff;
-          /* Match navbar bg */
-          z-index: 999;
-          padding: 1rem;
-      }
-  }
+/* Glassmorphism Header */
+.glass-nav {
+    margin-top: 50px;
+    background-color: rgba(0, 0, 0, 0.8) !important; /* Dark glass for universal visibility */
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    padding: 10px 0;
+}
 
-  .fixed-top {
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  }
+.glass-nav:hover {
+    background-color: rgba(0, 0, 0, 0.9) !important;
+}
 
-  .glass-nav {
-      margin-top: 50px;
-      background-color: rgba(255, 255, 255, 0.7) !important;
-      backdrop-filter: blur(8px);
-  }
 
-  /* Make all nav text black */
-  .glass-nav .nav-link,
-  .glass-nav a,
-  .glass-nav .navbar-brand {
-      color: #000 !important;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
-  /* Toggler icon black */
-  .glass-nav .navbar-toggler {
-      border-color: #000 !important;
-  }
+/* Nav Links */
+.glass-nav .nav-link {
+    color: #fff !important;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 0.75rem;
+    padding: 8px 18px !important;
+    transition: all 0.3s ease;
+    position: relative;
+}
 
-  .glass-nav .navbar-toggler-icon {
-      filter: invert(1);
-      /* Makes hamburger icon black */
-  }
+.glass-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: #fff;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
 
-  .top-fixed-nav {
-      height: 50px;
-      background-color: black;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 100000;
-      /* keeps it above other elements */
-  }
+.glass-nav .nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+/* Top Navigation */
+.top-fixed-nav {
+    height: 50px;
+    background-color: #000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1031;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.top-fixed-nav .nav-link {
+    color: rgba(255,255,255,0.7) !important;
+    transition: color 0.3s ease;
+}
+
+.top-fixed-nav .nav-link:hover {
+    color: #fff !important;
+}
+
+/* Logo Adjustments */
+.glass-nav img {
+    height: 45px;
+    filter: brightness(0) invert(1);
+    transition: all 0.3s ease;
+}
+
+
+/* Mobile Adjustments */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background-color: #000 !important;
+        margin-top: 15px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .glass-nav {
+        margin-top: 50px;
+        padding: 5px 0 !important;
+    }
+    .glass-nav img {
+        height: 32px !important; /* Smaller logo for mobile */
+    }
+    .navbar-toggler {
+        padding: 4px 8px !important;
+        font-size: 0.85rem !important; /* Compact menu button */
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+}
+
+

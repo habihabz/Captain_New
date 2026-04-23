@@ -1,29 +1,29 @@
 import 'product.dart';
 
 class Favourite {
-  final int id;
-  final int productId;
-  final int createdBy;
-  final String createdByName;
-  final DateTime createdOn;
-  final Product? product; // The product details are usually returned via ProductForExtend
+  final int f_id;
+  final int f_product;
+  final int f_cre_by;
+  final String f_cre_by_name;
+  final DateTime f_cre_date;
+  final Product? product; 
 
   Favourite({
-    this.id = 0,
-    required this.productId,
-    this.createdBy = 0,
-    this.createdByName = '',
-    DateTime? createdOn,
+    this.f_id = 0,
+    required this.f_product,
+    this.f_cre_by = 0,
+    this.f_cre_by_name = '',
+    DateTime? f_cre_date,
     this.product,
-  }) : createdOn = createdOn ?? DateTime.now();
+  }) : f_cre_date = f_cre_date ?? DateTime.now();
 
   factory Favourite.fromJson(Map<String, dynamic> json) {
     return Favourite(
-      id: json['f_id'] ?? 0,
-      productId: json['f_product'] ?? 0,
-      createdBy: json['f_cre_by'] ?? 0,
-      createdByName: json['f_cre_by_name'] ?? '',
-      createdOn: json['f_cre_date'] != null 
+      f_id: json['f_id'] ?? 0,
+      f_product: json['f_product'] ?? 0,
+      f_cre_by: json['f_cre_by'] ?? 0,
+      f_cre_by_name: json['f_cre_by_name'] ?? '',
+      f_cre_date: json['f_cre_date'] != null 
           ? DateTime.parse(json['f_cre_date']) 
           : DateTime.now(),
       product: json.containsKey('p_id') ? Product.fromJson(json) : null,
@@ -32,11 +32,11 @@ class Favourite {
 
   Map<String, dynamic> toJson() {
     return {
-      'f_id': id,
-      'f_product': productId,
-      'f_cre_by': createdBy,
-      'f_cre_by_name': createdByName,
-      'f_cre_date': createdOn.toIso8601String(),
+      'f_id': f_id,
+      'f_product': f_product,
+      'f_cre_by': f_cre_by,
+      'f_cre_by_name': f_cre_by_name,
+      'f_cre_date': f_cre_date.toIso8601String(),
     };
   }
 }

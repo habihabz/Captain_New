@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 
 namespace Erp.Server.Services
 {
@@ -8,7 +8,6 @@ namespace Erp.Server.Services
         DbResult createOrUpdateCustomerOrder(RequestParams requestParams);
         DbResult deleteCustomerOrder(int id);
         CustomerOrder getCustomerOrder(int id);
-        List<CustomerOrderDetail> getCustomerOrderDetails(int id);
         List<CustomerOrder> getCustomerOrders(RequestParams requestParms);
         List<CustomerOrder> getMyOrders(RequestParams requestParms);
         DbResult updateStatusForCustomerOrder(RequestParams requestParams);

@@ -1,16 +1,36 @@
- .order-card {
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border-color: #000;
- 
+.order-card {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid #f0f0f0 !important;
   }
 
   .order-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+    border-color: #e0e0e0 !important;
+  }
+
+  .bg-primary-soft {
+    background-color: rgba(94, 114, 228, 0.1) !important;
+  }
+
+  .bg-success-soft {
+    background-color: rgba(45, 206, 137, 0.1) !important;
+  }
+
+  .text-primary-soft {
+    color: rgba(94, 114, 228, 0.6) !important;
+  }
+
+  .view-details-btn {
+    transition: all 0.3s ease;
+  }
+
+  .order-card:hover .text-primary {
+    color: #000 !important;
   }
 
   .pagination {
+    margin-top: 3rem;
     justify-content: center;
   }
 

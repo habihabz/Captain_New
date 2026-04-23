@@ -1,3 +1,3 @@
-.body{
-    margin-top: 100px;
+.website-content-padding {
+    padding-top: 110px; /* Offset for fixed headers (50px top bar + 60px nav) */
 }

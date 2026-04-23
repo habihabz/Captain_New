@@ -47,8 +47,25 @@ namespace Erp.Server.Controllers
         [Authorize]
         public Customer getCustomer([FromBody] int id)
         {
-            Customer customer = new Customer();
-            customer = icustomer.getCustomer(id);
+            Customer customer = icustomer.getCustomer(id);
+            
+            // Fallback to User table if customer not found (id is 0 or name is empty)
+            if (customer == null || customer.c_id == 0)
+            {
+                User user = iuser.getUser(id);
+                if (user != null && user.u_id != 0)
+                {
+                    customer = new Customer
+                    {
+                        c_id = user.u_id,
+                        c_name = user.u_name,
+                        c_username = user.u_username,
+                        c_email = user.u_email,
+                        c_phone = user.u_phone ?? "",
+                        c_image_url = user.u_image_url
+                    };
+                }
+            }
             return customer;
         }
         [HttpPost("createOrUpdateCustomer")]
@@ -109,7 +126,8 @@ namespace Erp.Server.Controllers
                         c_name = user.u_name,
                         c_username = user.u_username,
                         c_email = user.u_email,
-                        c_phone = user.u_phone ?? ""
+                        c_phone = user.u_phone ?? "",
+                        c_image_url = user.u_image_url
                     };
                     
                     var token = ijwtAuthManager.GenerateToken(Login.username);
@@ -139,11 +157,38 @@ namespace Erp.Server.Controllers
             return dbResult;
         }
 
+        [HttpPost("uploadProfileImage")]
+        [Authorize]
+        public async Task<DbResult> uploadProfileImage([FromForm] int id, IFormFile image)
+        {
+            if (image != null && image.Length > 0)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "profiles");
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
+                var filePath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                var imageUrl = $"/uploads/profiles/{fileName}";
+                var result = icustomer.updateProfileImage(id, imageUrl);
+                
+                // Fallback to Users table if not found in Customers table
+                if (result.message != "Success" || result.message == "Customer not found")
+                {
+                    result = iuser.updateProfileImage(id, imageUrl);
+                }
+                
+                return result;
+            }
+            return new DbResult { id=0 ,message = "No image file provided" };
+        }
     }
 
-    public class PasswordUpdateRequest
-    {
-        public int userId { get; set; }
-        public string newPassword { get; set; }
-    }
 }

@@ -150,8 +150,8 @@ class ProductProvider with ChangeNotifier {
       // Client-side search filtering if query exists
       if (_searchQuery.isNotEmpty) {
         _products = _products.where((p) => 
-          p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          p.description.toLowerCase().contains(_searchQuery.toLowerCase())
+          p.p_name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          p.p_description.toLowerCase().contains(_searchQuery.toLowerCase())
         ).toList();
       }
     } catch (e) {

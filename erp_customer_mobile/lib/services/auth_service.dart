@@ -10,7 +10,7 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      final response = await _apiClient.post('/Customer/getCustomerLogin', {
+      final response = await _apiClient.post('/Login/getlogin', {
         'username': username,
         'password': password,
       });
@@ -20,7 +20,7 @@ class AuthService {
       if (data['message'] == 'Success') {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(AppConstants.tokenKey, data['token']);
-        await prefs.setString(AppConstants.userDataKey, jsonEncode(data['customer']));
+        await prefs.setString(AppConstants.userDataKey, jsonEncode(data['user']));
       }
       
       return data;
@@ -31,10 +31,10 @@ class AuthService {
 
   Future<DbResult> register(Customer customer, String password) async {
     try {
-      final customerJson = customer.toJson();
-      customerJson['password'] = password; // Assuming backend expects password in the same object or separate
+      final userJson = customer.toJson();
+      userJson['u_password'] = password; 
       
-      final response = await _apiClient.post('/Customer/registerCustomer', customerJson);
+      final response = await _apiClient.post('/User/registerUser', userJson);
       final data = _apiClient.processResponse(response);
       return DbResult.fromJson(data);
     } catch (e) {
@@ -50,10 +50,9 @@ class AuthService {
 
   Future<DbResult> updateProfile(Customer customer) async {
     try {
-      final response = await _apiClient.post('/Customer/createOrUpdateCustomer', customer.toJson());
+      final response = await _apiClient.post('/User/createOrUpdateUser', customer.toJson());
       final data = _apiClient.processResponse(response);
       
-      // Update stored data if successful
       if (data['status'] == true) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(AppConstants.userDataKey, jsonEncode(customer.toJson()));
@@ -65,10 +64,26 @@ class AuthService {
     }
   }
 
+  Future<DbResult> uploadProfileImage(int customerId, String filePath) async {
+    try {
+      final response = await _apiClient.multipartPost(
+        '/Customer/uploadProfileImage',
+        {'id': customerId.toString()},
+        filePath,
+        'image'
+      );
+      
+      final data = _apiClient.processResponse(response);
+      return DbResult.fromJson(data);
+    } catch (e) {
+      return DbResult(message: e.toString(), status: false);
+    }
+  }
+
+  // Use consistent naming - redirect to User endpoint
   Future<DbResult> updatePassword(int customerId, String newPassword) async {
     try {
-      // Trying to use a consistent naming pattern even if we need to add it to backend
-      final response = await _apiClient.post('/Customer/updatePassword', {
+      final response = await _apiClient.post('/User/updatePassword', {
         'userId': customerId,
         'newPassword': newPassword,
       });

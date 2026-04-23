@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace Erp.Server.Models
@@ -36,6 +36,9 @@ namespace Erp.Server.Models
 
         [Display(Name = "Active")]
         public string? c_active_yn { get; set; } = "Y";
+
+        [Display(Name = "Image URL")]
+        public string? c_image_url { get; set; } = string.Empty;
 
         [Display(Name = "Created By")]
         public int? c_cre_by { get; set; }

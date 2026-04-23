@@ -40,6 +40,12 @@ namespace Erp.Server.Models
         public DbSet<ConstantValue> ConstantValues { get; set; }
         public DbSet<ReturnOrder> ReturnOrders { get; set; }
         public DbSet<Promocode> Promocodes { get; set; }
+        public DbSet<DashboardStats> DashboardStats { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<DashboardStats>().HasNoKey();
+        }
 
 
     }

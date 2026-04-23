@@ -1423,7 +1423,7 @@ a:hover, a:focus {
   text-decoration: none; }
   
 .site_title span:hover{
-  background: #fff;
+  background: transparent;
 }
 .nav.navbar-nav > li > a {
   color: #515356 !important; }

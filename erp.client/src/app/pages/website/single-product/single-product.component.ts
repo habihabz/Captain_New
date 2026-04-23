@@ -46,6 +46,7 @@ export class SingleProductComponent implements OnInit {
   currentUser: User = new User();
   favourite: Favourite = new Favourite();
   productAttachements: any[] = [];
+  userFavourites: Favourite[] = [];
 
   // IMAGE ZOOM VARIABLES
   isZoomed: boolean = false;
@@ -92,6 +93,7 @@ export class SingleProductComponent implements OnInit {
     this.getProductByCountry(this.productId);
     this.getProductsMayLike(this.productId);
     this.getProductReviews(this.productId);
+    this.loadUserFavourites();
   }
   getProductByCountry(productId: number) {
     this.productAttachements= [];
@@ -302,9 +304,37 @@ export class SingleProductComponent implements OnInit {
     );
   }
 
-  addToFavourites(productId: number) {
+  loadUserFavourites() {
+    if (this.currentUser && this.currentUser.u_id) {
+      const params = new RequestParms();
+      params.id = this.currentUser.u_id;
+      this.ifavouriteService.getFavourites(params).subscribe(res => {
+        this.userFavourites = res;
+      });
+    }
+  }
 
-    if (productId && this.currentUser && this.currentUser.u_id) {
+  isFavourite(productId: number): boolean {
+    return this.userFavourites.some(x => x.f_product == productId);
+  }
+
+  addToFavourites(productId: number) {
+    if (!this.currentUser || !this.currentUser.u_id) {
+      this.router.navigate(['/customer-login']);
+      return;
+    }
+
+    const existingFav = this.userFavourites.find(x => x.f_product == productId);
+
+    if (existingFav) {
+      this.ifavouriteService.deleteFavourite(existingFav.f_id).subscribe((data: DbResult) => {
+        if (data.message == "Success") {
+          this.snackbarService.showSuccess("Removed from favourites");
+          this.loadUserFavourites();
+        }
+      });
+    } else {
+      this.favourite = new Favourite();
       this.favourite.f_cre_by = this.currentUser.u_id;
       this.favourite.f_product = productId;
 
@@ -312,7 +342,7 @@ export class SingleProductComponent implements OnInit {
         (data: DbResult) => {
           if (data.message == "Success") {
             this.snackbarService.showSuccess("Added to favourites");
-            this.router.navigate(['/favourites']);
+            this.loadUserFavourites();
           }
           else {
             this.snackbarService.showError(data.message);
@@ -321,11 +351,36 @@ export class SingleProductComponent implements OnInit {
         (error: any) => {
         }
       );
-
-    } else {
-      this.router.navigate(['/login']);
     }
-
   }
 
+  isDarkColor(color: any): boolean {
+    if (!color) return true;
+    
+    // If it's a number (ID), we can't determine brightness from it
+    if (typeof color !== 'string') return true;
+
+    const c = color.toLowerCase();
+    if (c === 'black' || c === 'navy' || c === 'darkblue' || c === 'purple') return true;
+    if (c === 'white' || c === 'yellow' || c === 'lime' || c === '#ffffff') return false;
+    
+    // If hex code, calculate luminance
+    if (c.startsWith('#')) {
+      const hex = c.replace('#', '');
+      if (hex.length === 3) {
+        const r = parseInt(hex[0] + hex[0], 16);
+        const g = parseInt(hex[1] + hex[1], 16);
+        const b = parseInt(hex[2] + hex[2], 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance < 0.5;
+      } else if (hex.length === 6) {
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance < 0.5;
+      }
+    }
+    return true;
+  }
 }

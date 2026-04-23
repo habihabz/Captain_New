@@ -1,0 +1,40 @@
+/* Sidebar Brand Styling */
+.site_title {
+    background: transparent !important;
+    transition: all 0.3s ease;
+}
+
+.site_title:hover {
+    background: transparent !important;
+    text-decoration: none !important;
+}
+
+.site_title span {
+    color: #1abb9c !important; /* Force teal color */
+    background: transparent !important;
+    transition: all 0.3s ease;
+}
+
+.site_title:hover span {
+    color: #1abb9c !important;
+    background: transparent !important;
+    text-shadow: 0 0 15px rgba(26, 187, 156, 0.4);
+}
+
+.sidebar-logo {
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.site_title:hover .sidebar-logo {
+    transform: rotate(360deg) scale(1.1);
+}
+
+/* Sidebar Search Polish */
+.search-container input:focus {
+    background: rgba(255,255,255,0.12) !important;
+    width: 105%;
+}
+
+.search-container {
+    transition: all 0.3s ease;
+}

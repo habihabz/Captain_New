@@ -11,5 +11,6 @@ namespace Erp.Server.Services
         List<User> getUsers();
         DbResult registerUser(User user);
         DbResult updatePassword(int userId, string newPassword);
+        DbResult updateProfileImage(int userId, string imageUrl);
     }
 }
