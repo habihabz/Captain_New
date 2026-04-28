@@ -1,4 +1,6 @@
- <router-outlet></router-outlet>
+<!-- Global Loading Bar -->
+<div *ngIf="loadingService.loading$ | async" class="progress" style="position: fixed; top: 0; left: 0; width: 100%; height: 4px; z-index: 99999; background-color: transparent; border-radius: 0;">
+    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 100%"></div>
+</div>
 
-
-
+<router-outlet></router-outlet>

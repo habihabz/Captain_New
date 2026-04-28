@@ -1,0 +1,6 @@
+/* Customer Component Styles */
+.ag-theme-alpine {
+    --ag-border-color: #f1f1f1;
+    --ag-header-background-color: #f8f9fa;
+    --ag-odd-row-background-color: #fafafa;
+}

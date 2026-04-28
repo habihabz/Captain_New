@@ -45,20 +45,12 @@ namespace Erp.Server.Repository
         {
             var _id = new SqlParameter("id", id + "");
             var customerorder = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCustomerOrder @id;", _id).ToList().FirstOrDefault() ?? new CustomerOrder();
-            if (customerorder.co_id > 0)
-            {
-                customerorder.details = getCustomerOrderDetails(customerorder.co_id);
-            }
+            
             return customerorder;
         }
 
 
-        public List<CustomerOrderDetail> getCustomerOrderDetails(int id)
-        {
-            var _id = new SqlParameter("id", id + "");
-            var customerOrderDetails = db.Set<CustomerOrderDetail>().FromSqlRaw("EXEC dbo.getCustomerOrderDetails @id;", _id).ToList();
-            return customerOrderDetails;
-        }
+    
 
         public List<CustomerOrder> getCustomerOrders(RequestParams requestParms)
         {

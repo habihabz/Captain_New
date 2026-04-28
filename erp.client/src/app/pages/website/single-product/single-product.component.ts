@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IProductService } from '../../../services/iproduct.service';
 import { Product } from '../../../models/product.model';
@@ -81,7 +82,9 @@ export class SingleProductComponent implements OnInit {
     private ifavouriteService: IFavouriteService,
     private iproductReviewService: IProductReviewService,
     private geolocationService: GeolocationService,
-    private iuser: IuserService
+    private iuser: IuserService,
+    private titleService: Title,
+    private metaService: Meta
   ) {
 
     this.currentUser = iuser.getCurrentUser();
@@ -102,6 +105,12 @@ export class SingleProductComponent implements OnInit {
     this.iproductService.getProductByCountry(this.requestParms).subscribe(
       (data: Product) => {
         this.product = data;
+        
+        // Dynamic SEO
+        this.titleService.setTitle(`${this.product.p_name} - Captain Premium Gear`);
+        this.metaService.updateTag({ name: 'description', content: this.product.p_short_name || `Buy ${this.product.p_name} at Captain. High-quality sports equipment.` });
+        this.metaService.updateTag({ property: 'og:title', content: this.product.p_name });
+        
         // Set default color and size
         const colors = this.getListFromJSON(this.product.p_colors);
         if (colors && colors.length > 0) {

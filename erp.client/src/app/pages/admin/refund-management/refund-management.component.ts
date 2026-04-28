@@ -18,6 +18,7 @@ export class RefundManagementComponent implements OnInit {
   rowCount: number = 0;
   activeTab: 'pending' | 'completed' = 'pending';
   currentUser: User = new User();
+  requestParms: RequestParms = new RequestParms();
   
   @ViewChild('refundGrid') refundGrid!: AgGridAngular;
 
@@ -105,7 +106,7 @@ export class RefundManagementComponent implements OnInit {
   }
 
   loadRefundableOrders() {
-    this.paymentService.getRefundableOrders().subscribe({
+    this.paymentService.getRefundableOrders(this.requestParms).subscribe({
       next: (data) => {
         this.refundableOrders = data;
         this.rowCount = data.length;
@@ -117,7 +118,7 @@ export class RefundManagementComponent implements OnInit {
   }
 
   loadCompletedRefunds() {
-    this.paymentService.getCompletedRefunds().subscribe({
+    this.paymentService.getCompletedRefunds(this.requestParms).subscribe({
       next: (data) => {
         this.refundableOrders = data;
         this.rowCount = data.length;
@@ -126,6 +127,21 @@ export class RefundManagementComponent implements OnInit {
         this.snackBarService.showError("Failed to load refund history.");
       }
     });
+  }
+
+  applyFilters() {
+    this.loadData();
+  }
+
+  onDateRangeChanged(event: { startDate: string, endDate: string }) {
+    this.requestParms.startDate = event.startDate;
+    this.requestParms.endDate = event.endDate;
+    this.loadData();
+  }
+
+  resetFilters() {
+    this.requestParms = new RequestParms();
+    this.loadData();
   }
 
   processRefund(order: any) {
@@ -150,7 +166,14 @@ export class RefundManagementComponent implements OnInit {
       },
       error: (err) => {
         const errorMsg = err.error?.message || err.error || err.message;
-        this.snackBarService.showError("Razorpay error: " + errorMsg);
+        
+        // Handle "already refunded" case gracefully
+        if (typeof errorMsg === 'string' && errorMsg.toLowerCase().includes('fully refunded already')) {
+          this.snackBarService.showSuccess("Payment was already refunded on Razorpay. Marking as completed.");
+          this.updateOrderStatus(order.co_id, 'ALREADY_REFUNDED');
+        } else {
+          this.snackBarService.showError("Razorpay error: " + errorMsg);
+        }
       }
     });
   }
@@ -161,6 +184,7 @@ export class RefundManagementComponent implements OnInit {
     params.status = 15; // REFUND COMPLETED
     params.user = this.currentUser.u_id;
     params.refundId = refundId;
+    params.completedYn = 'Y';
 
     this.icustomerOrder.updateStatusForCustomerOrder(params).subscribe({
       next: () => {

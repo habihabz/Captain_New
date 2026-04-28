@@ -1,4 +1,5 @@
 using Erp.Server.Models;
+using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,21 +13,20 @@ namespace Erp.Server.Controllers
     [ApiController]
     public class RefundController : ControllerBase
     {
-        private readonly DBContext _db;
+        private readonly IRefund _refund;
 
-        public RefundController(DBContext db)
+        public RefundController(IRefund refund)
         {
-            _db = db;
+            _refund = refund;
         }
 
         [HttpPost("getRefundableOrders")]
         [Authorize]
-        public IActionResult GetRefundableOrders()
+        public IActionResult GetRefundableOrders(RequestParams requestParams)
         {
             try
             {
-                
-                var refundableOrders = _db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getRefundableOrders").ToList();
+                var refundableOrders = _refund.GetRefundableOrders(requestParams);
                 return Ok(refundableOrders);
             }
             catch (Exception ex)
@@ -37,11 +37,11 @@ namespace Erp.Server.Controllers
 
         [HttpPost("getCompletedRefunds")]
         [Authorize]
-        public IActionResult GetCompletedRefunds()
+        public IActionResult GetCompletedRefunds(RequestParams requestParams)
         {
             try
             {
-                var completedOrders = _db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCompletedRefunds").ToList();
+                var completedOrders = _refund.GetCompletedRefunds(requestParams);
                 return Ok(completedOrders);
             }
             catch (Exception ex)

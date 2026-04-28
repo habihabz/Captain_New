@@ -1,171 +1,162 @@
-<div class="container-fluid" style="min-height: 70vh; padding-bottom: 120px;">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb bg-light px-3 py-2 rounded">
-      <li class="breadcrumb-item">
-        <a routerLink="/home">Home</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Shop
-      </li>
-    </ol>
-  </nav>
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-12 col-sm-12">
-        <div class="filter-container d-flex justify-content-end">
-          <div class="filter-rating" style="margin: 10px;">
-            <select id="ratingFilter" [(ngModel)]="sortBy" (change)="getProductsByFilters()" class="form-control">
-              <option value="0">Sort By</option>
-              <option value="1">Featured</option>
-              <option value="2">Popularity</option>
-              <option value="3">Newest</option>
-              <option value="4">Price : Hight-Low</option>
-              <option value="5">Price : Low-High</option>
-            </select>
-          </div>
-        </div>
+<div class="global-breadcrumb-wrapper mb-3">
+  <div class="container-fluid px-lg-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Shop</li>
+      </ol>
+    </nav>
+  </div>
+</div>
 
+<div class="container-fluid px-lg-5" style="min-height: 70vh; padding-bottom: 80px;">
+  <!-- Hidden H1 for SEO -->
+  <h1 class="sr-only" style="display:none;">Shop Our Sports Collection</h1>
+
+  <div class="shop-header-actions d-flex justify-content-between align-items-center mb-4">
+    <button class="btn btn-dark d-lg-none rounded-pill px-4 d-flex align-items-center gap-2" (click)="isMobileFilterOpen = true">
+      <i class="fa fa-filter"></i> Filters
+    </button>
+    
+    <div class="filter-rating ms-auto" style="min-width: 200px;">
+      <select id="ratingFilter" [(ngModel)]="sortBy" (change)="getProductsByFilters()" class="form-select border-0 shadow-sm rounded-pill px-4 py-2">
+        <option value="0">Default Sorting</option>
+        <option value="1">Featured</option>
+        <option value="2">Popularity</option>
+        <option value="3">Newest</option>
+        <option value="4">Price: High to Low</option>
+        <option value="5">Price: Low to High</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="shop-main-row">
+    <!-- MOBILE OVERLAY -->
+    <div class="mobile-filter-overlay" [class.active]="isMobileFilterOpen" (click)="isMobileFilterOpen = false"></div>
+
+    <!-- Filter Sidebar -->
+    <div class="shop-sidebar" [class.active]="isMobileFilterOpen">
+      <div class="d-lg-none d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h5 class="fw-bold mb-0">Filters</h5>
+        <button class="btn-close" (click)="isMobileFilterOpen = false"></button>
       </div>
-      <div class="row" style="height: 100%;">
-        <!-- Filter Sidebar (Reduced width to 20%) -->
-        <div class="shop-sidebar" style="width: 20%;">
-          <div class="filter-card shadow-sm rounded-4 bg-white p-3 mb-4">
-            <h5 class="fw-bold mb-4 text-dark d-flex align-items-center">
-              <i class="fa fa-filter me-2 text-primary"></i> Filters
-            </h5>
 
-            <!-- HIERARCHICAL TREE -->
-            <div class="hierarchy-container">
-              <div *ngFor="let cat of hierarchy" class="tree-node border-bottom border-light py-2">
-                <div class="d-flex align-items-center gap-2 py-1">
-                  <i class="fa cursor-pointer text-muted" 
-                     [ngClass]="cat.isOpen ? 'fa-chevron-down' : 'fa-chevron-right'"
-                     style="font-size: 10px; width: 12px;"
-                     (click)="toggleNode(cat)"></i>
-                  <div class="custom-control custom-checkbox d-flex align-items-center">
-                    <input type="checkbox" class="custom-control-input" [id]="'cat-'+cat.id"
-                           [checked]="isCategorySelected(cat.id)" (change)="onCategoryChange($event, cat.id)">
-                    <label class="custom-control-label fw-bold small text-dark cursor-pointer ms-2 mb-0" [for]="'cat-'+cat.id" 
-                           (click)="toggleNode(cat)">{{ cat.name }}</label>
+      <div class="filter-card shadow-sm rounded-4 bg-white p-3 mb-4 border-0">
+        <h6 class="fw-bold mb-4 text-dark d-none d-lg-flex align-items-center">
+          <i class="fa fa-filter me-2 text-primary"></i> Filter Products
+        </h6>
+
+        <!-- HIERARCHICAL TREE -->
+        <div class="hierarchy-container">
+          <div *ngFor="let cat of hierarchy" class="tree-node border-bottom border-light py-2">
+            <div class="d-flex align-items-center gap-2 py-1">
+              <i class="fa cursor-pointer text-muted" [ngClass]="cat.isOpen ? 'fa-chevron-down' : 'fa-chevron-right'"
+                style="font-size: 10px; width: 12px;" (click)="toggleNode(cat)"></i>
+              <div class="form-check d-flex align-items-center mb-0">
+                <input type="checkbox" class="form-check-input mt-0" [id]="'cat-'+cat.id"
+                  [checked]="isCategorySelected(cat.id)" (change)="onCategoryChange($event, cat.id)">
+                <label class="form-check-label fw-bold small text-dark cursor-pointer ms-2" [for]="'cat-'+cat.id" (click)="toggleNode(cat)">
+                  {{ cat.name }}
+                </label>
+              </div>
+            </div>
+
+            <!-- LEVEL 2: SUBCATEGORY -->
+            <div class="ms-4 tree-children" *ngIf="cat.isOpen">
+              <div *ngFor="let sub of cat.children" class="tree-node py-1">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="fa cursor-pointer text-muted" [ngClass]="sub.isOpen ? 'fa-minus' : 'fa-plus'"
+                    style="font-size: 8px; width: 12px;" (click)="toggleNode(sub)"></i>
+                  <div class="form-check d-flex align-items-center mb-0">
+                    <input type="checkbox" class="form-check-input mt-0" [id]="'sub-'+sub.id"
+                      [checked]="isSubCategorySelected(sub.id)" (change)="onSubCategoryChange($event, sub.id)">
+                    <label class="form-check-label small text-muted cursor-pointer ms-2" [for]="'sub-'+sub.id" (click)="toggleNode(sub)">
+                      {{ sub.name }}
+                    </label>
                   </div>
                 </div>
 
-                <!-- LEVEL 2: SUBCATEGORY -->
-                <div class="ms-4 tree-children" *ngIf="cat.isOpen">
-                  <div *ngFor="let sub of cat.children" class="tree-node py-1">
+                <!-- LEVEL 3: DIVISION -->
+                <div class="ms-3 tree-children" *ngIf="sub.isOpen">
+                  <div *ngFor="let div of sub.children" class="tree-node py-1">
                     <div class="d-flex align-items-center gap-2">
-                      <i class="fa cursor-pointer text-muted" 
-                         [ngClass]="sub.isOpen ? 'fa-minus' : 'fa-plus'"
-                         style="font-size: 8px; width: 12px;"
-                         (click)="toggleNode(sub)"></i>
-                      <div class="custom-control custom-checkbox d-flex align-items-center">
-                        <input type="checkbox" class="custom-control-input" [id]="'sub-'+sub.id"
-                               [checked]="isSubCategorySelected(sub.id)" (change)="onSubCategoryChange($event, sub.id)">
-                        <label class="custom-control-label small text-muted cursor-pointer ms-2 mb-0" [for]="'sub-'+sub.id"
-                               (click)="toggleNode(sub)">{{ sub.name }}</label>
-                      </div>
-                    </div>
-
-                    <!-- LEVEL 3: DIVISION -->
-                    <div class="ms-3 tree-children" *ngIf="sub.isOpen">
-                      <div *ngFor="let div of sub.children" class="tree-node py-1">
-                        <div class="d-flex align-items-center gap-2">
-                          <i class="fa cursor-pointer text-muted-extra" 
-                             [ngClass]="div.isOpen ? 'fa-caret-down' : 'fa-caret-right'"
-                             style="font-size: 10px; width: 10px;"
-                             (click)="toggleNode(div)"></i>
-                          <div class="custom-control custom-checkbox d-flex align-items-center">
-                            <input type="checkbox" class="custom-control-input" [id]="'div-'+div.id"
-                                   [checked]="isDivisionSelected(div.id)" (change)="onDivisionChange($event, div.id)">
-                            <label class="custom-control-label x-small text-muted cursor-pointer ms-2 mb-0" [for]="'div-'+div.id" 
-                                   style="font-size: 11px;" (click)="toggleNode(div)">{{ div.name }}</label>
-                          </div>
-                        </div>
-
-                        <!-- LEVEL 4: SUB DIVISION -->
-                        <div class="ms-3 tree-children" *ngIf="div.isOpen">
-                          <div *ngFor="let sdiv of div.children" class="tree-node py-1">
-                            <div class="custom-control custom-checkbox ms-2 d-flex align-items-center">
-                              <input type="checkbox" class="custom-control-input" [id]="'sdiv-'+sdiv.id"
-                                     [checked]="isSubDivisionSelected(sdiv.id)" (change)="onSubDivisionChange($event, sdiv.id)">
-                              <label class="custom-control-label xx-small text-muted cursor-pointer ms-2 mb-0" [for]="'sdiv-'+sdiv.id" 
-                                     style="font-size: 10px;">{{ sdiv.name }}</label>
-                            </div>
-                          </div>
-                        </div>
+                      <i class="fa cursor-pointer text-muted-extra" [ngClass]="div.isOpen ? 'fa-caret-down' : 'fa-caret-right'"
+                        style="font-size: 10px; width: 10px;" (click)="toggleNode(div)"></i>
+                      <div class="form-check d-flex align-items-center mb-0">
+                        <input type="checkbox" class="form-check-input mt-0" [id]="'div-'+div.id"
+                          [checked]="isDivisionSelected(div.id)" (change)="onDivisionChange($event, div.id)">
+                        <label class="form-check-label x-small text-muted cursor-pointer ms-2" [for]="'div-'+div.id" (click)="toggleNode(div)">
+                          {{ div.name }}
+                        </label>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- SIZE SECTION -->
-            <div class="mt-4 pt-3 border-top">
-              <h6 class="fw-bold mb-3 small text-uppercase" style="letter-spacing: 1px;">By Size</h6>
-              <div class="d-flex flex-wrap gap-2">
-                <div *ngFor="let sz of sizes" class="size-chip" [ngClass]="{'active': selectedSizeIds.includes(sz.md_id)}">
-                  <input type="checkbox" [id]="'sz-'+sz.md_id" class="d-none"
-                         (change)="onSizeChange($event, sz.md_id)">
-                  <label [for]="'sz-'+sz.md_id" class="cursor-pointer px-3 py-1 border rounded-pill small transition-all">
-                    {{ sz.md_name }}
-                  </label>
+        <!-- SIZE SECTION -->
+        <div class="mt-4 pt-3 border-top">
+          <h6 class="fw-bold mb-3 small text-uppercase" style="letter-spacing: 1px; font-size: 11px;">Select Size</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <div *ngFor="let sz of sizes" class="size-chip" [ngClass]="{'active': selectedSizeIds.includes(sz.md_id)}">
+              <input type="checkbox" [id]="'sz-'+sz.md_id" class="d-none" (change)="onSizeChange($event, sz.md_id)">
+              <label [for]="'sz-'+sz.md_id" class="cursor-pointer rounded-pill transition-all">
+                {{ sz.md_name }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Area -->
+    <div class="products-area">
+      <div class="row g-2 g-md-4">
+        <div *ngFor="let product of this.products" class="col-lg-3 col-md-4 col-grid-mobile">
+          <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
+            <div class="product-image-container flex-grow-1" [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
+              <ng-container *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
+                <img [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
+                     [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+              </ng-container>
+
+              <div class="product-actions position-absolute top-0 end-0 m-2">
+                <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                  <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                </button>
+              </div>
+
+              <div class="product-badge position-absolute top-0 start-0 m-2" *ngIf="product.p_price > 5000">
+                <span class="badge bg-dark text-white rounded-pill px-2 py-1" style="font-size: 8px;">PREMIUM</span>
+              </div>
+            </div>
+
+            <div class="product-details text-center p-2 p-md-3">
+              <span class="product-category" style="font-size: 9px;">{{ product.p_sub_category_name }}</span>
+              <a class="product-name">{{product.p_name}}</a>
+
+              <div class="product-rating mb-2" style="font-size: 10px;">
+                <div class="stars">
+                  <i class="fa fa-star text-warning" *ngFor="let s of [1,2,3,4,5]" [ngClass]="{'opacity-25': product.p_overall_rating < s}"></i>
                 </div>
+              </div>
+
+              <div class="product-price">
+                <span class="small">₹</span>{{ product.p_price | number }}
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Products Area (Expanded to 80%) -->
-        <div class="products-area" style="width: 80%;">
-          <div class="row g-4">
-            <div *ngFor="let product of this.products" class="col-lg-3 col-md-6">
-              <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
-                <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center" 
-                     [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
-                  <ng-container *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
-                    <img [src]="apiUrl + '/' + p_attachement.pa_image_path"
-                         alt="{{product.p_name}}" 
-                         class="img-fluid" 
-                         [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
-                  </ng-container>
-                  
-                  <!-- Favorite Button -->
-                  <div class="product-actions position-absolute top-0 end-0 m-3">
-                    <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
-                      <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
-                    </button>
-                  </div>
-
-                  <div class="product-badge position-absolute top-0 start-0 m-3" *ngIf="product.p_price > 5000">
-                    <span class="badge bg-dark text-white rounded-0 px-3 py-2">PREMIUM</span>
-                  </div>
-                </div>
-
-                <div class="product-details text-center p-3">
-                  <span class="product-category">{{ product.p_sub_category_name }}</span>
-                  <a class="product-name">{{product.p_name}}</a>
-                  
-                  <!-- Rating Display -->
-                  <div class="product-rating mb-3">
-                    <div class="stars">
-                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 1}"></i>
-                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 2}"></i>
-                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 3}"></i>
-                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 4}"></i>
-                      <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 5}"></i>
-                    </div>
-                    <span class="ms-1 small text-muted">({{ product.p_overall_rating | number:'1.1-1' }})</span>
-                  </div>
-
-                  <div class="product-price">
-                    <span>&#x20B9;</span> {{ product.p_price | number }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div *ngIf="products.length === 0" class="text-center py-5">
+        <i class="fa fa-search fa-3x text-muted opacity-25 mb-3"></i>
+        <h4 class="text-muted">No products found matching your criteria</h4>
+        <button class="btn btn-outline-primary mt-3 rounded-pill" (click)="selectedSizeIds=[]; selectedCategoryIds=[]; getProductsByFilters()">Clear Filters</button>
       </div>
     </div>
   </div>

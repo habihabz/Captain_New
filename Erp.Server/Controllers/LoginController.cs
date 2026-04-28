@@ -1,4 +1,4 @@
-﻿using Erp.Server.Models;
+using Erp.Server.Models;
 using Erp.Server.Repository;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Http;
@@ -60,7 +60,13 @@ namespace Erp.Server.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while processing the login request.");
-                return StatusCode(StatusCodes.Status500InternalServerError, new Credentials { message = "An error occurred while processing the request." });
+                string errorMessage = ex.Message + (ex.InnerException != null ? " | Inner: " + ex.InnerException.Message : "");
+                return StatusCode(StatusCodes.Status500InternalServerError, new Credentials 
+                { 
+                    username = Login.username, 
+                    message = errorMessage, 
+                    user = null 
+                });
             }
         }
     }

@@ -191,3 +191,59 @@
 .btn-secondary:hover {
     background-color: #dee2e6;
 }
+/* Responsive Adjustments */
+@media (max-width: 991px) {
+    .custom-attachment-modal {
+        min-height: auto;
+    }
+
+    .col-lg-4.border-end {
+        border-end: none !important;
+        border-bottom: 1px solid #f1f3f5;
+        padding-bottom: 2rem;
+        padding-right: 0 !important;
+    }
+
+    .col-lg-8 {
+        padding-left: 0 !important;
+        padding-top: 2rem;
+    }
+
+    .image-preview-grid-v3 {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-header {
+        padding: 20px 15px !important;
+    }
+
+    .modal-body {
+        padding: 15px !important;
+    }
+
+    .upload-drop-zone {
+        padding: 30px 15px !important;
+    }
+
+    .icon-circle {
+        width: 45px;
+        height: 45px;
+    }
+
+    .preview-img-frame {
+        padding: 5px;
+    }
+    
+    .modal-footer {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+}

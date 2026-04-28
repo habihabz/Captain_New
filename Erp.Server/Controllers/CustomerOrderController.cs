@@ -14,20 +14,18 @@ namespace Erp.Server.Controllers
     {
         private readonly ILogger<CustomerOrderController> logger;
         private readonly IUser iuser;
-        private readonly ICustomer icustomer;
         private readonly ICustomerOrder icustomerOrder;
         private readonly IJwtAuthManager ijwtAuthManager;
         private readonly IGeneratePDF igeneratePDF;
         private readonly IConstantValue iconstantValue;
 
         public CustomerOrderController(ILogger<CustomerOrderController> _logger,
-            IUser _iuser,ICustomerOrder _icustomerorder, IJwtAuthManager _ijwtAuthManager, ICustomer _icustomer,IGeneratePDF _igeneratePDF, IConstantValue _iconstantValue)
+            IUser _iuser,ICustomerOrder _icustomerorder, IJwtAuthManager _ijwtAuthManager, IGeneratePDF _igeneratePDF, IConstantValue _iconstantValue)
         {
             logger = _logger;
             iuser = _iuser;
             icustomerOrder = _icustomerorder;
             ijwtAuthManager = _ijwtAuthManager;
-            icustomer = _icustomer;
             igeneratePDF = _igeneratePDF;
             iconstantValue = _iconstantValue;
 

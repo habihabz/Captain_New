@@ -3,7 +3,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ScriptLoaderService } from './services/script.loader.service';
-
+import { LoadingService } from './services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +15,8 @@ export class AppComponent implements OnInit{
   constructor(
     private http: HttpClient,
     private scriptLoaderService: ScriptLoaderService,
-    private router: Router
+    private router: Router,
+    public loadingService: LoadingService
   ) { 
     // Automatically scroll to top on every route change
     this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {

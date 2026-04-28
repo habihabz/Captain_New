@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /user-registration
+
+Sitemap: https://captain.com/sitemap.xml

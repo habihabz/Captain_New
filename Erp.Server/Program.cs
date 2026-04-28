@@ -87,7 +87,6 @@ builder.Services.AddTransient<IPurchaseOrder, PurchaseOrderRepository>();
 builder.Services.AddTransient<IMenu, MenuRepository>();
 builder.Services.AddTransient<IRoleMenu, RoleMenuRepository>();
 builder.Services.AddTransient<ISupplier, SupplierRepository>();
-builder.Services.AddTransient<ICustomer, CustomerRepository>();
 builder.Services.AddTransient<IExpense, ExpenseRepository>();
 builder.Services.AddTransient<IIncome, IncomeRepository>();
 builder.Services.AddTransient<ICategory, CategoryRepository>();
@@ -109,6 +108,7 @@ builder.Services.AddTransient<IReport, ReportRepository>();
 builder.Services.AddTransient<IReturnOrder, ReturnOrderRepository>();
 builder.Services.AddTransient<IGeneratePDF, GenetatePDFRepository>();
 builder.Services.AddTransient<IPromocode, PromocodeRepository>();
+builder.Services.AddTransient<IRefund, RefundRepository>();
 
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");

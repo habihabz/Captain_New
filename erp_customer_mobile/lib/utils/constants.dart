@@ -1,9 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppConstants {
   // API URL
-  // For Android Emulator, use 10.0.2.2. For iOS or Web, use localhost or your machine's IP.
-  static const String baseUrl = 'https://localhost:7299';
+  // Set this to true to use production API, or let it follow kReleaseMode
+  static const bool useProduction = kReleaseMode;
+
+  static const String baseUrl = useProduction 
+      ? 'https://api.husicaptain.com/' 
+      : 'https://localhost:7299';
+      
   static const String baseApiUrl = '$baseUrl/api';
 
   // Razorpay Key Placeholder

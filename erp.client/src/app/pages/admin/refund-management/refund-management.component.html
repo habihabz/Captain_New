@@ -35,29 +35,73 @@
 
             <div class="x_panel shadow-sm border-0 bg-white"
                 style="border-radius: 0 12px 12px 12px; border-top: 4px solid #198754 !important;">
-                <div class="x_title d-flex justify-content-between align-items-center pb-3 mb-0">
-                    <div class="page-header-text d-flex flex-column pt-2">
-
-                        <span class="text-muted small mt-2 d-block" style="padding-left: 38px;">{{ activeTab ===
-                            'pending' ? 'Action required for these online payment orders' : 'Record of automated refunds
-                            processed via Razorpay' }}</span>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <!-- INFO ICON (Shown only on Pending) -->
-                        <div *ngIf="activeTab === 'pending'"
-                            class="info-badge d-flex align-items-center bg-light px-3 py-2 rounded-pill border shadow-xs"
-                            style="cursor: help;"
-                            [title]="'Processing a refund here will instantly move money from your Razorpay balance to the customer\'s account.'">
-                            <i class="fa fa-info-circle text-primary me-2"></i>
-                            <span class="text-muted small fw-bold">HELP</span>
+                <div class="x_title border-0 pb-0 mb-0">
+                    <div class="row align-items-end g-3 p-4">
+                        <!-- Left: Info Text -->
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column mb-1">
+                                <h5 class="fw-bold text-dark mb-1" style="font-size: 16px;">
+                                    <i
+                                        class="fa {{ activeTab === 'pending' ? 'fa-hourglass-half text-warning' : 'fa-check-circle text-success' }} me-2"></i>
+                                    {{ activeTab === 'pending' ? 'Pending Settlements' : 'Payout History' }}
+                                </h5>
+                                <span class="text-muted" style="font-size: 11px;">
+                                    {{ activeTab === 'pending' ? 'Review and process online refunds' : 'View record of
+                                    completed transactions' }}
+                                </span>
+                            </div>
                         </div>
 
-                        <button *ngIf="activeTab === 'pending'"
-                            class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-xs"
-                            (click)="loadRefundableOrders()">
-                            <i class="fa fa-refresh me-2"></i> Refresh List
-                        </button>
+                        <!-- Center: Context-Aware Filters -->
+                        <div class="col-md-7">
+                            <div class="row g-3">
+                                <!-- Order Search (Common to both) -->
+                                <div [class]="activeTab === 'pending' ? 'col-md-6' : 'col-md-4'">
+                                    <label class="small fw-bold text-muted text-uppercase mb-2 d-block" style="font-size: 10px; letter-spacing: 0.5px;">Search Order</label>
+                                    <div class="input-group input-group-sm shadow-xs rounded-3 overflow-hidden border">
+                                        <span class="input-group-text bg-white border-0 pe-1">
+                                            <i class="fa fa-search text-muted small"></i>
+                                        </span>
+                                        <input type="number" class="form-control border-0 shadow-none ps-1"
+                                            [(ngModel)]="requestParms.id" placeholder="Enter Order ID"
+                                            (keyup.enter)="applyFilters()">
+                                    </div>
+                                </div>
+
+                                <!-- Date Range (ONLY for Payout History) -->
+                                <div class="col-md-5" *ngIf="activeTab === 'completed'">
+                                    <label class="small fw-bold text-muted text-uppercase mb-2 d-block" style="font-size: 10px; letter-spacing: 0.5px;">Filter By Date</label>
+                                    <div class="input-group input-group-sm shadow-xs rounded-3 overflow-hidden border">
+                                        <span class="input-group-text bg-white border-0 pe-1">
+                                            <i class="fa fa-calendar-o text-muted small"></i>
+                                        </span>
+                                        <input type="text" appDateRange class="form-control border-0 shadow-none ps-1"
+                                            placeholder="Select Date Range" 
+                                            [startDate]="requestParms.startDate" 
+                                            [endDate]="requestParms.endDate"
+                                            (rangeChanged)="onDateRangeChanged($event)">
+                                    </div>
+                                </div>
+
+                                <!-- Filter Buttons -->
+                                <div class="col-md-3 d-flex align-items-end gap-2">
+                                    <button class="btn btn-sm btn-primary rounded-3 px-3 fw-bold shadow-sm" style="height: 31px;" (click)="applyFilters()">
+                                        FILTER
+                                    </button>
+                                    <button class="btn btn-sm btn-light border rounded-3 px-2 shadow-xs" style="height: 31px;" (click)="resetFilters()" title="Reset">
+                                        <i class="fa fa-undo text-muted"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Actions -->
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold shadow-xs border-2"
+                                (click)="loadData()">
+                                <i class="fa fa-refresh me-2"></i> REFRESH
+                            </button>
+                        </div>
                     </div>
                 </div>
 

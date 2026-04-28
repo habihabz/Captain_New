@@ -1,4 +1,5 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Feedback } from '../../../models/feedback.model';
 import { Router } from '@angular/router';
 import { SnackBarService } from '../../../services/isnackbar.service';
@@ -10,7 +11,7 @@ import { DbResult } from '../../../models/dbresult.model';
   templateUrl: './contact.us.component.html',
   styleUrl: './contact.us.component.css'
 })
-export class ContactUsComponent {
+export class ContactUsComponent implements OnInit {
   feedback:Feedback=new Feedback();
 
 
@@ -19,10 +20,17 @@ export class ContactUsComponent {
     private router: Router,
     private snackBarService: SnackBarService,
     private ifeedbackService: IFeedbackService,
+    private titleService: Title,
+    private metaService: Meta
 
   ) 
   {
     
+  }
+
+  ngOnInit(): void {
+    this.titleService.setTitle('Contact Us - Captain Support & Feedback');
+    this.metaService.updateTag({ name: 'description', content: 'Have questions? Get in touch with Captain for support, feedback, or business inquiries. We\'re here to help athletes succeed.' });
   }
 
 

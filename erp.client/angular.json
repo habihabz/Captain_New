@@ -75,6 +75,10 @@
               "src/assets/js/jquery.datatables.js",
               "src/assets/vendors/select2/dist/js/select2.full.min.js"
              
+            ],
+            "allowedCommonJsDependencies": [
+              "@ckeditor/ckeditor5-build-classic",
+              "sweetalert2"
             ]
           },
           "configurations": {

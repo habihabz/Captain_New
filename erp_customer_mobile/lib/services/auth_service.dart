@@ -67,7 +67,7 @@ class AuthService {
   Future<DbResult> uploadProfileImage(int customerId, String filePath) async {
     try {
       final response = await _apiClient.multipartPost(
-        '/Customer/uploadProfileImage',
+        '/User/uploadProfileImage',
         {'id': customerId.toString()},
         filePath,
         'image'

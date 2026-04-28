@@ -1,3 +1,163 @@
-body {
-  background: #fff !important;
+/* --- 🔓 PREMIUM LOGIN PAGE --- */
+
+.login-page-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.login-card-glass {
+    width: 100%;
+    max-width: 450px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    padding: 45px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.login-logo {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.login-header h3 {
+    font-size: 1.8rem;
+    letter-spacing: -1px;
+}
+
+.login-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-group-premium {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group-premium i {
+    position: absolute;
+    left: 18px;
+    color: #94a3b8;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.input-group-premium .form-control {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1e293b;
+    transition: all 0.3s ease;
+}
+
+.input-group-premium .form-control:focus {
+    border-color: #1abb9c;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(26, 187, 156, 0.1);
+    outline: none;
+}
+
+.input-group-premium .form-control:focus + i {
+    color: #1abb9c;
+}
+
+.btn-pill {
+    border-radius: 50px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    background-color: #1abb9c !important;
+    border: none !important;
+}
+
+.btn-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(26, 187, 156, 0.2);
+}
+
+.text-teal {
+    color: #1abb9c !important;
+}
+
+.hover-lift {
+    transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+.login-footer p {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Animations */
+.animate__animated {
+    animation-duration: 0.8s;
+}
+
+@media (max-width: 576px) {
+    .login-card-glass {
+        padding: 30px 24px;
+        border-radius: 20px;
+        margin: 10px;
+    }
+
+    .login-logo {
+        height: 32px;
+        margin-bottom: 1rem !important;
+    }
+
+    .login-header {
+        margin-bottom: 2rem !important;
+    }
+
+    .login-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .input-group-premium .form-control {
+        padding: 12px 12px 12px 45px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-pill {
+        height: 50px;
+    }
+
+    .login-footer {
+        margin-top: 2rem !important;
+        padding-top: 1rem !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .login-card-glass {
+        padding: 25px 18px;
+    }
+    
+    .login-header h3 {
+        font-size: 1.3rem;
+    }
 }

@@ -66,14 +66,13 @@ export class IuserService {
     formData.append('id', userId.toString());
     formData.append('image', image, image.name);
     
-    // We can call the Customer endpoint as it has the User fallback logic
-    const customerApiUrl = `${environment.serverHostAddress}/api/Customer/uploadProfileImage`;
+    const userApiUrl = `${this.apiUrl}/uploadProfileImage`;
     const token = this.iLoginService.getToken();
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.post<DbResult>(customerApiUrl, formData, { headers });
+    return this.http.post<DbResult>(userApiUrl, formData, { headers });
   }
 
   getCurrentUser(): User  {

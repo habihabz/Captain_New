@@ -6,6 +6,7 @@ import { Menu } from '../../../models/menu.model';
 import { IMenuService } from '../../../services/imenu.service';
 import { ScriptLoaderService } from '../../../services/script.loader.service';
 import { ILoginService } from '../../../services/ilogin.service';
+import { environment } from '../../../../environments/environment';
 
 
 @Component({
@@ -19,6 +20,7 @@ export class SidebarComponent implements OnInit {
   allMenus: Menu[] = [];
   menus: Menu[] = [];
   searchTerm: string = '';
+  fileUrl = environment.fileUrL;
 
   constructor(
     private iuserService: IuserService,

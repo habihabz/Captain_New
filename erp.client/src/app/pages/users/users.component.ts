@@ -19,17 +19,31 @@ declare var $: any;
 })
 export class UsersComponent implements OnInit {
   users: User[] = [];
+  allUsers: User[] = [];
   user: User = new User();
   roles: Role[] = [];
   dbResult: DbResult = new DbResult();
   currentUser: User = new User();
   role: any = 0;
+  selectedRoleFilter: any = 0;
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
   private subscription: Subscription = new Subscription();
   
   pagination = true;
   domLayout: DomLayoutType = 'autoHeight';
 
   colDefs: ColDef[] = [
+    { 
+      headerName: "Profile", 
+      field: "u_image_url", 
+      width: 80, 
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => {
+        const url = p.value ? Env.serverHostAddress + p.value : 'images/img.jpg';
+        return `<img src="${url}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ddd; object-fit: cover;">`;
+      }
+    },
     { 
       headerName: "ID", 
       field: "u_id", 
@@ -49,6 +63,25 @@ export class UsersComponent implements OnInit {
       cellClass: 'text-primary'
     },
     { 
+      headerName: "Email", 
+      field: "u_email", 
+      flex: 1.2,
+      cellClass: 'text-muted'
+    },
+    { 
+      headerName: "Phone", 
+      field: "u_phone", 
+      width: 130,
+      cellClass: 'text-muted'
+    },
+    { 
+      headerName: "Date of Birth", 
+      field: "u_date_of_birth", 
+      width: 130,
+      cellClass: 'text-muted',
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    },
+    { 
       headerName: "Role", 
       field: "u_role_name", 
       width: 150,
@@ -64,9 +97,16 @@ export class UsersComponent implements OnInit {
         return `<span class="grid-badge ${isActive ? 'bg-success' : 'bg-danger'} text-white shadow-xs">${isActive ? 'Yes' : 'No'}</span>`;
       }
     },
+    { 
+        headerName: "Created On", 
+        field: "u_cre_date", 
+        width: 130, 
+        cellClass: 'text-center',
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
+    },
     {
       headerName: 'Actions',
-      width: 180,
+      width: 150,
       pinned: 'right',
       cellClass: 'text-center',
       cellRenderer: 'actionRenderer',
@@ -98,13 +138,6 @@ export class UsersComponent implements OnInit {
           }
         ]
       }
-    },
-    { 
-        headerName: "Created On", 
-        field: "u_cre_date", 
-        width: 130, 
-        cellClass: 'text-center',
-        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
     }
   ];
 
@@ -137,12 +170,26 @@ export class UsersComponent implements OnInit {
   loadUsers() {
     this.iuserService.getUsers().subscribe(
       (data: User[]) => {
-        this.users = data;
+        this.allUsers = data;
+        this.applyRoleFilter();
       },
       (error: any) => {
         console.error('Error fetching users', error);
       }
     );
+  }
+
+  onRoleFilterChange(event: any) {
+    this.selectedRoleFilter = event;
+    this.applyRoleFilter();
+  }
+
+  applyRoleFilter() {
+    if (!this.selectedRoleFilter || this.selectedRoleFilter == 0) {
+      this.users = [...this.allUsers];
+    } else {
+      this.users = this.allUsers.filter(u => u.u_role_id == this.selectedRoleFilter);
+    }
   }
 
   loadRoles() {
@@ -181,8 +228,17 @@ export class UsersComponent implements OnInit {
     this.iuserService.createOrUpdateUser(this.user).subscribe(
       (data: DbResult) => {
         if(data.message == "Success") {
-          this.iuserService.refreshUsers();
-          this.closeModal();
+          const userId = this.user.u_id || data.id;
+          
+          if (this.selectedFile && userId) {
+            this.iuserService.uploadProfileImage(userId, this.selectedFile).subscribe(() => {
+              this.iuserService.refreshUsers();
+              this.closeModal();
+            });
+          } else {
+            this.iuserService.refreshUsers();
+            this.closeModal();
+          }
         } else {
           alert(data.message);
         }
@@ -190,11 +246,25 @@ export class UsersComponent implements OnInit {
     );
   }
 
+  onProfileFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   editUser(id: number): void {
     this.iuserService.getUser(id).subscribe(
       (data: User) => {
         this.user = data;
         this.role = data.u_role_id;
+        this.selectedFile = null;
+        this.previewUrl = data.u_image_url ? Env.serverHostAddress + data.u_image_url : null;
         $('#userFormModal').modal('show');
       }
     );
@@ -203,6 +273,8 @@ export class UsersComponent implements OnInit {
   createUser(): void {
     this.user = new User();
     this.role = 0;
+    this.selectedFile = null;
+    this.previewUrl = null;
     $('#userFormModal').modal('show');
   }
 

@@ -9,6 +9,7 @@ import { ICustomerService } from '../../../../services/icustomer.service';
 import { Customer } from '../../../../models/customer.model';
 import { User } from '../../../../models/user.model';
 import { IuserService } from '../../../../services/iuser.service';
+import { ILoginService } from '../../../../services/ilogin.service';
 
 @Component({
   selector: 'app-website-top',
@@ -26,7 +27,8 @@ export class WebsiteTopComponent {
     private elRef: ElementRef,
     private router: Router,
     private geolocationService: GeolocationService,
-    private iuser: IuserService
+    private iuser: IuserService,
+    private loginService: ILoginService
   ) {
     this.country = this.geolocationService.getCurrentCountry();
     this.currentUser = iuser.getCurrentUser();
@@ -78,8 +80,7 @@ export class WebsiteTopComponent {
     return !!this.currentUser?.u_id; // or another relevant property
   }
   logout(): void {
-    localStorage.removeItem('token'); // Remove token on logout
-    this.router.navigate(['login']);
+    this.loginService.logout();
     this.closeMenu();
   }
 }

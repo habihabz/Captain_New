@@ -1,5 +1,5 @@
-/* General Layout & Typography */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+/* General Layout & Typography */
 
 :host {
     font-family: 'Outfit', sans-serif;

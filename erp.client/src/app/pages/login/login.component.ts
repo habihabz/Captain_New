@@ -27,8 +27,10 @@ export class LoginComponent implements OnInit {
   onLogin(): void {
     this.iloginService.getLogin(this.credential).subscribe({
       next: (data: UserCredential) => {
+         
         // Handle successful login
         if (data.message === "Success") {
+        
           // Store JWT token in local storage
           localStorage.setItem('token', data.token);
           sessionStorage.setItem('user',JSON.stringify(data.user))
@@ -51,7 +53,7 @@ export class LoginComponent implements OnInit {
         console.error('Login error:', error);
         // Extract and display the error message
         const errorMessage = error.error?.message || 'An unknown error occurred';
-        alert(errorMessage);
+        
       }
     });
   }

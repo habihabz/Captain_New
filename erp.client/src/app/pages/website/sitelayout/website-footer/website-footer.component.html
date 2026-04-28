@@ -23,12 +23,12 @@
                 <div class="company__info wow fadeInUp " data-wow-duration=".7s" data-wow-delay=".4s">
                     <h3 class="f-title">Get Help</h3>
                     <ul>
-                        <li><a href="contact.html">Contact Us</a></li>
-                        <li><a href="accordion.html">Delivery Information</a></li>
-                        <li><a href="accordion.html">Sale Terms & Conditions</a></li>
-                        <li><a href="accordion.html">Privacy Notice</a></li>
-                        <li><a href="accordion.html">Shopping FAQs</a></li>
-                        <li><a href="accordion.html">Returns & Refundss</a></li>
+                        <li><a routerLink="/contact-us">Contact Us</a></li>
+                        <li><a routerLink="/shop">Delivery Information</a></li>
+                        <li><a routerLink="/shop">Sale Terms & Conditions</a></li>
+                        <li><a routerLink="/shop">Privacy Notice</a></li>
+                        <li><a routerLink="/shop">Shopping FAQs</a></li>
+                        <li><a routerLink="/shop">Returns & Refundss</a></li>
                     </ul>
                 </div>
             </div>
@@ -38,7 +38,7 @@
 
                     <ul class="row list-unstyled">
                         <li class="col-6" *ngFor="let category of categories.slice(1,10)">
-                            <a href="category">{{ category.ct_name }}</a>
+                            <a routerLink="/category">{{ category.ct_name }}</a>
                         </li>
                     </ul>
                 </div>
@@ -58,7 +58,7 @@
                 </div>
             </div>
         </div>
-        <div class="footer__bottom pb-10 mt-60">
+        <div class="footer__bottom">
             <div class="row">
                 <div class="col-xl-5 col-lg-5 col-md-6 col-sm-12 ">
                     <p>Copyright © <span>Captain</span> All Rights Reserved <span></span>
@@ -67,8 +67,8 @@
                 <div class="col-xl-5 offset-xl-2 col-lg-4 col-md-6 col-sm-12">
                     <div class="footer-menu">
                         <ul class="text-end">
-                            <li><a href="contact.html">Site Map</a></li>
-                            <li><a href="contact.html">Contact Us</a></li>
+                            <li><a routerLink="/sitemap">Site Map</a></li>
+                            <li><a routerLink="/contact-us">Contact Us</a></li>
                         </ul>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { environment } from '../../../../environments/environment';
 import { Product } from '../../../models/product.model';
 import { Category } from '../../../models/category.model';
@@ -59,6 +60,7 @@ export class ShopComponent implements OnInit {
   favourite: Favourite = new Favourite();
   currentUser: User = new User();
   userFavourites: Favourite[] = [];
+  isMobileFilterOpen: boolean = false;
 
   constructor(
     private elRef: ElementRef,
@@ -70,6 +72,8 @@ export class ShopComponent implements OnInit {
     private geolocationService: GeolocationService,
     private iuser: IuserService,
     private snackbarService: SnackBarService,
+    private titleService: Title,
+    private metaService: Meta
   ) {
     this.currentUser = iuser.getCurrentUser();
     this.country = this.geolocationService.getCurrentCountry();
@@ -77,6 +81,7 @@ export class ShopComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setSEO();
     this.loadCategories();
     this.getProductsByCountry();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
@@ -84,6 +89,13 @@ export class ShopComponent implements OnInit {
     this.getMasterDatasByType("SubDivision", (data) => { this.subdivisions = data; });
     this.getMasterDatasByType("ProductSize", (data) => { this.sizes = data; });
     this.loadUserFavourites();
+  }
+
+  setSEO() {
+    this.titleService.setTitle('Shop Premium Sports Equipment - Captain');
+    this.metaService.updateTag({ name: 'description', content: 'Browse our extensive collection of sports gear, including footballs, badminton rackets, and athletic apparel. High-quality equipment for professional athletes.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Shop Premium Sports Equipment - Captain' });
+    this.metaService.updateTag({ property: 'og:image', content: 'assets/img/shop-banner.jpg' });
   }
   getProductsByCountry() {
     this.iproductService.getProductsByCountry(this.country.md_id).subscribe(

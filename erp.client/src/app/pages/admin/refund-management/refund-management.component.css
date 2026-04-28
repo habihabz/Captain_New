@@ -138,3 +138,82 @@
     50% { transform: scale(1.05); opacity: 0.35; }
     100% { transform: scale(1); opacity: 0.25; }
 }
+
+/* NEW FILTER BAR STYLES */
+.filter-bar-container {
+    transition: all 0.3s ease;
+}
+
+.filter-bar-container:focus-within {
+    background: #fff !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+.date-input-wrapper input[type="date"] {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 125px;
+}
+
+/* Remove default date picker icons/styling for cleaner look */
+.date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+.date-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.date-input-wrapper::before {
+    content: '\f073';
+    font-family: 'FontAwesome';
+    color: #94a3b8;
+    font-size: 12px;
+    pointer-events: none;
+    margin-right: 2px;
+}
+
+.filter-btn {
+    background: #5e72e4;
+    border: none;
+    box-shadow: 0 4px 6px rgba(94, 114, 228, 0.2);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+}
+
+.filter-btn:hover {
+    background: #4a5ed3;
+    transform: translateY(-1px);
+}
+
+.reset-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reset-btn:hover {
+    background: #f8fafc;
+}
+
+.filter-divider {
+    height: 20px !important;
+    align-self: center;
+    border-left: 1px solid #e2e8f0;
+}

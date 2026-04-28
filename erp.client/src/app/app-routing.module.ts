@@ -10,7 +10,6 @@ import { RoleComponent } from './pages/role/role.component';
 import { MenuComponent } from './pages/menu/menu.component';
 import { MenuAllocationComponent } from './pages/menu.allocation/menu.allocation.component';
 import { SupplierComponent } from './pages/supplier/supplier.component';
-import { CustomerComponent } from './pages/customer/customer.component';
 import { CategoryComponent } from './pages/category/category.component';
 import { IncomeComponent } from './pages/income/income.component';
 import { MasterDataComponent } from './pages/master-data/master-data.component';
@@ -21,12 +20,11 @@ import { SingleProductComponent } from './pages/website/single-product/single-pr
 import { ContactUsComponent } from './pages/website/contact.us/contact.us.component';
 import { BlogsComponent } from './pages/website/blogs/blogs.component';
 import { ShopComponent } from './pages/website/shop/shop.component';
+import { SitemapComponent } from './pages/website/sitemap/sitemap.component';
 import { FeedbackComponent } from './pages/feedback/feedback.component';
 import { ProductReviewsComponent } from './pages/product.reviews/product.reviews.component';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { PriceChangeComponent } from './pages/price.change/price.change.component';
-
-import { CustomerLoginComponent } from './pages/website/customer-login/customer-login.component';
 import { MycartComponent } from './pages/website/mycart/mycart.component';
 import { UserRegistrationComponent } from './pages/website/user-registration/user-registration.component';
 import { FavouriteComponent } from './pages/website/favourite/favourite.component';
@@ -65,6 +63,9 @@ const routes: Routes = [
         path: 'contact-us', component: ContactUsComponent
       },
       {
+        path: 'sitemap', component: SitemapComponent
+      },
+      {
         path: 'about-us', component: AboutUsComponent
       },
       {
@@ -99,11 +100,6 @@ const routes: Routes = [
     path: 'user-registration',
     component: UserRegistrationComponent
   },
-  {
-    path: 'customer-login',
-    component: CustomerLoginComponent
-  },
-  // Define your login route
   {
     path: 'login',
     component: LoginComponent
@@ -145,10 +141,6 @@ const routes: Routes = [
       {
         path: 'menuallocation',
         component: MenuAllocationComponent
-      },
-      {
-        path: 'customers',
-        component: CustomerComponent
       },
       {
         path: 'suppliers',
@@ -214,6 +206,14 @@ const routes: Routes = [
       {
         path: 'refund-management',
         component: RefundManagementComponent
+      },
+      {
+        path: 'refund-management',
+        component: RefundManagementComponent
+      },
+      {
+        path: 'order-report',
+        component: OrderReportComponent
       }
 
     ]

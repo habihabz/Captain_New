@@ -1,5 +1,16 @@
-<div class="container-fluid py-4 bg-light" style="min-height: 100vh; padding-top: 90px !important;">
-  <div class="row px-lg-5">
+<div class="global-breadcrumb-wrapper">
+  <div class="container-fluid px-lg-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My Orders</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="container-fluid py-4 bg-light px-lg-5" style="min-height: 100vh;">
+  <div class="row">
     <!-- SIDEBAR FILTERS -->
     <div class="col-lg-3 col-xl-2 mb-4">
       <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden bg-white">
@@ -54,15 +65,8 @@
         </div>
       </div>
 
-      <!-- BREADCRUMBS & TITLE -->
+      <!-- TITLE ONLY (Breadcrumbs moved to top) -->
       <div class="mb-3 px-1">
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-transparent p-0 m-0" style="font-size: 11px;">
-              <li class="breadcrumb-item"><a routerLink="/home" class="text-primary text-decoration-none">Home</a></li>
-              <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-muted text-decoration-none">My Account</a></li>
-              <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">My Orders</li>
-            </ol>
-          </nav>
           <div class="d-flex justify-content-between align-items-center mt-2">
               <h4 class="fw-bold text-dark mb-0">Showing {{ filteredOrders.length }} Orders</h4>
               <div class="text-muted small" *ngIf="selectedStatuses.size > 0 || selectedYears.size > 0 || searchTerm">

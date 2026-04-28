@@ -5,13 +5,13 @@
 
 .auth-container {
     width: 100%;
-    max-width: 450px; /* Narrower container matches the login screenshot */
+    max-width: 600px; 
     padding: 20px;
 }
 
 .brand-section .brand-logo {
-    width: 60px;
-    height: 60px;
+    width: 45px;
+    height: 45px;
     object-fit: contain;
 }
 
@@ -108,4 +108,101 @@
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0.5);
     cursor: pointer;
+}
+.camera-label {
+    width: 34px;
+    height: 34px;
+    background-color: #28d0b1 !important;
+    font-size: 12px;
+}
+
+.xx-small { font-size: 10px; }
+.x-small { font-size: 11px; }
+
+/* Mobile Tweaks */
+@media (max-width: 576px) {
+    .auth-wrapper {
+        justify-content: flex-start !important;
+        padding-top: 10px !important;
+    }
+    
+    .auth-container {
+        width: 96% !important;
+        max-width: 450px !important;
+        padding: 4px !important;
+    }
+
+    .auth-card {
+        border-radius: 1rem !important;
+        margin: 0 !important;
+    }
+
+    .card-body {
+        padding: 12px 10px !important;
+    }
+
+    .brand-section .brand-logo {
+        width: 28px;
+        height: 28px;
+        margin-bottom: 2px !important;
+    }
+
+    .brand-section h4 {
+        font-size: 1.2rem;
+        margin-bottom: 2px !important;
+    }
+    
+    .brand-section p {
+        font-size: 10px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .auth-input {
+        height: 36px;
+        font-size: 12px;
+        padding: 6px 10px 6px 35px !important;
+        border-radius: 8px !important;
+    }
+
+    .input-icon {
+        left: 12px;
+        font-size: 12px;
+    }
+
+    .auth-label {
+        font-size: 9.5px;
+        margin-bottom: 3px;
+        font-weight: 700;
+    }
+    
+    .mb-1 {
+        margin-bottom: 6px !important;
+    }
+
+    .btn-auth {
+        padding: 8px 0 !important;
+        font-size: 12px;
+        height: 40px;
+        border-radius: 20px !important;
+        margin-top: 8px;
+    }
+    
+    .custom-check {
+        margin-bottom: 4px !important;
+    }
+    
+    .custom-check label {
+        font-size: 11px !important;
+        line-height: 1.2;
+    }
+    
+    .copyright-text {
+        margin-top: 0.8rem;
+        font-size: 9px;
+    }
+    
+    .small.text-muted {
+        font-size: 11px !important;
+        margin-bottom: 0.8rem !important;
+    }
 }

@@ -14,36 +14,31 @@
             <div class="pb-0">
                 <ul class="nav nav-tabs border-0 mb-0 px-1" id="orderTabs" role="tablist">
                     <li class="nav-item">
-                        <button class="nav-link" 
-                            [ngClass]="{'active': requestParms.completedYn === 'A'}" 
+                        <button class="nav-link" [ngClass]="{'active': requestParms.completedYn === 'A'}"
                             (click)="setTab('A')" type="button">
                             <i class="fa fa-th-list me-2"></i>All Orders
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" 
-                            [ngClass]="{'active': requestParms.completedYn === 'N'}" 
+                        <button class="nav-link" [ngClass]="{'active': requestParms.completedYn === 'N'}"
                             (click)="setTab('N')" type="button">
                             <i class="fa fa-bolt text-warning me-2"></i>Active
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" 
-                            [ngClass]="{'active': requestParms.completedYn === 'Y'}" 
+                        <button class="nav-link" [ngClass]="{'active': requestParms.completedYn === 'Y'}"
                             (click)="setTab('Y')" type="button">
                             <i class="fa fa-check-circle text-success me-2"></i>Completed
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" 
-                            [ngClass]="{'active': requestParms.completedYn === 'C'}" 
+                        <button class="nav-link" [ngClass]="{'active': requestParms.completedYn === 'C'}"
                             (click)="setTab('C')" type="button">
                             <i class="fa fa-times-circle text-danger me-2"></i>Canceled
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" 
-                            [ngClass]="{'active': requestParms.completedYn === 'R'}" 
+                        <button class="nav-link" [ngClass]="{'active': requestParms.completedYn === 'R'}"
                             (click)="setTab('R')" type="button">
                             <i class="fa fa-reply text-info me-2"></i>Returned
                         </button>
@@ -58,26 +53,28 @@
             <!-- Filter Section -->
             <div class="filter-row shadow-xs">
                 <div class="row align-items-end g-3">
-                    <div class="col-md-4" *ngIf="requestParms.completedYn !== 'C' && requestParms.completedYn !== 'Y' && requestParms.completedYn !== 'R'">
+                    <div class="col-md-4"
+                        *ngIf="requestParms.completedYn !== 'C' && requestParms.completedYn !== 'Y' && requestParms.completedYn !== 'R'">
                         <div class="form-group mb-0">
                             <label><i class="fa fa-filter me-1"></i> Filter by Order Status</label>
                             <select appSelect2 #status id="status" class="form-control" name="status"
                                 (selectionChanged)="onCustomerOrderStatusChange($event);">
                                 <option [value]="0">All System Statuses</option>
-                                <option *ngFor="let cos of customerOrderStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
+                                <option *ngFor="let cos of customerOrderStatuses" [value]="cos.s_id">{{ cos.s_name }}
+                                </option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="col-md-4" *ngIf="requestParms.completedYn === 'Y' || requestParms.completedYn === 'C' || requestParms.completedYn === 'R'">
+                    <div class="col-md-4"
+                        *ngIf="requestParms.completedYn === 'Y' || requestParms.completedYn === 'C' || requestParms.completedYn === 'R'">
                         <div class="form-group mb-0">
-                            <label class="small fw-bold text-muted mb-1"><i class="fa fa-calendar me-1"></i> Filter by Date Range</label>
+                            <label class="small fw-bold text-muted mb-1"><i class="fa fa-calendar me-1"></i> Filter by
+                                Date Range</label>
                             <div class="input-group input-group-sm shadow-xs">
-                                <input type="text" class="form-control" appDateRange 
-                                    [startDate]="requestParms.startDate" 
-                                    [endDate]="requestParms.endDate"
-                                    (rangeChanged)="onDateRangeChange($event)"
-                                    placeholder="Select Date Range">
+                                <input type="text" class="form-control" appDateRange
+                                    [startDate]="requestParms.startDate" [endDate]="requestParms.endDate"
+                                    (rangeChanged)="onDateRangeChange($event)" placeholder="Select Date Range">
                                 <span class="input-group-text bg-white border-start-0 text-muted">
                                     <i class="fa fa-calendar small"></i>
                                 </span>
@@ -88,12 +85,14 @@
                     <div class="col-md-3">
                         <div class="form-group mb-0">
                             <label class="small fw-bold text-muted mb-1">ORDER NO.</label>
-                            <input type="number" class="form-control form-control-sm shadow-xs" [(ngModel)]="requestParms.id">
+                            <input type="number" class="form-control form-control-sm shadow-xs"
+                                [(ngModel)]="requestParms.id">
                         </div>
                     </div>
 
                     <div class="col-md-2 d-flex align-items-end">
-                        <button class="btn btn-dark btn-sm fw-bold shadow-sm px-4 w-100" style="height: 31px;" (click)="getCustomerOrders()">
+                        <button class="btn btn-dark btn-sm fw-bold shadow-sm px-4 w-100" style="height: 31px;"
+                            (click)="getCustomerOrders()">
                             <i class="fa fa-search me-2"></i> SEARCH
                         </button>
                     </div>
@@ -103,9 +102,9 @@
             <!-- Grid Container -->
             <div class="row">
                 <div class="col-md-12">
-                    <ag-grid-angular #customerOrderGrid class="ag-theme-quartz ag-theme-acmecorp" style="width: 100%; height: 65vh;"
-                        [rowData]="customerOrders" [columnDefs]="colDefs" [pagination]="pagination"
-                        [defaultColDef]="defaultColDef" [enableCellTextSelection]="true"
+                    <ag-grid-angular #customerOrderGrid class="ag-theme-quartz ag-theme-acmecorp"
+                        style="width: 100%; height: 65vh;" [rowData]="customerOrders" [columnDefs]="colDefs"
+                        [pagination]="pagination" [defaultColDef]="defaultColDef" [enableCellTextSelection]="true"
                         [components]="frameworkComponents" [paginationPageSize]="paginationPageSize10"
                         [domLayout]="'normal'" [paginationPageSizeSelector]="paginationPageSizeSelector10"
                         [rowSelection]="rowSelectionOptions" (gridReady)="onGridReady($event)"
@@ -115,25 +114,27 @@
             </div>
 
             <!-- Bulk Action Bar (Floating at bottom) -->
-            <div class="bulk-action-bar shadow-lg" *ngIf="selectedRowsCount > 0 && (requestParms.completedYn === 'N' || requestParms.completedYn === 'A')">
+            <div class="bulk-action-bar shadow-lg"
+                *ngIf="selectedRowsCount > 0 && (requestParms.completedYn === 'N' || requestParms.completedYn === 'A')">
                 <div class="d-flex align-items-center gap-5">
                     <div class="badge-selected px-4 py-2 me-2">
-                        <i class="fa fa-shopping-basket me-2"></i>
+                        <i class="fa fa-shopping-basket me-2"></i> &nbsp;
                         <span>{{ selectedRowsCount }} Orders Selected</span>
                     </div>
-                    
+
                     <div class="d-flex align-items-center gap-4">
-                        <label class="bulk-label">UPDATE STATUS TO:</label>
+                        <label class="bulk-label padding"> &nbsp;UPDATE STATUS TO &nbsp;: &nbsp;</label>
                         <div style="width: 280px;">
-                            <select *ngIf="isBulkListReady" appSelect2 class="form-control bulk-select" #bulkStatusSelect
-                                (selectionChanged)="bulkStatusId = +$event">
+                            <select *ngIf="isBulkListReady" appSelect2 class="form-control bulk-select"
+                                #bulkStatusSelect (selectionChanged)="bulkStatusId = +$event">
                                 <option value="0">Select New Status</option>
-                                <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}</option>
+                                <option *ngFor="let cos of bulkUpdateStatuses" [value]="cos.s_id">{{ cos.s_name }}
+                                </option>
                             </select>
                         </div>
                     </div>
                 </div>
-                
+
                 <button class="btn btn-bulk-execute px-4 ms-4" [disabled]="!bulkStatusId" (click)="onBulkUpdate()">
                     <i class="fa fa-bolt me-2"></i> EXECUTE BULK UPDATE
                 </button>
@@ -150,7 +151,8 @@
 
             <div class="modal-header border-0 bg-white pt-4 px-4 pb-0">
                 <h5 class="modal-title fw-bold text-dark">Customer Order Details</h5>
-                <button type="button" class="close" (click)="closeModal($event, 'customerOrderDetailModal')" aria-label="Close">
+                <button type="button" class="close" (click)="closeModal($event, 'customerOrderDetailModal')"
+                    aria-label="Close">
                     <span aria-hidden="true" style="font-size: 24px;">&times;</span>
                 </button>
             </div>
@@ -187,15 +189,17 @@
                                     </div>
 
                                     <!-- CANCELLED ALERT -->
-                                    <div class="mt-4 d-flex align-items-center p-4 rounded-4" 
-                                         style="background-color: rgba(220, 53, 69, 0.05); color: #dc3545; border-left: 5px solid #dc3545; gap: 15px;" 
-                                         *ngIf="isOrderCanceled()">
-                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                    <div class="mt-4 d-flex align-items-center p-4 rounded-4"
+                                        style="background-color: rgba(220, 53, 69, 0.05); color: #dc3545; border-left: 5px solid #dc3545; gap: 15px;"
+                                        *ngIf="isOrderCanceled()">
+                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                            style="width: 32px; height: 32px;">
                                             <i class="fa fa-times" style="font-size: 14px;"></i>
                                         </div>
                                         <div>
                                             <div class="fw-bold mb-0" style="font-size: 15px;">Order Cancelled</div>
-                                            <div class="small opacity-75 fw-medium">This order has been officially cancelled and removed from active processing.</div>
+                                            <div class="small opacity-75 fw-medium">This order has been officially
+                                                cancelled and removed from active processing.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -217,8 +221,7 @@
                                 &nbsp; Order Status Journey
                             </h6>
                             <ul class="tracker ms-2">
-                                <li *ngFor="let omh of orderMovementHistories" 
-                                    [ngClass]="{
+                                <li *ngFor="let omh of orderMovementHistories" [ngClass]="{
                                         'canceled': (omh.omh_status_name || '').toLowerCase().includes('cancel'),
                                         'done': omh.omh_cre_date && !(omh.omh_status_name || '').toLowerCase().includes('cancel')
                                     }">
@@ -344,7 +347,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Change Status</h5>
-                <button type="button" class="close" (click)="closeModal($event, 'StatusChangeModal')" aria-label="Close">
+                <button type="button" class="close" (click)="closeModal($event, 'StatusChangeModal')"
+                    aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -366,7 +370,8 @@
             </div>
             <div class="modal-footer d-flex justify-content-end">
                 <button type="button" class="btn btn-success" (click)="updateStatusForCustomerOrder()">Update</button>
-                <button type="button" class="btn btn-secondary" (click)="closeModal($event, 'StatusChangeModal')">Close</button>
+                <button type="button" class="btn btn-secondary"
+                    (click)="closeModal($event, 'StatusChangeModal')">Close</button>
             </div>
         </div>
     </div>

@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Product } from '../../../models/product.model';
 import { Router } from '@angular/router';
 import { IProductService } from '../../../services/iproduct.service';
@@ -58,7 +59,9 @@ export class WebHomeComponent implements OnInit {
     private isliderService: ISliderService,
     private snackbarService: SnackBarService,
     private iblogService: IBlogService,
-    private iuser: IuserService
+    private iuser: IuserService,
+    private titleService: Title,
+    private metaService: Meta
 
   ) {
     this.currentUser = iuser.getCurrentUser();
@@ -71,6 +74,7 @@ export class WebHomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setSEO();
     this.loadUserCountry();
     this.loadCategories();
     this.getSliders();
@@ -78,6 +82,13 @@ export class WebHomeComponent implements OnInit {
     this.getBlogsForHomePage();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
     this.loadUserFavourites();
+  }
+
+  setSEO() {
+    this.titleService.setTitle('Captain - Premium Sports Gear & Apparel');
+    this.metaService.updateTag({ name: 'description', content: 'Discover premium sports equipment, football gear, and high-performance badminton accessories at Captain. Lead to Win with our expert-crafted products.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Captain - Premium Sports Gear & Apparel' });
+    this.metaService.updateTag({ property: 'og:description', content: 'Elevate your game with high-performance sports gear from Captain.' });
   }
 
   getSliders() {

@@ -22,6 +22,7 @@ import { Address } from '../../models/address.model';
 declare var $: any;
 
 import { environment } from '../../../environments/environment';
+import { CustomerOrder } from '../../models/customer.order.model';
 
 @Component({
   selector: 'app-returned-orders',
@@ -36,8 +37,8 @@ export class ReturnedOrdersComponent implements OnInit {
   currentUser: User = new User();
   returnOrders: ReturnOrder[] = [];
   activeDetailTab: string = 'summary';
-  selectedReturn: ReturnOrder = {} as ReturnOrder;
-  selectedOrder: any = null;
+  selectedReturn: ReturnOrder | null = null;
+  selectedOrder: CustomerOrder | null = null;
   statuses: Status[] = [];
   requestParms: RequestParms = new RequestParms();
   orderMovementHistories: OrderMovementHistory[] = [];
@@ -45,6 +46,8 @@ export class ReturnedOrdersComponent implements OnInit {
   bulkStatusId: number = 0;
   bulkUpdateStatuses: Status[] = [];
   isBulkListReady: boolean = true;
+  isLoading: boolean = false;
+  isRefundEnabled: boolean = false;
   rowSelectionOptions: RowSelectionOptions = {
     mode: 'multiRow',
     checkboxes: true,
@@ -78,7 +81,7 @@ export class ReturnedOrdersComponent implements OnInit {
       cellClass: 'text-center fw-bold text-muted',
       headerClass: 'text-center'
     },
-     {
+    {
       headerName: "Order ID",
       field: "ro_order_no",
       width: 100,
@@ -167,11 +170,20 @@ export class ReturnedOrdersComponent implements OnInit {
   }
 
   getReturnRequests() {
+    this.isLoading = true;
     this.requestParms.user = this.currentUser.u_id;
     this.ireturnOrder.getReturnRequests(this.requestParms).subscribe(
       (data: ReturnOrder[]) => {
         this.returnOrders = data;
-        setTimeout(() => this.returnOrderGrid.api.sizeColumnsToFit(), 500);
+        this.isLoading = false;
+        setTimeout(() => {
+          if (this.returnOrderGrid && this.returnOrderGrid.api) {
+            this.returnOrderGrid.api.sizeColumnsToFit();
+          }
+        }, 500);
+      },
+      (error) => {
+        this.isLoading = false;
       }
     );
   }
@@ -220,16 +232,19 @@ export class ReturnedOrdersComponent implements OnInit {
       this.getOrderMovementHistory(data.ro_order_no);
       this.icustomerOrder.getCustomerOrder(data.ro_order_no).subscribe(order => {
         this.selectedOrder = order;
-        this.resolveOrderItemImage(this.selectedOrder);
-        
+        if (this.selectedOrder) {
+          this.resolveOrderItemImage(this.selectedOrder);
+        }
+
         // If address details is just an ID or empty, fetch from master
         if (order.co_c_address && (!order.co_c_address_details || !isNaN(Number(order.co_c_address_details)))) {
           this.iAddressService.getAddress(order.co_c_address).subscribe((addresses: Address[]) => {
-            if (addresses && addresses.length > 0) {
+            if (addresses && addresses.length > 0 && this.selectedOrder) {
               this.selectedOrder.co_c_address_details = addresses[0].ad_address + ', ' + (addresses[0].ad_pincode || '');
             }
           });
         }
+        this.updateRefundButtonVisibility();
       });
       $("#returnDetailModal").modal("show");
     } else if (action === 'statusChange') {
@@ -252,54 +267,17 @@ export class ReturnedOrdersComponent implements OnInit {
   }
 
   issueRefund(order: ReturnOrder) {
+    if (!confirm(`Are you sure you want to move this order to "Payment Initiated"? It will be processed via Refund Management.`)) {
+      return;
+    }
     this.selectedReturn = order;
-
-    // Fetch the customer order to get the payment reference explicitly
-    this.icustomerOrder.getCustomerOrder(order.ro_order_no).subscribe({
-      next: (orderData: any) => {
-        const paymentId = orderData?.co_payment_id;
-
-        if (!paymentId) {
-          this.snackBarService.showError("No payment reference found for this order. Cannot process automatic refund.");
-          return;
-        }
-
-        if (!confirm(`Are you sure you want to issue a refund of ₹${order.ro_net_amount} for this order via Razorpay?`)) {
-          return;
-        }
-
-        const refundRequest: RefundRequest = {
-          paymentId: paymentId,
-          amount: order.ro_net_amount || 0,
-          orderId: order.ro_order_no
-        };
-
-        this.paymentService.processRefund(refundRequest).subscribe({
-          next: (res) => {
-            if (res.status === 'success') {
-              this.snackBarService.showSuccess("Refund processed successfully!");
-              // Update status to Refund Completed (ID 15)
-              this.updateReturnStatus(15);
-              $("#returnDetailModal").modal("hide");
-            } else {
-              this.snackBarService.showError(res.message || "Failed to process refund.");
-            }
-          },
-          error: (err) => {
-            const errorMsg = err.error?.message || err.error || err.message;
-            this.snackBarService.showError("An error occurred while processing the refund: " + errorMsg);
-          }
-        });
-      },
-      error: (err) => {
-        this.snackBarService.showError("Failed to fetch order details to process refund.");
-      }
-    });
+    this.updateReturnStatus(14); // 14: Payment Initiated
+    $("#returnDetailModal").modal("hide");
   }
 
   updateReturnStatus(newStatus: number) {
     const updatePayload: ReturnOrder = {
-      ...this.selectedReturn,
+      ...this.selectedReturn!,
       ro_status: newStatus,
       ro_cre_by: this.currentUser.u_id
     };
@@ -309,6 +287,10 @@ export class ReturnedOrdersComponent implements OnInit {
         if (data.message === "Success") {
           this.snackBarService.showSuccess("Return status updated successfully.");
           this.getReturnRequests();
+          if (this.selectedReturn) {
+            this.selectedReturn.ro_status = newStatus;
+            this.updateRefundButtonVisibility();
+          }
           $("#ReturnStatusModal").modal("hide");
         } else {
           this.snackBarService.showError(data.message);
@@ -390,7 +372,7 @@ export class ReturnedOrdersComponent implements OnInit {
         const image =
           attachments.find(x => String(x.pa_color).trim() === String(order.co_color).trim())?.pa_image_path ||
           attachments[0]?.pa_image_path || '';
-        
+
         order.resolvedImageUrl = this.formatImageUrl(image);
       } else {
         order.resolvedImageUrl = this.getOrderItemImage(order);
@@ -405,7 +387,7 @@ export class ReturnedOrdersComponent implements OnInit {
     const cartColorName = String(order.co_color_name || '').toLowerCase().trim();
     let matchingImage = attachments.find((x: any) => String(x.pa_color || '').trim() === cartColor);
     if (!matchingImage && cartColorName) {
-        matchingImage = attachments.find((x: any) => String(x.pa_color_name || x.pa_color || '').toLowerCase().trim() === cartColorName);
+      matchingImage = attachments.find((x: any) => String(x.pa_color_name || x.pa_color || '').toLowerCase().trim() === cartColorName);
     }
     return this.formatImageUrl(matchingImage ? matchingImage.pa_image_path : attachments[0].pa_image_path);
   }
@@ -416,5 +398,73 @@ export class ReturnedOrdersComponent implements OnInit {
     while (cleanPath.startsWith('/')) { cleanPath = cleanPath.substring(1); }
     if (cleanPath.startsWith('http')) return cleanPath;
     return `${this.environment.serverHostAddress}/${cleanPath}`;
+  }
+
+  showWorkflowHeader(indexOrId: number): any {
+    if (indexOrId === null || indexOrId === undefined) return false;
+
+    // If it's a workflow ID (typically > 5 or specific range, but here we use it for label)
+    if (indexOrId < 10 && indexOrId > 0) {
+      switch (indexOrId) {
+        case 1: return 'Order Lifecycle';
+        case 2: return 'Return Process';
+        case 3: return 'Refund & Settlement';
+        default: return 'Workflow Stage';
+      }
+    }
+
+    // If it's an index for *ngIf check
+    const index = indexOrId;
+    if (index === 0) return true;
+
+    const current = this.orderMovementHistories[index];
+    const previous = this.orderMovementHistories[index - 1];
+
+    return current.omh_workflow_id !== previous.omh_workflow_id;
+  }
+
+  getWorkflowColor(workflowId: number): string {
+    switch (workflowId) {
+      case 1: return '#5e72e4'; // Primary Blue
+      case 2: return '#fb6340'; // Orange
+      case 3: return '#2dce89'; // Green
+      default: return '#adb5bd';
+    }
+  }
+
+  getWorkflowIcon(workflowId: number): string {
+    switch (workflowId) {
+      case 1: return 'fa-shopping-basket';
+      case 2: return 'fa-undo-alt';
+      case 3: return 'fa-check-double';
+      default: return 'fa-info-circle';
+    }
+  }
+
+  updateRefundButtonVisibility() {
+    if (!this.selectedReturn || !this.statuses.length) {
+      this.isRefundEnabled = false;
+      return;
+    }
+
+    const currentStatusId = Number(this.selectedReturn.ro_status);
+
+    // 1. Check if refund is already done/advanced (Status ID >= 14 or similar)
+    // Adjust this threshold based on your DB values (15 is typically "Refund Processed")
+    if (currentStatusId >= 15) {
+      this.isRefundEnabled = false;
+      return;
+    }
+
+    // 2. Check priority against "Verified" status
+    const verifiedStatus = this.statuses.find(s => s.s_name.toLowerCase().includes('verified') && s.s_workflow_id === 2);
+    const currentStatus = this.statuses.find(s => Number(s.s_id) === currentStatusId && s.s_workflow_id === 2);
+
+    if (verifiedStatus && currentStatus) {
+      // Show button if priority is strictly GREATER than verified priority
+      this.isRefundEnabled = currentStatus.cos_priority >= verifiedStatus.cos_priority;
+    } else {
+      this.isRefundEnabled = false;
+    }
   }
 }

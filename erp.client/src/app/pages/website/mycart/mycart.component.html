@@ -1,14 +1,15 @@
-<div class="container-fluid py-4 bg-light cart-page-wrapper" style="min-height: 100vh; padding-top: 47px !important;">
+<div class="global-breadcrumb-wrapper">
+  <div class="container-fluid px-lg-5">
     <nav aria-label="breadcrumb">
-        <ol class="breadcrumb bg-light px-4 py-3 rounded m-0 border-bottom">
-            <li class="breadcrumb-item">
-                <a routerLink="/home" class="text-decoration-none small text-muted">Home</a>
-            </li>
-            <li class="breadcrumb-item active small" aria-current="page">
-                My Cart
-            </li>
-        </ol>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My Cart</li>
+      </ol>
     </nav>
+  </div>
+</div>
+
+<div class="container-fluid px-lg-5 py-4 bg-light cart-page-wrapper" style="min-height: 100vh;">
     <div>
         <div class="container py-4 py-md-5">
             <div class="row gx-lg-5" *ngIf="this.carts.length > 0">

@@ -1,14 +1,15 @@
-<div class="blog-area mb-5" style="min-height: 80vh;">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb bg-light px-3 py-2 rounded">
-      <li class="breadcrumb-item">
-        <a routerLink="/home">Home</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Blogs
-      </li>
-    </ol>
-  </nav>
+<div class="global-breadcrumb-wrapper">
+  <div class="container-fluid px-lg-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Blogs</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="blog-area px-lg-5 py-4" style="min-height: 80vh;">
   <!-- BLOG LIST -->
   <div class="container p-4" *ngIf="blogId === 0">
 

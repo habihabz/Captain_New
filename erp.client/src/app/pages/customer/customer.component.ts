@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
-import { Customer } from '../../models/customer.model';
 import { IuserService } from '../../services/iuser.service';
 import { DbResult } from '../../models/dbresult.model';
 import { User } from '../../models/user.model';
@@ -16,8 +15,8 @@ declare var $: any;
   styleUrl: './customer.component.css'
 })
 export class CustomerComponent implements OnInit, OnDestroy {
-  customers: Customer[] = [];
-  customer: Customer = new Customer();
+  customers: any[] = [];
+  customer: User = new User();
   currentUser: User = new User();
   dbResult: DbResult = new DbResult();
   private subscription: Subscription = new Subscription();
@@ -28,30 +27,25 @@ export class CustomerComponent implements OnInit, OnDestroy {
   colDefs: ColDef[] = [
     {
       headerName: "ID",
-      field: "c_id",
+      field: "u_id",
       width: 70,
       cellClass: 'text-center fw-bold text-muted'
     },
     {
       headerName: "Name",
-      field: "c_name",
+      field: "u_name",
       flex: 1.2,
       cellClass: 'fw-bold text-dark'
     },
     {
       headerName: "Phone Number",
-      field: "c_mobile",
+      field: "u_phone",
       width: 140,
       cellClass: 'text-center'
     },
     {
       headerName: "Email Address",
-      field: "c_email",
-      flex: 1.5
-    },
-    {
-      headerName: "Address",
-      field: "c_address",
+      field: "u_email",
       flex: 1.5
     },
     {
@@ -68,7 +62,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
             cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
             icon: 'fa fa-pencil',
             action: 'onEdit',
-            onEdit: (data: any) => this.editCustomer(data.c_id)
+            onEdit: (data: any) => this.editCustomer(data.u_id)
           },
           {
             name: '',
@@ -76,14 +70,14 @@ export class CustomerComponent implements OnInit, OnDestroy {
             cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
             icon: 'fa fa-trash',
             action: 'onDelete',
-            onDelete: (data: any) => this.deleteCustomer(data.c_id)
+            onDelete: (data: any) => this.deleteCustomer(data.u_id)
           }
         ]
       }
     },
     {
       headerName: "Joined On",
-      field: "c_cre_date",
+      field: "u_cre_date",
       width: 130,
       cellClass: 'text-center',
       valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-GB') : ''
@@ -121,7 +115,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   loadCustomers(): void {
     this.icustomerService.getCustomers().subscribe(
-      (data: Customer[]) => {
+      (data: any[]) => {
         this.customers = data;
       },
       (error: any) => {
@@ -135,7 +129,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   createOrUpdateCustomer(): void {
-    this.customer.c_cre_by = this.currentUser.u_id;
+    this.customer.u_cre_by = this.currentUser.u_id;
     this.icustomerService.createOrUpdateCustomer(this.customer).subscribe(
       (data: DbResult) => {
         this.dbResult = data;
@@ -168,7 +162,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   editCustomer(id: number): void {
     this.icustomerService.getCustomer(id).subscribe(
-      (data: Customer) => {
+      (data: any) => {
         this.customer = data;
         $('#customerFormModal').modal('show');
       }
@@ -176,7 +170,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   createCustomer(): void {
-    this.customer = new Customer();
+    this.customer = new User();
     $('#customerFormModal').modal('show');
   }
 }
