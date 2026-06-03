@@ -3,6 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/customer.dart';
 import '../services/auth_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import '../providers/favourite_provider.dart';
+import '../providers/cart_provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -107,6 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -224,6 +229,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                             
                             const SizedBox(height: 15),
+                            
+                            // Google Signup Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: OutlinedButton(
+                                onPressed: authProvider.isLoading ? null : () async {
+                                  final success = await authProvider.googleLogin();
+                                  if (mounted) {
+                                    if (success) {
+                                      final customerId = authProvider.customer!.u_id;
+                                      Provider.of<FavouriteProvider>(context, listen: false).fetchFavourites(customerId);
+                                      Provider.of<CartProvider>(context, listen: false).fetchCart(customerId);
+                                      // Pop the signup screen and push replacement to home or just push replacement
+                                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                    } else if (authProvider.errorMessage != null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            authProvider.errorMessage!,
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+                                          ),
+                                          backgroundColor: Colors.black87,
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.g_mobiledata, size: 30, color: Colors.black),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'SIGN UP WITH GOOGLE',
+                                      style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 25),
                             
                             // Footer
                             Row(

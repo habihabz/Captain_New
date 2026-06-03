@@ -189,6 +189,55 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                             ),
                             
+                            const SizedBox(height: 20),
+
+                            // Google Login Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: OutlinedButton(
+                                onPressed: authProvider.isLoading ? null : () async {
+                                  final success = await authProvider.googleLogin();
+                                  if (mounted) {
+                                    if (success) {
+                                      final customerId = authProvider.customer!.u_id;
+                                      Provider.of<FavouriteProvider>(context, listen: false).fetchFavourites(customerId);
+                                      Provider.of<CartProvider>(context, listen: false).fetchCart(customerId);
+                                      Navigator.pushReplacementNamed(context, '/home');
+                                    } else if (authProvider.errorMessage != null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            authProvider.errorMessage!,
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+                                          ),
+                                          backgroundColor: Colors.black87,
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.g_mobiledata, size: 30, color: Colors.black),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'SIGN IN WITH GOOGLE',
+                                      style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1E293B)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            
                             const SizedBox(height: 25),
                             
                             Row(

@@ -29,6 +29,26 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> googleLogin(String idToken) async {
+    try {
+      final response = await _apiClient.post('/Login/google-login', {
+        'idToken': idToken,
+      });
+
+      final data = _apiClient.processResponse(response);
+      
+      if (data['message'] == 'Success') {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(AppConstants.tokenKey, data['token']);
+        await prefs.setString(AppConstants.userDataKey, jsonEncode(data['user']));
+      }
+      
+      return data;
+    } catch (e) {
+      return {'message': 'Error: ${e.toString()}', 'status': false};
+    }
+  }
+
   Future<DbResult> register(Customer customer, String password) async {
     try {
       final userJson = customer.toJson();

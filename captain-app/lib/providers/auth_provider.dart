@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/customer.dart';
 import '../services/auth_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -48,6 +49,56 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = _cleanErrorMessage(e.toString());
       _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: '130186997553-8e8o1n0olv7ce7cm697ghnof3gk9bk1n.apps.googleusercontent.com',
+  );
+
+  Future<bool> googleLogin() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        _errorMessage = 'Failed to get Google ID token';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      final result = await _authService.googleLogin(idToken);
+      if (result['message'] == 'Success') {
+        _customer = Customer.fromJson(result['user']);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = _cleanErrorMessage(result['message'] ?? 'Google login failed');
+        _isLoading = false;
+        await _googleSignIn.signOut();
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e.toString());
+      _isLoading = false;
+      await _googleSignIn.signOut();
       notifyListeners();
       return false;
     }
