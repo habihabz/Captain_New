@@ -5,21 +5,41 @@
   width: 100%;
 }
 
+@media (min-width: 992px) {
+  /* This prevents the main browser window from scrolling, locking the footer at the bottom */
+  .shop-main-row {
+    height: calc(100vh - 140px);
+    overflow: hidden; 
+  }
+}
+
+/* Mobile sticky header actions */
+@media (max-width: 991px) {
+  .shop-header-actions {
+    position: -webkit-sticky; /* Required for iOS Safari */
+    position: sticky;
+    top: 110px; /* Increased to clear the double header */
+    z-index: 1020; 
+    background-color: #fff; 
+    padding: 10px 0;
+    margin-top: -10px;
+    border-bottom: 1px solid #eee;
+  }
+}
+
 /* Sidebar: Default 20% on Desktop */
 .shop-sidebar {
   flex: 0 0 20%;
   max-width: 20%;
-  position: sticky;
-  top: 90px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
   transition: all 0.3s ease;
 }
 
-.shop-sidebar::-webkit-scrollbar {
-  display: none;
+@media (min-width: 992px) {
+  .shop-sidebar {
+    height: 100%;
+    overflow-y: auto; /* Allow filter to scroll when it overflows */
+    overflow-x: hidden;
+  }
 }
 
 /* Products: Default 80% on Desktop */
@@ -27,6 +47,30 @@
   flex: 0 0 80%;
   max-width: 80%;
   padding-left: 20px;
+}
+
+@media (min-width: 992px) {
+  .products-area {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom scrollbar for products area so it looks clean */
+.products-area::-webkit-scrollbar {
+  width: 6px;
+}
+.products-area::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+.products-area::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.products-area::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .filter-card {

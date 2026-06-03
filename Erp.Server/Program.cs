@@ -10,6 +10,7 @@ using QuestPDF.Infrastructure;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddMemoryCache();
 
 // =======================
 // CORS
@@ -109,6 +110,7 @@ builder.Services.AddTransient<IReturnOrder, ReturnOrderRepository>();
 builder.Services.AddTransient<IGeneratePDF, GenetatePDFRepository>();
 builder.Services.AddTransient<IPromocode, PromocodeRepository>();
 builder.Services.AddTransient<IRefund, RefundRepository>();
+builder.Services.AddTransient<INotificationService, NotificationService>();
 
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");

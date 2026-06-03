@@ -1,18 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Customer } from '../../../models/customer.model';
 import { Router } from '@angular/router';
 import { DbResult } from '../../../models/dbresult.model';
 import { User } from '../../../models/user.model';
 import { IuserService } from '../../../services/iuser.service';
+import { environment } from '../../../../environments/environment';
 
 import Swal from 'sweetalert2';
+
+declare var google: any;
 
 @Component({
   selector: 'app-user-registration',
   templateUrl: './user-registration.component.html',
   styleUrl: './user-registration.component.css'
 })
-export class UserRegistrationComponent {
+export class UserRegistrationComponent implements OnInit {
   users: User[] = [];
   user: User = new User();
   is_get_updates: boolean = false;
@@ -22,6 +25,54 @@ export class UserRegistrationComponent {
   constructor(private iuserService: IuserService, private router: Router) {
 
 
+  }
+
+  ngOnInit(): void {
+    // Initialize Google Sign-In
+    if (typeof google !== 'undefined') {
+      google.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: this.handleGoogleCredentialResponse.bind(this)
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("googleSignInBtnReg"),
+        { theme: "outline", size: "large", width: "100%" }
+      );
+    }
+  }
+
+  handleGoogleCredentialResponse(response: any) {
+    if (response.credential) {
+      this.iuserService.googleLogin(response.credential).subscribe({
+        next: (res: any) => {
+          if (res.message === "Success") {
+            localStorage.setItem('token', res.token);
+            sessionStorage.setItem('user', JSON.stringify(res.user));
+            
+            Swal.fire({
+              icon: res.isNewUser ? 'success' : 'info',
+              title: res.isNewUser ? 'Account Created' : 'Account Already Exists',
+              text: res.isNewUser ? 'Welcome to Captain! Please complete your profile.' : 'You already have an account. Redirecting you now...',
+              timer: res.isNewUser ? 3000 : 2000,
+              showConfirmButton: false
+            }).then(() => {
+              if (res.isNewUser) {
+                this.router.navigate(['profile']);
+              } else if(res.user.u_is_admin == 'Y'){
+                this.router.navigate(['dashboard']);
+              } else {
+                this.router.navigate(['web-home']);
+              }
+            });
+          } else {
+            Swal.fire('Registration Failed', res.message, 'error');
+          }
+        },
+        error: (err: any) => {
+          Swal.fire('Error', err.error?.message || 'Google sign-up failed. Please try again.', 'error');
+        }
+      });
+    }
   }
 
   registerUser(): void {

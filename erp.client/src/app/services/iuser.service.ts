@@ -27,6 +27,10 @@ export class IuserService {
     return this.http.post<User[]>(`${this.apiUrl}/getUsers`, {}, { headers });  
   }
 
+  googleLogin(idToken: string): Observable<any> {
+    return this.http.post<any>(`${environment.serverHostAddress}/api/Login/google-login`, { idToken });
+  }
+
   getUser(id: number): Observable<User> {
     const headers = this.getHttpHeaders();
     return this.http.post<User>(`${this.apiUrl}/getUser`, id, { headers });  
@@ -88,5 +92,22 @@ export class IuserService {
       }
     }
     return new User(); // Return null if no user data is found
+  }
+
+  sendVerificationCode(userId: number, type: string, target: string): Observable<DbResult> {
+    const headers = this.getHttpHeaders();
+    const payload = { userId, type, target };
+    return this.http.post<DbResult>(`${this.apiUrl}/sendVerificationCode`, payload, { headers });
+  }
+
+  verifyCode(userId: number, type: string, target: string, code: string): Observable<DbResult> {
+    const headers = this.getHttpHeaders();
+    const payload = { userId, type, target, code };
+    return this.http.post<DbResult>(`${this.apiUrl}/verifyCode`, payload, { headers });
+  }
+
+  updateProfile(user: User): Observable<DbResult> {
+    const headers = this.getHttpHeaders();
+    return this.http.post<DbResult>(`${this.apiUrl}/updateProfile`, user, { headers });
   }
 }

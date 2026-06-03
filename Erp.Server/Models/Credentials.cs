@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace Erp.Server.Models
@@ -21,5 +21,7 @@ namespace Erp.Server.Models
         [Display(Name = "user")]
         public User? user { get; set; } = new User();
 
+        [NotMapped]
+        public bool isNewUser { get; set; } = false;
     }
 }

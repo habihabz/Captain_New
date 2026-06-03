@@ -93,10 +93,19 @@
 
                         <!-- Action -->
                         <div class="col-12 mb-2">
-                            <button type="submit" class="btn btn-teal btn-auth w-100 py-3 rounded-pill fw-bold text-uppercase shadow-sm" 
-                                    (click)="registerUser()" [disabled]="!regForm.form.valid || !agree_terms">
-                                SECURE SIGNUP <i class="fa fa-arrow-right ms-2 fs-xs"></i>
-                            </button>
+                                <button type="submit" class="btn btn-teal w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center border-0 shadow-sm transition-all"
+                                        [disabled]="regForm.invalid || !agree_terms" (click)="registerUser()">
+                                    CREATE ACCOUNT <i class="fa fa-arrow-right ms-2 small"></i>
+                                </button>
+
+                                <div class="text-center my-3 text-muted position-relative">
+                                    <span class="bg-white px-2 position-relative" style="z-index: 1;">OR</span>
+                                    <hr class="position-absolute w-100 top-50 start-0 m-0" style="z-index: 0;">
+                                </div>
+
+                                <div class="d-flex justify-content-center mb-4">
+                                    <div id="googleSignInBtnReg"></div>
+                                </div>
                         </div>
                         
                         <div class="col-12 text-center mt-2">

@@ -2,7 +2,7 @@ using Erp.Server.Models;
 using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Erp.Server.Controllers
 {
@@ -12,12 +12,15 @@ namespace Erp.Server.Controllers
     {
         private readonly ILogger<User> logger;
         private readonly IUser iusers;
+        private readonly INotificationService inotificationService;
+        private readonly Microsoft.Extensions.Caching.Memory.IMemoryCache _cache;
     
-        public UserController(ILogger<User> _logger,IUser _iusers)
+        public UserController(ILogger<User> _logger,IUser _iusers, INotificationService _inotificationService, Microsoft.Extensions.Caching.Memory.IMemoryCache cache)
         {
             logger = _logger;
             iusers = _iusers;
-         
+            inotificationService = _inotificationService;
+            _cache = cache;
         }
            
         [HttpPost("getUsers")]
@@ -105,6 +108,61 @@ namespace Erp.Server.Controllers
                 return result;
             }
             return new DbResult { id = 0, message = "No image file provided" };
+        }
+
+        [HttpPost("sendVerificationCode")]
+        [Authorize]
+        public async Task<DbResult> sendVerificationCode([FromBody] VerificationRequest request)
+        {
+            string code = new Random().Next(100000, 999999).ToString();
+            string cacheKey = $"Verification_{request.UserId}_{request.Type}";
+            
+            _cache.Set(cacheKey, code, TimeSpan.FromMinutes(5));
+
+            bool success = false;
+            if (request.Type.Equals("Email", StringComparison.OrdinalIgnoreCase))
+            {
+                success = await inotificationService.SendEmailAsync(request.Target, "Captain App Verification Code", $"Your verification code is: {code}");
+            }
+            else if (request.Type.Equals("Phone", StringComparison.OrdinalIgnoreCase))
+            {
+                success = await inotificationService.SendWhatsAppAsync(request.Target, $"Your Captain App verification code is: {code}");
+            }
+
+            if (success)
+            {
+                return new DbResult { message = "Success" };
+            }
+
+            return new DbResult { message = "Failed to send verification code." };
+        }
+
+        [HttpPost("verifyCode")]
+        [Authorize]
+        public DbResult verifyCode([FromBody] VerifyCodeRequest request)
+        {
+            string cacheKey = $"Verification_{request.UserId}_{request.Type}";
+            if (_cache.TryGetValue(cacheKey, out string? storedCode))
+            {
+                if (storedCode == request.Code)
+                {
+                    _cache.Remove(cacheKey);
+                    
+                    // Call repository to update the flag in database
+                    return iusers.updateUserVerification(request.UserId, request.Type);
+                }
+                return new DbResult { message = "Invalid code." };
+            }
+            
+            return new DbResult { message = "Code expired or not found." };
+        }
+        [HttpPost("updateProfile")]
+        [Authorize]
+        public DbResult updateProfile([FromBody] User user)
+        {
+            DbResult dbResult = new DbResult();
+            dbResult = iusers.updateProfileDetails(user);
+            return dbResult;
         }
     }
 }

@@ -31,6 +31,10 @@ export class TopnavComponent {
     this.loginService.logout();
   }
 
+  onImageError(event: any) {
+    event.target.src = 'https://ui-avatars.com/api/?name=' + (this.currentUser?.u_name || 'User') + '&background=1abb9c&color=fff&size=150';
+  }
+
   openOwnPasswordModal() {
     this.newPassword = "";
     $('#ownPasswordModal').modal('show');

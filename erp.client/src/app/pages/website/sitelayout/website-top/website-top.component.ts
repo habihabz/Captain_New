@@ -10,6 +10,7 @@ import { Customer } from '../../../../models/customer.model';
 import { User } from '../../../../models/user.model';
 import { IuserService } from '../../../../services/iuser.service';
 import { ILoginService } from '../../../../services/ilogin.service';
+import { IMasterDataService } from '../../../../services/imaster.data.service';
 
 @Component({
   selector: 'app-website-top',
@@ -22,13 +23,15 @@ export class WebsiteTopComponent {
   currentUser: User = new User();
   currentCountry: string = '';
   menuVisible = false;
+  countries: MasterData[] = [];
   @ViewChild('sidenav') sidenav!: MatSidenav;
   constructor(
     private elRef: ElementRef,
     private router: Router,
     private geolocationService: GeolocationService,
     private iuser: IuserService,
-    private loginService: ILoginService
+    private loginService: ILoginService,
+    private masterDataService: IMasterDataService
   ) {
     this.country = this.geolocationService.getCurrentCountry();
     this.currentUser = iuser.getCurrentUser();
@@ -36,7 +39,26 @@ export class WebsiteTopComponent {
 
   ngOnInit(): void {
     this.fetchCurrentCountry();
+    this.fetchCountries();
+  }
 
+  fetchCountries() {
+    let req = new RequestParms();
+    req.type = 'COUNTRY';
+    this.masterDataService.getMasterDatasByType(req).subscribe(
+      (data: MasterData[]) => {
+        this.countries = data;
+      },
+      (error: any) => {
+        console.error('Error fetching countries', error);
+      }
+    );
+  }
+
+  changeCountry(c: MasterData) {
+    this.country = c;
+    sessionStorage.setItem('country', JSON.stringify(c));
+    window.location.reload();
   }
 
   navigateTo(moveto: string) {

@@ -524,6 +524,11 @@ export class MycartComponent implements OnInit, OnDestroy {
   }
 
   async pay() {
+    if (!this.selectedAddress) {
+      this.snackbarService.showError("Please add a delivery address before placing an order.");
+      return;
+    }
+
     await this.loadRazorpay();
 
     const Razorpay = (window as any).Razorpay;

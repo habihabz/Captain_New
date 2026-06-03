@@ -10,7 +10,7 @@
           <a href="javascript:;" class="user-profile dropdown-toggle d-flex align-items-center gap-2"
             aria-haspopup="true" id="navbarDropdown" data-toggle="dropdown" aria-expanded="false"
             style="font-weight: 600; color: #344767; text-decoration: none; padding: 5px 10px; border-radius: 30px; transition: all 0.2s;">
-            <img [src]="currentUser.u_image_url ? fileUrl + currentUser.u_image_url : 'images/img.jpg'" alt=""
+            <img [src]="currentUser.u_image_url && currentUser.u_image_url !== 'null' ? fileUrl + currentUser.u_image_url : 'https://ui-avatars.com/api/?name=' + (currentUser.u_name || 'User') + '&background=1abb9c&color=fff'" (error)="onImageError($event)" alt=""
               style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
             <span class="d-none d-md-inline">{{ currentUser.u_name }}</span>
           </a>
@@ -131,7 +131,7 @@
         
         <div class="text-center mb-4">
           <div class="position-relative d-inline-block">
-            <img [src]="currentUser.u_image_url ? fileUrl + currentUser.u_image_url : 'images/img.jpg'" 
+            <img [src]="currentUser.u_image_url && currentUser.u_image_url !== 'null' ? fileUrl + currentUser.u_image_url : 'https://ui-avatars.com/api/?name=' + (currentUser.u_name || 'User') + '&background=1abb9c&color=fff'" (error)="onImageError($event)" 
                  alt="Profile" 
                  style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
             <label for="profileImageInput" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center border border-3 border-white shadow-sm" 

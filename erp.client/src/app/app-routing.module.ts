@@ -43,9 +43,7 @@ import { PromocodeComponent } from './pages/promocode/promocode.component';
 import { RefundManagementComponent } from './pages/admin/refund-management/refund-management.component';
 import { PaymentSuccessComponent } from './pages/website/payment.success/payment.success.component';
 import { PaymentFailureComponent } from './pages/website/payment.failure/payment.failure.component';
-
-
-
+import { UserProfileComponent } from './pages/website/user-profile/user-profile.component';
 
 const routes: Routes = [
   // Redirect empty path to login
@@ -94,6 +92,7 @@ const routes: Routes = [
       { path: 'order-details/:id', component: OrderDetailsComponent },
       { path: 'payment-success', component: PaymentSuccessComponent },
       { path: 'payment-failure', component: PaymentFailureComponent },
+      { path: 'profile', component: UserProfileComponent },
     ]
   },
   {

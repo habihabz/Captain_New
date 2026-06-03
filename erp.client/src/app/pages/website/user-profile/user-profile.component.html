@@ -1,0 +1,137 @@
+<div class="global-breadcrumb-wrapper">
+  <div class="container-fluid px-lg-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My Profile</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="profile-area pt-5 pb-5 bg-light" style="min-height: 60vh;">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Left Sidebar -->
+            <div class="col-lg-4">
+                <div class="profile-sidebar text-center p-4 border-0 rounded-4 shadow-sm bg-white h-100 position-relative">
+                    <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-3 shadow-sm" (click)="toggleEdit()" *ngIf="!isEditing">
+                        <i class="fa fa-pencil"></i> Edit
+                    </button>
+                    <div class="profile-img position-relative d-inline-block mb-4 mt-2">
+                        <img [src]="getProfileImageUrl()" (error)="onImageError($event)" alt="Profile Picture" class="rounded-circle shadow" style="width: 160px; height: 160px; object-fit: cover; border: 4px solid #fff;">
+                        <input type="file" id="profileUpload" (change)="onFileSelected($event)" accept="image/*" class="d-none">
+                        <label for="profileUpload" class="btn btn-dark position-absolute rounded-circle shadow d-flex align-items-center justify-content-center" style="bottom: 5px; right: 5px; cursor: pointer; width: 40px; height: 40px; transition: transform 0.2s;">
+                            <i class="fa fa-camera"></i>
+                        </label>
+                    </div>
+                    <ng-container *ngIf="!isEditing">
+                        <h3 class="fw-bold mb-1">{{ user.u_name || 'Captain User' }}</h3>
+                        <p class="text-muted mb-4">&#64;{{ user.u_username || 'username' }}</p>
+                        
+                        <div class="contact-info text-start px-3 py-3 rounded-3 bg-light">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-box bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 36px; height: 36px;">
+                                    <i class="fa fa-envelope text-primary"></i>
+                                </div>
+                                <span class="text-dark fw-medium" style="word-break: break-all;">{{ user.u_email || 'Not provided' }}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 36px; height: 36px;">
+                                    <i class="fa fa-phone text-primary"></i>
+                                </div>
+                                <span class="text-dark fw-medium">{{ user.u_phone || 'Not provided' }}</span>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <ng-container *ngIf="isEditing">
+                        <div class="text-start mt-2">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Full Name</label>
+                                <input type="text" class="form-control bg-light shadow-none border-0" [(ngModel)]="editedUser.u_name" placeholder="Your name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Email Address</label>
+                                <input type="email" class="form-control bg-light shadow-none border-0" [(ngModel)]="editedUser.u_email" placeholder="name@example.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Phone Number</label>
+                                <input type="text" class="form-control bg-light shadow-none border-0" [(ngModel)]="editedUser.u_phone" placeholder="e.g. +15551234567">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fa fa-info-circle"></i> Include country code (e.g. +91)</small>
+                            </div>
+                            <div class="d-flex gap-2 mt-4">
+                                <button class="btn btn-dark flex-grow-1 shadow-sm" (click)="saveProfile()">Save Changes</button>
+                                <button class="btn btn-light border flex-grow-1" (click)="toggleEdit()">Cancel</button>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+            
+            <!-- Right Content -->
+            <div class="col-lg-8">
+                <div class="profile-content p-4 p-md-5 border-0 rounded-4 shadow-sm bg-white h-100">
+                    <h3 class="fw-bold mb-4 pb-3 border-bottom d-flex align-items-center">
+                        <i class="fa fa-shield me-2 text-primary"></i> Security & Verification
+                    </h3>
+                    
+                    <!-- Email Verification Card -->
+                    <div class="verification-card p-4 rounded-4 mb-4 border" [ngClass]="user.u_email_verified === 'Y' ? 'border-success border-2 bg-white' : 'border-light bg-light'">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="verification-icon rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" [ngClass]="user.u_email_verified === 'Y' ? 'bg-success' : 'bg-secondary'" style="width: 48px; height: 48px; font-size: 20px;">
+                                    <i class="fa fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">Email Address</h5>
+                                    <p class="mb-0" [ngClass]="user.u_email_verified === 'Y' ? 'text-secondary' : 'text-muted'">{{ user.u_email || 'No email provided' }}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-success px-3 py-2 rounded-pill fs-6 shadow-sm" *ngIf="user.u_email_verified === 'Y'"><i class="fa fa-check-circle me-1"></i> Verified</span>
+                                <button class="btn btn-dark px-4 rounded-pill shadow-sm hover-lift" *ngIf="user.u_email_verified !== 'Y' && !emailCodeSent" (click)="sendVerification('Email')">Verify Email</button>
+                            </div>
+                        </div>
+                        <!-- OTP Input Area -->
+                        <div class="mt-4 pt-4 border-top" *ngIf="emailCodeSent && user.u_email_verified !== 'Y'">
+                            <p class="mb-3 text-sm fw-medium"><i class="fa fa-info-circle me-1 text-primary"></i> A 6-digit verification code has been sent to your email.</p>
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-lg bg-white shadow-none" [(ngModel)]="emailCode" placeholder="Enter OTP code" style="max-width: 250px; letter-spacing: 2px;">
+                                <button class="btn btn-primary px-4 rounded-3 shadow-sm" (click)="verifyCode('Email')">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone Verification Card -->
+                    <div class="verification-card p-4 rounded-4 border" [ngClass]="user.u_phone_verified === 'Y' ? 'border-success border-2 bg-white' : 'border-light bg-light'">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="verification-icon rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" [ngClass]="user.u_phone_verified === 'Y' ? 'bg-success' : 'bg-secondary'" style="width: 48px; height: 48px; font-size: 22px;">
+                                    <i class="fa fa-whatsapp"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">Phone Number</h5>
+                                    <p class="mb-0" [ngClass]="user.u_phone_verified === 'Y' ? 'text-secondary' : 'text-muted'">{{ user.u_phone || 'No phone provided' }}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-success px-3 py-2 rounded-pill fs-6 shadow-sm" *ngIf="user.u_phone_verified === 'Y'"><i class="fa fa-check-circle me-1"></i> Verified</span>
+                                <button class="btn btn-dark px-4 rounded-pill shadow-sm hover-lift" *ngIf="user.u_phone_verified !== 'Y' && !phoneCodeSent" (click)="sendVerification('Phone')">Verify Phone</button>
+                            </div>
+                        </div>
+                        <!-- OTP Input Area -->
+                        <div class="mt-4 pt-4 border-top" *ngIf="phoneCodeSent && user.u_phone_verified !== 'Y'">
+                            <p class="mb-3 text-sm fw-medium"><i class="fa fa-info-circle me-1 text-primary"></i> A verification code has been sent via WhatsApp.</p>
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-lg bg-white shadow-none" [(ngModel)]="phoneCode" placeholder="Enter OTP code" style="max-width: 250px; letter-spacing: 2px;">
+                                <button class="btn btn-primary px-4 rounded-3 shadow-sm" (click)="verifyCode('Phone')">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

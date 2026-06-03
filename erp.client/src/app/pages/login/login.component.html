@@ -32,6 +32,15 @@
         SECURE LOGIN <i class="fa fa-arrow-right ms-2 small"></i>
       </button>
 
+      <div class="text-center my-3 text-muted position-relative">
+        <span class="bg-white px-2 position-relative" style="z-index: 1;">OR</span>
+        <hr class="position-absolute w-100 top-50 start-0 m-0" style="z-index: 0;">
+      </div>
+
+      <div class="d-flex justify-content-center mb-4">
+        <div id="googleSignInBtn"></div>
+      </div>
+
       <div class="text-center">
         <p class="text-muted small mb-0">Don't have an account?</p>
         <a (click)="navigateTo('user-registration')" class="text-teal fw-bold small text-decoration-none" style="cursor: pointer;">

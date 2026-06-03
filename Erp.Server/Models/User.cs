@@ -54,6 +54,12 @@ namespace Erp.Server.Models
         [Display(Name = "Created By Name")]
         public string? u_cre_by_name { get; set; } = string.Empty;
 
+        [Display(Name = "Email Verified")]
+        public string? u_email_verified { get; set; } = "N";
+
+        [Display(Name = "Phone Verified")]
+        public string? u_phone_verified { get; set; } = "N";
+
         [Display(Name = "Created On")]
         [DataType(DataType.Date)]
         public DateTime u_cre_date { get; set; } = DateTime.Now;

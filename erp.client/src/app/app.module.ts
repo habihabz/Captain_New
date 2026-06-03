@@ -61,7 +61,7 @@ import { StatusComponent } from './pages/status/status.component';
 import { ActionRendererComponent } from './directives/action.renderer';
 import { PromocodeComponent } from './pages/promocode/promocode.component';
 import { RefundManagementComponent } from './pages/admin/refund-management/refund-management.component';
-
+import { UserProfileComponent } from './pages/website/user-profile/user-profile.component';
 
 // Define a function to get the token
 export function tokenGetter() {
@@ -113,7 +113,8 @@ const jwtConfig: JwtModuleOptions = {
     StatusComponent,
     ActionRendererComponent,
     PromocodeComponent,
-    RefundManagementComponent
+    RefundManagementComponent,
+    UserProfileComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,39 @@
+/* Premium Profile Styling */
+.hover-opacity-100 {
+    opacity: 1 !important;
+    transition: opacity 0.3s ease;
+}
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+}
+
+.verification-card {
+    transition: all 0.3s ease;
+}
+
+.verification-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.profile-img label:hover {
+    transform: scale(1.1);
+    background-color: #000 !important;
+}
+
+/* Custom form inputs */
+.form-control-lg {
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.form-control-lg:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.1) !important;
+}
+

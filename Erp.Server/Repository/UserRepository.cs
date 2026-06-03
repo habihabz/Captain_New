@@ -52,6 +52,15 @@ namespace Erp.Server.Repository
             return user;
         }
 
+        public User getUserByEmail(string email)
+        {
+            var _email = new SqlParameter("email", email);
+            // Assuming there isn't a dbo.getUserByEmail stored procedure, we use a raw SQL query
+            // Adding dummy columns for properties that are expected by the User model but might not be in the table
+            var user = db.Set<User>().FromSqlRaw("EXEC dbo.getUserByEmail @email;", _email).ToList().FirstOrDefault() ?? new User();
+            return user;
+        }
+
         public List<User> getUsers()
         {
             var users = db.Set<User>().FromSqlRaw("EXEC dbo.getUsers;").ToList();
@@ -96,6 +105,49 @@ namespace Erp.Server.Repository
                 var _image = new SqlParameter("image", imageUrl);
                 var rows = db.Database.ExecuteSqlRaw("UPDATE dbo.Users SET u_image_url = @image WHERE u_id = @id", _image, _id);
                 return new DbResult { id = rows, message = rows > 0 ? "Success" : "User not found" };
+            }
+            catch (Exception ex)
+            {
+                return new DbResult { id = 0, message = ex.Message };
+            }
+        }
+
+        public DbResult updateUserVerification(int userId, string type)
+        {
+            try
+            {
+                var _id = new SqlParameter("id", userId);
+                string column = type.Equals("Email", StringComparison.OrdinalIgnoreCase) ? "u_email_verified" : "u_phone_verified";
+                var rows = db.Database.ExecuteSqlRaw($"UPDATE dbo.Users SET {column} = 'Y' WHERE u_id = @id", _id);
+                return new DbResult { id = rows, message = rows > 0 ? "Success" : "User not found" };
+            }
+            catch (Exception ex)
+            {
+                return new DbResult { id = 0, message = ex.Message };
+            }
+        }
+        public DbResult updateProfileDetails(User user)
+        {
+            try
+            {
+                var existingUser = getUser(user.u_id);
+                if (existingUser == null || existingUser.u_id == 0) return new DbResult { message = "User not found" };
+
+                string emailVerified = existingUser.u_email == user.u_email ? existingUser.u_email_verified : "N";
+                string phoneVerified = existingUser.u_phone == user.u_phone ? existingUser.u_phone_verified : "N";
+
+                var _id = new SqlParameter("id", user.u_id);
+                var _name = new SqlParameter("name", user.u_name ?? (object)DBNull.Value);
+                var _email = new SqlParameter("email", user.u_email ?? (object)DBNull.Value);
+                var _phone = new SqlParameter("phone", user.u_phone ?? (object)DBNull.Value);
+                var _emailVerified = new SqlParameter("emailVerified", emailVerified ?? (object)DBNull.Value);
+                var _phoneVerified = new SqlParameter("phoneVerified", phoneVerified ?? (object)DBNull.Value);
+
+                var rows = db.Database.ExecuteSqlRaw(
+                    "UPDATE dbo.Users SET u_name = @name, u_email = @email, u_phone = @phone, u_email_verified = @emailVerified, u_phone_verified = @phoneVerified WHERE u_id = @id",
+                    _name, _email, _phone, _emailVerified, _phoneVerified, _id);
+
+                return new DbResult { id = rows, message = rows > 0 ? "Success" : "Failed to update profile" };
             }
             catch (Exception ex)
             {
