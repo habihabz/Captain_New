@@ -28,9 +28,10 @@ namespace Erp.Server.Repository
             var details = new SqlParameter("details", requestParams.details + "");
             var promo = new SqlParameter("promo", requestParams.others + "");
             var paymentId = new SqlParameter("paymentId", requestParams.paymentId + "");
+            var co_delivery_charge = new SqlParameter("co_delivery_charge", requestParams.deliveryCharge);
 
-            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateCustomerOrder @details, @user ,@promo, @paymentId;",
-                details, user, promo, paymentId).ToList().FirstOrDefault() ?? new DbResult();
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateCustomerOrder @details, @user ,@promo, @paymentId, @co_delivery_charge;",
+                details, user, promo, paymentId, co_delivery_charge).ToList().FirstOrDefault() ?? new DbResult();
             return dbresult;
         }
 

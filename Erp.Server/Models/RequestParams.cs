@@ -12,6 +12,7 @@ namespace Erp.Server.Models
         public int color { get; set; } = 0;
         public string others { get; set; } = string.Empty;
         public decimal amount { get; set; } = 0;
+        public decimal deliveryCharge { get; set; } = 0;
         public string paymentId { get; set; } = string.Empty;
         public string startDate { get; set; } = string.Empty;
         public string endDate { get; set; } = string.Empty;

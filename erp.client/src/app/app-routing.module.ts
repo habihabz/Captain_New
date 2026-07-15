@@ -44,6 +44,8 @@ import { RefundManagementComponent } from './pages/admin/refund-management/refun
 import { PaymentSuccessComponent } from './pages/website/payment.success/payment.success.component';
 import { PaymentFailureComponent } from './pages/website/payment.failure/payment.failure.component';
 import { UserProfileComponent } from './pages/website/user-profile/user-profile.component';
+import { PackagingTypeComponent } from './pages/admin/packaging-type/packaging-type.component';
+import { WaybillsComponent } from './pages/admin/waybills/waybills.component';
 
 const routes: Routes = [
   // Redirect empty path to login
@@ -213,6 +215,14 @@ const routes: Routes = [
       {
         path: 'order-report',
         component: OrderReportComponent
+      },
+      {
+        path: 'packaging-types',
+        component: PackagingTypeComponent
+      },
+      {
+        path: 'waybills',
+        component: WaybillsComponent
       }
 
     ]

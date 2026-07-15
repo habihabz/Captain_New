@@ -29,8 +29,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="productFormModal" tabindex="-1" role="dialog" aria-labelledby="productFormModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="productFormModal" role="dialog" aria-labelledby="productFormModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -38,7 +37,8 @@
                     <i class="fa {{ product.p_id ? 'fa-edit' : 'fa-plus-circle' }} text-success"></i>
                     {{ product.p_id ? 'Update Product Details' : 'Create New Product' }}
                 </h5>
-                <button type="button" class="btn-close shadow-none" data-dismiss="modal" aria-label="Close" style="border:none; background:transparent; font-size:20px;">×</button>
+                <button type="button" class="btn-close shadow-none" data-dismiss="modal" aria-label="Close"
+                    style="border:none; background:transparent; font-size:20px;">×</button>
             </div>
             <div class="modal-body">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -121,6 +121,21 @@
                                                     (selectionChanged)="onSubDivisionChange($event);">
                                                     <option *ngFor="let sd of subdivisions" [value]="sd.md_id">{{
                                                         sd.md_name }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="p_packaging_type">Packaging Type</label>
+                                                <select appSelect2 #p_packaging_type id="p_packaging_type"
+                                                    class="form-control" [(ngModel)]="product.p_packaging_type"
+                                                    name="p_packaging_type"
+                                                    (selectionChanged)="onPackagingTypeChange($event);">
+                                                    <option value="">Select Packaging Type</option>
+                                                    <option *ngFor="let pt of packagingTypes" [value]="pt.pt_id">
+                                                        {{ pt.pt_name }} ({{ pt.pt_length }}x{{ pt.pt_breadth }}x{{
+                                                        pt.pt_height }} cm)
+                                                    </option>
                                                 </select>
                                             </div>
                                         </div>

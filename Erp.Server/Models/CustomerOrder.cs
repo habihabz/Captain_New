@@ -65,6 +65,7 @@ namespace Erp.Server.Models
 
         public string? co_payment_id { get; set; } = string.Empty;
         public string? co_refund_id { get; set; } = string.Empty;
+        public string? co_waybill { get; set; } = string.Empty;
         public DateTime co_cre_date { get; set; } = DateTime.Now;
 
         [NotMapped]

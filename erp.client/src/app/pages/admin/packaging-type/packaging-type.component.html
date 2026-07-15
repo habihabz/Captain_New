@@ -1,0 +1,114 @@
+<div class="right_col" role="main" style="min-height: 99vh; padding-top: 10px;">
+  <!-- Breadcrumbs -->
+  <div class="row mb-4">
+    <div class="col-12 px-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 m-0">
+          <li class="breadcrumb-item text-muted small">Admin Console</li>
+          <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">Packaging Types</li>
+        </ol>
+      </nav>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <h3 class="fw-bold text-dark m-0">Packaging Types</h3>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="text-muted small fw-bold">Active Types:</span>
+          <span class="badge bg-soft-info text-info px-4 py-2 rounded-pill fw-bold"
+            style="background: rgba(17, 205, 239, 0.15); font-size: 13px;">{{ packagingTypes.length }} Types</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="x_panel border-0 shadow-sm rounded-4 mx-2">
+    <div class="x_title border-0 pb-0 px-3 pt-4">
+      <div class="row align-items-center">
+        <div class="col">
+          <button class="btn-create shadow-sm hover-lift" (click)="createPackagingType()">
+            <i class="fa fa-plus"></i> CREATE NEW PACKAGING TYPE
+          </button>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="x_content" style="display: block;">
+      <div class="row">
+        <div class="col-12">
+          <div class="table-responsive">
+            <ag-grid-angular #packagingTypeGrid style="width: 100%;" class="ag-theme-quartz ag-theme-acmecorp"
+                [rowData]="packagingTypes" [columnDefs]="colDefs" [defaultColDef]="defaultColDef" [pagination]="true"
+                [paginationPageSize]="20" [domLayout]="domLayout" [components]="frameworkComponents"
+                (gridReady)="onGridReady($event)">
+            </ag-grid-angular>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <!-- Add/Edit Modal -->
+  <div class="modal fade" id="packagingTypeModal" tabindex="-1" role="dialog" aria-labelledby="packagingTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="packagingTypeModalLabel">
+            {{ packagingType.pt_id == 0 ? 'Add Packaging Type' : 'Edit Packaging Type' }}
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form #ptForm="ngForm" (ngSubmit)="createOrUpdatePackagingType()">
+            
+            <div class="form-group mb-3">
+              <label for="typeName">Type Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="typeName" name="typeName" [(ngModel)]="packagingType.pt_name" required placeholder="e.g. Small Box">
+            </div>
+  
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group mb-3">
+                  <label for="length">Length (cm) <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" id="length" name="length" [(ngModel)]="packagingType.pt_length" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group mb-3">
+                  <label for="breadth">Breadth (cm) <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" id="breadth" name="breadth" [(ngModel)]="packagingType.pt_breadth" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group mb-3">
+                  <label for="height">Height (cm) <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" id="height" name="height" [(ngModel)]="packagingType.pt_height" required>
+                </div>
+              </div>
+            </div>
+  
+            <div class="form-group mb-3">
+              <label for="iPkgType">Package Type</label>
+              <select class="form-control" id="iPkgType" name="iPkgType" [(ngModel)]="packagingType.pt_pkg_type">
+                <option value="box">Box</option>
+                <option value="flyer">Flyer</option>
+              </select>
+            </div>
+  
+            <div class="form-group mb-3">
+              <label for="active">Active</label>
+              <select class="form-control" id="active" name="active" [(ngModel)]="packagingType.pt_active_yn">
+                <option value="Y">Active</option>
+                <option value="N">Inactive</option>
+              </select>
+            </div>
+  
+            <div class="modal-footer px-0 pb-0">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!ptForm.form.valid">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>

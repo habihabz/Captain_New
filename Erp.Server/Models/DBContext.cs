@@ -40,10 +40,15 @@ namespace Erp.Server.Models
         public DbSet<ReturnOrder> ReturnOrders { get; set; }
         public DbSet<Promocode> Promocodes { get; set; }
         public DbSet<DashboardStats> DashboardStats { get; set; }
+        public DbSet<PackagingType> PackagingTypes { get; set; }
+        public DbSet<Waybill> Waybills { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DashboardStats>().HasNoKey();
+            modelBuilder.Entity<Cart>().ToTable("carts");
+            modelBuilder.Entity<Address>().ToTable("address");
+            modelBuilder.Entity<Waybill>().ToTable("Waybills");
         }
 
 

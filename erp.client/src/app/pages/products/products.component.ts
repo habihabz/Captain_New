@@ -23,6 +23,8 @@ import { ProdColor } from '../../models/prod.color.model';
 import { Barcode } from '../../models/barcode.model';
 import { ProdAttachement } from '../../models/prod.attachments.model';
 import { environment } from '../../../environments/environment';
+import { PackagingTypeService } from '../../services/packaging.type.service';
+import { PackagingType } from '../../models/packaging.type.model';
 
 
 declare var $: any;
@@ -50,6 +52,7 @@ export class ProductsComponent implements OnInit {
   subdivisions: MasterData[] = [];
   sizes: MasterData[] = [];
   colors: MasterData[] = [];
+  packagingTypes: PackagingType[] = [];
   requestParms: RequestParms = new RequestParms();
   newBarcode: string = '';
   prodSize: ProdSize = new ProdSize();
@@ -83,6 +86,7 @@ export class ProductsComponent implements OnInit {
     private iproductService: IProductService,
     private imasterDataService: IMasterDataService,
     private icategoryService: ICategoryService,
+    private packagingTypeService: PackagingTypeService,
 
 
 
@@ -119,6 +123,11 @@ export class ProductsComponent implements OnInit {
     { 
       headerName: "Sub Category", 
       field: "p_sub_category_name", 
+      width: 180
+    },
+    { 
+      headerName: "Packaging Type", 
+      field: "p_packaging_type_name", 
       width: 180
     },
     {
@@ -250,6 +259,7 @@ export class ProductsComponent implements OnInit {
   ngOnInit(): void {
     this.getProducts();
     this.loadCategories();
+    this.loadPackagingTypes();
     this.subscription.add(
       this.iproductService.refreshProducts$.subscribe(() => {
         this.getProducts();
@@ -270,6 +280,16 @@ export class ProductsComponent implements OnInit {
       },
       (error: any) => {
         this.snackBarService.showError('Error fetching categories ' + error);
+      }
+    );
+  }
+  loadPackagingTypes(): void {
+    this.packagingTypeService.getPackagingTypes().subscribe(
+      (data: PackagingType[]) => {
+        this.packagingTypes = data;
+      },
+      (error: any) => {
+        this.snackBarService.showError('Error fetching packaging types ' + error);
       }
     );
   }
@@ -426,6 +446,7 @@ export class ProductsComponent implements OnInit {
   onSubCategoryChange(sc_id: any) { this.product.p_sub_category = sc_id; }
   onDivisionChange(d_id: any) { this.product.p_division = d_id; }
   onSubDivisionChange(sd_id: any) { this.product.p_sub_division = sd_id; }
+  onPackagingTypeChange(pt_id: any) { this.product.p_packaging_type = pt_id; }
   onProdSizeChange(ps_id: number) {
     const selectedSize = this.sizes.find(size => size.md_id == ps_id);
     if (selectedSize) {
@@ -487,6 +508,11 @@ export class ProductsComponent implements OnInit {
     this.selectedFiles = [];
     $("#newSize").val(0).trigger('change');
     $("#newColor").val(0).trigger('change');
+    $("#p_category").val(0).trigger('change');
+    $("#p_sub_category").val(0).trigger('change');
+    $("#p_division").val(0).trigger('change');
+    $("#p_sub_division").val(0).trigger('change');
+    $("#p_packaging_type").val('').trigger('change');
   }
 
   setSelect2Values() {
@@ -494,7 +520,7 @@ export class ProductsComponent implements OnInit {
     $("#p_sub_category").val(this.product.p_sub_category).trigger('change');
     $("#p_division").val(this.product.p_division).trigger('change');
     $("#p_sub_division").val(this.product.p_sub_division).trigger('change');
-
+    $("#p_packaging_type").val(this.product.p_packaging_type || '').trigger('change');
   }
   addBarcode() {
     if (this.newBarcode != "") {

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace Erp.Server.Models
@@ -76,5 +76,11 @@ namespace Erp.Server.Models
         
         [Display(Name = "Attachments")]
         public string p_attachements { get; set; } = string.Empty;
+
+        [Display(Name = "Packaging Type")]
+        public int? p_packaging_type { get; set; }
+
+        [Display(Name = "Packaging Type Name")]
+        public string? p_packaging_type_name { get; set; } = string.Empty;
     }
 }

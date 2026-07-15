@@ -106,7 +106,8 @@
                                     *ngFor="let ad of addresses; let i = index; let last = last"
                                     [ngClass]="{'border-bottom pb-3': !last}">
                                     <label class="form-check-label d-flex align-items-start gap-3 w-100 p-2"
-                                        [for]="'radio' + i" style="cursor: pointer;">
+                                        [for]="'radio' + i" style="cursor: pointer;"
+                                        (click)="selectAddress(ad)">
                                         <input class="form-check-input mt-1 flex-shrink-0 custom-radio" type="radio"
                                             name="exampleRadio" [id]="'radio' + i" [value]="ad.ad_address"
                                             [checked]="ad === selectedAddress">
@@ -115,11 +116,18 @@
                                             <div class="d-flex justify-content-between align-items-start mb-1">
                                                 <span class="fw-bold text-truncate pe-2" style="font-size: 14px;">{{
                                                     ad.ad_name }}</span>
-                                                <button type="button"
-                                                    class="btn text-danger btn-sm shadow-none p-0 flex-shrink-0 ms-2"
-                                                    (click)="deleteAddress(ad.ad_id); $event.stopPropagation();">
-                                                    <i class="fa fa-trash-o" style="font-size: 14px;"></i>
-                                                </button>
+                                                <div class="d-flex align-items-center ms-2 flex-shrink-0">
+                                                    <button type="button"
+                                                        class="btn text-primary btn-sm shadow-none p-0 me-3"
+                                                        (click)="editAddress(ad); $event.stopPropagation();">
+                                                        <i class="fa fa-pencil" style="font-size: 14px;"></i>
+                                                    </button>
+                                                    <button type="button"
+                                                        class="btn text-danger btn-sm shadow-none p-0"
+                                                        (click)="deleteAddress(ad.ad_id); $event.stopPropagation();">
+                                                        <i class="fa fa-trash-o" style="font-size: 14px;"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="text-muted mb-1 small">
                                                 <i class="fa fa-phone me-1 opacity-75"></i> {{ ad.ad_phone }}
@@ -131,12 +139,15 @@
                                 </div>
                             </ng-container>
 
-                            <div class="text-center mt-2 pt-2 border-top"
+                            <div class="mt-3 pt-3 border-top"
                                 *ngIf="showAllAddresses || addresses.length === 0">
-                                <button class="btn btn-outline-dark rounded-pill w-100 fw-bold py-1 btn-sm"
-                                    (click)="onShowAddressForm()">
-                                    <i class="fa" [ngClass]="showAddressForm ? 'fa-times' : 'fa-plus'"></i> {{
-                                    showAddressForm ? 'Cancel Format' : 'Add New Address' }}
+                                <button class="btn w-100 fw-bold py-2 d-flex align-items-center justify-content-center"
+                                    style="border: 1.5px dashed #adb5bd; color: #495057; background-color: #f8f9fa; border-radius: 10px; transition: all 0.2s ease-in-out;"
+                                    (click)="onShowAddressForm()"
+                                    onmouseover="this.style.backgroundColor='#e2e8f0'; this.style.borderColor='#94a3b8';"
+                                    onmouseout="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#adb5bd';">
+                                    <i class="fa" [ngClass]="showAddressForm ? 'fa-times text-danger' : 'fa-plus text-primary'" style="margin-right: 8px; font-size: 14px;"></i> 
+                                    <span style="font-size: 14px; letter-spacing: 0.5px;">{{ showAddressForm ? 'Cancel' : 'Add New Address' }}</span>
                                 </button>
                             </div>
                         </div>
@@ -146,7 +157,7 @@
                     <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" *ngIf="showAddressForm">
                         <div class="card-body p-4 p-md-5 bg-light bg-opacity-25">
                             <h6 class="fw-bold mb-4 d-flex align-items-center"><i
-                                    class="fa fa-map-marker me-2 text-primary"></i> Add New Address</h6>
+                                    class="fa fa-map-marker me-2 text-primary"></i> {{ address.ad_id ? 'Edit Address' : 'Add New Address' }}</h6>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="small fw-bold text-muted mb-1 ms-1">Full Name</label>
@@ -156,7 +167,38 @@
                                 <div class="col-md-6">
                                     <label class="small fw-bold text-muted mb-1 ms-1">Phone Number</label>
                                     <input class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white"
-                                        placeholder="Enter phone" type="text" [(ngModel)]="this.address.ad_phone" />
+                                        placeholder="Enter phone" type="text" [(ngModel)]="this.address.ad_phone" 
+                                        (ngModelChange)="onPhoneChange()"
+                                        [ngClass]="{'is-invalid': phoneMessage && !isPhoneValid, 'is-valid': isPhoneValid}" />
+                                    <div class="mt-1 small fw-bold" 
+                                         [ngClass]="{'text-success': isPhoneValid, 'text-danger': !isPhoneValid}"
+                                         *ngIf="phoneMessage && !isPhoneVerified">
+                                         <i class="fa fa-check-circle me-1" *ngIf="isPhoneValid"></i>
+                                         <i class="fa fa-times-circle me-1" *ngIf="!isPhoneValid"></i>
+                                         {{ phoneMessage }}
+                                    </div>
+                                    <div class="mt-1 small fw-bold text-success" *ngIf="isPhoneVerified">
+                                        <i class="fa fa-check-circle me-1"></i> Phone Verified
+                                    </div>
+
+                                    <!-- OTP SECTION -->
+                                    <div *ngIf="isPhoneValid && !isPhoneVerified" class="mt-2 animate__animated animate__fadeIn">
+                                        <button class="btn btn-dark rounded-3 px-3 py-2 fw-bold shadow-sm"
+                                                *ngIf="!isOtpSent" (click)="sendOtp()" style="font-size: 13px;">
+                                            SEND OTP VIA WHATSAPP
+                                        </button>
+                                        
+                                        <div *ngIf="isOtpSent" class="d-flex align-items-center mt-2 gap-2">
+                                            <input type="text" class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white" 
+                                                   placeholder="OTP" [(ngModel)]="otpCode" style="max-width: 120px; font-weight: bold; letter-spacing: 2px; text-align: center;">
+                                            <button class="btn btn-dark rounded-3 px-4 py-2 fw-bold shadow-sm" 
+                                                    (click)="verifyOtp()" [disabled]="isOtpVerifying" style="font-size: 14px;">
+                                                <i class="fa fa-circle-o-notch fa-spin me-1" *ngIf="isOtpVerifying"></i> VERIFY
+                                            </button>
+                                            <button class="btn btn-link text-decoration-none fw-bold text-muted p-0 ms-1" 
+                                                    (click)="sendOtp()" style="font-size: 13px;">RESEND</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-12">
                                     <label class="small fw-bold text-muted mb-1 ms-1">Full Address (House, Area,
@@ -168,7 +210,17 @@
                                 <div class="col-md-6">
                                     <label class="small fw-bold text-muted mb-1 ms-1">PIN Code</label>
                                     <input class="form-control rounded-3 border-0 shadow-sm py-2 px-3 bg-white"
-                                        placeholder="e.g. 676123" type="number" [(ngModel)]="this.address.ad_pincode" />
+                                        placeholder="e.g. 676123" type="number" [(ngModel)]="this.address.ad_pincode" 
+                                        (ngModelChange)="onPincodeChange()"
+                                        [ngClass]="{'is-invalid': pincodeMessage && !isPincodeValid, 'is-valid': isPincodeValid}" />
+                                    <div class="mt-1 small fw-bold" 
+                                         [ngClass]="{'text-success': isPincodeValid, 'text-danger': !isPincodeValid && pincodeMessage !== 'Checking...', 'text-muted': pincodeMessage === 'Checking...'}"
+                                         *ngIf="pincodeMessage">
+                                         <i class="fa fa-circle-o-notch fa-spin me-1" *ngIf="isPincodeChecking"></i>
+                                         <i class="fa fa-check-circle me-1" *ngIf="isPincodeValid"></i>
+                                         <i class="fa fa-times-circle me-1" *ngIf="!isPincodeValid && !isPincodeChecking"></i>
+                                         {{ pincodeMessage }}
+                                    </div>
                                 </div>
                                 <div class="col-md-6 d-flex align-items-end">
                                     <button class="btn btn-dark w-100 rounded-pill shadow-sm py-2 fw-bold"
@@ -251,10 +303,9 @@
                                 <div class="d-flex justify-content-between mb-3 small">
                                     <span class="text-muted">Delivery Charges</span>
                                     <span class="fw-bold text-success"
-                                        *ngIf="this.deliveryChargeConstant.cv_value == '0'">FREE</span>
+                                        *ngIf="this.deliveryCharge === 0">FREE</span>
                                     <span class="fw-bold"
-                                        *ngIf="this.deliveryChargeConstant.cv_value != '0'">₹{{this.deliveryChargeConstant.cv_value
-                                        | number:'1.2-2'}}</span>
+                                        *ngIf="this.deliveryCharge !== 0">₹{{this.deliveryCharge | number:'1.2-2'}}</span>
                                 </div>
                                 <div
                                     class="d-flex justify-content-between mb-3 border-bottom border-light pb-3 small text-muted">

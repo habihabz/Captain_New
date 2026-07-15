@@ -59,6 +59,17 @@ export class MycartComponent implements OnInit, OnDestroy {
   promoDiscount: number = 0;
   applyingPromo: boolean = false;
 
+  isPincodeChecking: boolean = false;
+  pincodeMessage: string = '';
+  isPincodeValid: boolean = false;
+
+  isPhoneValid: boolean = false;
+  phoneMessage: string = '';
+  isPhoneVerified: boolean = false;
+  isOtpSent: boolean = false;
+  isOtpVerifying: boolean = false;
+  otpCode: string = '';
+
 
   constructor(
 
@@ -84,7 +95,6 @@ export class MycartComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getConstantValues();
     this.getCarts();
-    this.getMyAddress();
   }
 
 
@@ -96,10 +106,12 @@ export class MycartComponent implements OnInit, OnDestroy {
         this.constantValueList.forEach((item) => {
           if (item.cv_name === 'Total Invoice Discount') {
             this.discountPercentConstant = item;
-          } else if (item.cv_name === 'Delivery Charge') {
+          } 
+          else if (item.cv_name === 'Delivery Charge') {
             this.deliveryChargeConstant = item;
             this.deliveryCharge = Number(this.deliveryChargeConstant.cv_value);
-          } else if (item.cv_name === 'Tax Percentage') {
+          }
+          else if (item.cv_name === 'Tax Percentage') {
             this.taxPercentConstant = item;
           }
         });
@@ -193,11 +205,11 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.icartService.getCarts(this.requestParms).subscribe(
       (data: Cart[]) => {
         this.carts = data;
-        this.getCartTotal();
         // Fetch specific images for each item correctly
         this.carts.forEach(cart => {
           this.resolveCartItemImage(cart);
         });
+        this.getMyAddress();
       },
       (error: any) => {
       }
@@ -258,7 +270,7 @@ export class MycartComponent implements OnInit, OnDestroy {
       (data: DbResult) => {
         if (data.message === 'Success') {
           this.carts = this.carts.filter(c => c.c_id != c_id);
-          this.getCartTotal();
+          this.calculateDeliveryCharge();
         } else {
           alert(data.message);
         }
@@ -290,7 +302,7 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.taxAmount = Math.round((netTaxableAmount * taxPerc / (100 + taxPerc)) * 100) / 100;
 
     // 5. Delivery
-    this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+    // Already set dynamically by calculateDeliveryCharge()
 
     // 6. Promo Discount Calculation
     this.promoDiscount = 0;
@@ -312,6 +324,39 @@ export class MycartComponent implements OnInit, OnDestroy {
 
     // 7. Net Amount (Total Price + Delivery - Promo Discount)
     this.netAmount = Math.round((this.totalPrice + this.deliveryCharge - this.promoDiscount) * 100) / 100;
+  }
+
+  calculateDeliveryCharge() {
+    if (!this.selectedAddress || !this.selectedAddress.ad_pincode) {
+      this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+      this.getCartTotal();
+      return;
+    }
+
+    const userId = this.currentUser.u_id;
+
+    this.http.get<any>(`${this.apiUrl}/api/Delhivery/calculateShippingCost/${userId}`)
+      .subscribe({
+        next: (res) => {
+          if (res && res.cost !== undefined) {
+            this.deliveryCharge = res.cost;
+            if (res.success === false) {
+              this.snackbarService.showError(res.message || "Failed to calculate delivery charge");
+            } else {
+              this.snackbarService.showSuccess("Delivery charge calculated successfully");
+            }
+          } else {
+            this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+            this.snackbarService.showError("Failed to calculate delivery charge");
+          }
+          this.getCartTotal();
+        },
+        error: (err) => {
+          this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+          this.getCartTotal();
+          this.snackbarService.showError("Failed to calculate delivery charge");
+        }
+      });
   }
 
   applyPromoCode() {
@@ -378,6 +423,7 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.requestParms.others = this.appliedPromo ? this.appliedPromo.pc_code : '';
     this.requestParms.paymentId = paymentId; 
     this.requestParms.amount = this.promoDiscount; 
+    this.requestParms.deliveryCharge = this.deliveryCharge;
 
     this.icustomerOrder.createOrUpdateCustomerOrder(this.requestParms).subscribe(
       (data: DbResult) => {
@@ -401,10 +447,37 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.iaddress.getMyAddresses(this.requestParms).subscribe(
       (data: Address[]) => {
         this.addresses = data;
+        this.calculateDeliveryCharge();
       },
       (error: any) => {
       }
     );
+  }
+
+  selectAddress(ad: Address) {
+    if (!ad || ad.ad_id === this.selectedAddress?.ad_id) return;
+
+    // Find current default to switch to 'N'
+    const oldDefault = this.addresses.find(a => a.ad_id !== ad.ad_id && a.ad_is_default_yn?.toUpperCase() === 'Y');
+
+    // Update local state instantly
+    this.addresses.forEach(a => {
+      a.ad_is_default_yn = (a.ad_id === ad.ad_id) ? 'Y' : 'N';
+    });
+    this.calculateDeliveryCharge();
+
+    // Persist to DB
+    ad.ad_is_default_yn = 'Y';
+    this.iaddress.createOrUpdateAddress(ad).subscribe(() => {
+      if (oldDefault) {
+        oldDefault.ad_is_default_yn = 'N';
+        this.iaddress.createOrUpdateAddress(oldDefault).subscribe(() => {
+          this.getMyAddress();
+        });
+      } else {
+        this.getMyAddress();
+      }
+    });
   }
 
   get hasDefaultAddress(): boolean {
@@ -416,36 +489,153 @@ export class MycartComponent implements OnInit, OnDestroy {
     return this.addresses.find(ad => ad.ad_is_default_yn?.toUpperCase() === 'Y') || this.addresses[0];
   }
 
-  CreateOrUpdateAddress() {
+  onPincodeChange() {
+    const pinStr = String(this.address.ad_pincode || '');
+    if (pinStr && pinStr.length >= 6) {
+      this.checkPincode();
+    } else {
+      this.pincodeMessage = '';
+      this.isPincodeValid = false;
+    }
+  }
 
+  onPhoneChange() {
+    this.isPhoneVerified = false;
+    this.isOtpSent = false;
+    this.otpCode = '';
+    
+    const phoneStr = String(this.address.ad_phone || '').trim();
+    const phoneRegex = /^[0-9]{10}$/; // Just ensuring 10 digits for general phone numbers
+    if (phoneStr.length === 0) {
+      this.phoneMessage = '';
+      this.isPhoneValid = false;
+    } else if (phoneRegex.test(phoneStr)) {
+      this.isPhoneValid = true;
+      this.phoneMessage = 'Valid Phone Number';
+    } else {
+      this.isPhoneValid = false;
+      this.phoneMessage = 'Invalid Phone Number (Must be 10 digits)';
+    }
+  }
+
+  checkPincode() {
+    this.isPincodeChecking = true;
+    this.pincodeMessage = 'Checking...';
+    
+    this.http.get<DbResult>(`${this.apiUrl}/api/Delhivery/checkPincodeServiceability/${this.address.ad_pincode}`)
+      .subscribe({
+        next: (res) => {
+          this.isPincodeChecking = false;
+          if (res.message === 'Success') {
+            this.isPincodeValid = true;
+            this.pincodeMessage = 'Serviceable Pincode';
+          } else {
+            this.isPincodeValid = false;
+            this.pincodeMessage = res.message || 'Not serviceable';
+          }
+        },
+        error: (err) => {
+          this.isPincodeChecking = false;
+          this.isPincodeValid = false;
+          this.pincodeMessage = 'Error checking pincode';
+        }
+      });
+  }
+
+  sendOtp() {
+    if (!this.isPhoneValid) return;
+    this.http.post<any>(`${this.apiUrl}/api/Otp/send-otp`, { phone: this.address.ad_phone })
+      .subscribe({
+        next: (res) => {
+          this.snackbarService.showSuccess("OTP sent successfully to your WhatsApp");
+          this.isOtpSent = true;
+        },
+        error: (err) => {
+          this.snackbarService.showError("Failed to send OTP. " + (err.error?.message || ''));
+        }
+      });
+  }
+
+  verifyOtp() {
+    if (!this.otpCode) {
+      this.snackbarService.showError("Please enter OTP");
+      return;
+    }
+    this.isOtpVerifying = true;
+    this.http.post<any>(`${this.apiUrl}/api/Otp/verify-otp`, { phone: this.address.ad_phone, otp: this.otpCode })
+      .subscribe({
+        next: (res) => {
+          this.isPhoneVerified = true;
+          this.isOtpVerifying = false;
+          this.snackbarService.showSuccess("Phone number verified successfully");
+        },
+        error: (err) => {
+          this.isOtpVerifying = false;
+          this.snackbarService.showError("Invalid or expired OTP");
+        }
+      });
+  }
+
+  CreateOrUpdateAddress() {
     this.address.ad_cre_by = this.currentUser.u_id;
-    if (this.address.ad_name != '' && this.address.ad_address != '' && this.address.ad_phone != '') {
+    if (this.address.ad_name != '' && this.address.ad_address != '' && this.address.ad_phone != '' && this.address.ad_pincode) {
+      if (!this.isPhoneValid) {
+         this.snackbarService.showError("Please enter a valid 10-digit Phone Number.");
+         return;
+      }
+      
+      if (!this.isPhoneVerified) {
+         this.snackbarService.showError("Please verify your phone number using OTP.");
+         return;
+      }
+      
+      if (!this.isPincodeValid) {
+         this.snackbarService.showError("Please enter a serviceable PIN code.");
+         return;
+      }
+
       this.iaddress.createOrUpdateAddress(this.address).subscribe(
         (dbResult: DbResult) => {
           if (dbResult.message == 'Success') {
-
             this.snackbarService.showSuccess("Successfully Created");
             this.showAddressForm = false;
             this.getMyAddress();
-
           }
           else {
             this.snackbarService.showError(dbResult.message);
           }
         },
         (error: any) => {
+           this.snackbarService.showError("Failed to save address");
         }
       );
     }
     else {
       this.snackbarService.showError("Please Enter All Data");
     }
-
   }
 
   onShowAddressForm() {
     this.showAddressForm = !this.showAddressForm
     this.address = new Address();
+    this.isPincodeValid = false;
+    this.pincodeMessage = '';
+    this.isPhoneValid = false;
+    this.phoneMessage = '';
+  }
+
+  editAddress(ad: Address) {
+    this.address = { ...ad }; // Clone the address for editing
+    this.showAddressForm = true;
+    // We assume if it's already an existing address, the phone is already verified
+    this.isPhoneVerified = true;
+    this.isOtpSent = false;
+    this.otpCode = '';
+    this.onPincodeChange(); // Trigger validation for the existing pincode
+    this.onPhoneChange();   // Trigger validation for the existing phone, will reset verification if changed
+    // Wait, onPhoneChange() will reset isPhoneVerified to false.
+    // Let's manually set it back to true since it's an existing address's phone
+    this.isPhoneVerified = true;
   }
 
   deleteAddress(ad_id: number) {
@@ -475,7 +665,7 @@ export class MycartComponent implements OnInit, OnDestroy {
         } else {
           this.snackbarService.showError("Failed to update cart");
         }
-        this.getCartTotal();
+        this.calculateDeliveryCharge();
       },
       (error: any) => {
       }

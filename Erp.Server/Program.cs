@@ -111,6 +111,7 @@ builder.Services.AddTransient<IGeneratePDF, GenetatePDFRepository>();
 builder.Services.AddTransient<IPromocode, PromocodeRepository>();
 builder.Services.AddTransient<IRefund, RefundRepository>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
+builder.Services.AddTransient<IPackagingType, PackagingTypeRepository>();
 
 builder.WebHost.CaptureStartupErrors(true);
 builder.WebHost.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");

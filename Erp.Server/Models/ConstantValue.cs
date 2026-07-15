@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Erp.Server.Models
 {
@@ -19,6 +20,7 @@ namespace Erp.Server.Models
         [Display(Name = "Created By")]
         public int? cv_cre_by { get; set; }
 
+        [NotMapped]
         [Display(Name = "Created By")]
         public string? cv_cre_by_name { get; set; } = string.Empty;
 

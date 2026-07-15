@@ -81,6 +81,33 @@ namespace Erp.Server.Controllers
                 
                 if (orderId > 0 && (dbResult.message == "Success" || dbResult.message.Contains("successfully", StringComparison.OrdinalIgnoreCase)))
                 {
+                    if (requestParams.id == 0)
+                    {
+                        var newOrders = _dbContext.CustomerOrders.Where(o => o.co_cre_by == requestParams.user && (o.co_waybill == null || o.co_waybill == "") && o.co_cre_date >= DateTime.Now.AddSeconds(-15)).ToList();
+                        if (newOrders.Any())
+                        {
+                            string waybillNumber = await GetUnusedWaybillAsync();
+                            if (!string.IsNullOrEmpty(waybillNumber))
+                            {
+                                foreach (var orderLine in newOrders)
+                                {
+                                    orderLine.co_waybill = waybillNumber;
+                                }
+
+                                var wbEntity = _dbContext.Waybills.FirstOrDefault(w => w.wb_number == waybillNumber);
+                                if (wbEntity != null)
+                                {
+                                    wbEntity.wb_status = "Used";
+                                    wbEntity.wb_order_id = newOrders.First().co_id;
+                                    wbEntity.wb_used_date = DateTime.Now;
+                                }
+
+                                await _dbContext.SaveChangesAsync();
+                                logger.LogInformation($"Assigned waybill '{waybillNumber}' to {newOrders.Count} order lines.");
+                            }
+                        }
+                    }
+
                     var order = icustomerOrder.getCustomerOrder(orderId);
                     
                     // ALWAYS take the email and phone from the User Profile, ignoring the order
@@ -321,6 +348,87 @@ namespace Erp.Server.Controllers
             }
 
             return dbResult;
+        }
+
+        private async Task<string> GetUnusedWaybillAsync()
+        {
+            var unusedWb = _dbContext.Waybills.FirstOrDefault(w => w.wb_status == "Unused");
+            if (unusedWb != null)
+            {
+                return unusedWb.wb_number;
+            }
+
+            var token = _configuration["DelhiverySettings:Token"];
+            var fetchUrl = _configuration["DelhiverySettings:FetchWaybillUrl"] ?? "https://staging-express.delhivery.com/waybill/api/bulk/json/";
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(3); // 3-second timeout limit
+                    var requestUri = $"{fetchUrl.TrimEnd('/')}/?count=25";
+                    var requestMsg = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                    requestMsg.Headers.TryAddWithoutValidation("Authorization", $"Token {token}");
+                    requestMsg.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                    requestMsg.Content = new StringContent("", System.Text.Encoding.UTF8, "application/json");
+
+                    var response = await client.SendAsync(requestMsg);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var cleaned = responseContent.Replace("\"", "").Replace("[", "").Replace("]", "").Trim();
+                        var fetchedList = cleaned.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                                 .Select(w => w.Trim())
+                                                 .Where(w => !string.IsNullOrEmpty(w))
+                                                 .ToList();
+
+                        if (fetchedList.Any())
+                        {
+                            var waybillEntities = fetchedList.Select(w => new Waybill
+                            {
+                                wb_number = w,
+                                wb_status = "Unused",
+                                wb_created_date = DateTime.Now
+                            }).ToList();
+
+                            _dbContext.Waybills.AddRange(waybillEntities);
+                            await _dbContext.SaveChangesAsync();
+
+                            var firstWb = _dbContext.Waybills.FirstOrDefault(w => w.wb_number == fetchedList.First() && w.wb_status == "Unused");
+                            return firstWb?.wb_number ?? fetchedList.First();
+                        }
+                    }
+                    else
+                    {
+                        var err = await response.Content.ReadAsStringAsync();
+                        logger.LogError($"Failed to fetch waybills from Delhivery during checkout: {response.StatusCode} - {response.ReasonPhrase} - {err}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error fetching bulk waybills from Delhivery API during checkout.");
+            }
+
+            // Fallback: Generate a unique temporary fallback waybill so user checkout never fails
+            string fallbackNumber = "PENDING-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+            try
+            {
+                var fallbackWb = new Waybill
+                {
+                    wb_number = fallbackNumber,
+                    wb_status = "Unused",
+                    wb_created_date = DateTime.Now
+                };
+                _dbContext.Waybills.Add(fallbackWb);
+                await _dbContext.SaveChangesAsync();
+                return fallbackNumber;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to save fallback waybill to database.");
+                return fallbackNumber;
+            }
         }
     }
 }

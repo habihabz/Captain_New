@@ -9,6 +9,7 @@ export class RequestParms {
   color:number;
   others:string;
   amount:number;
+  deliveryCharge: number;
   paymentId: string;
   startDate: string;
   endDate: string;
@@ -26,6 +27,7 @@ export class RequestParms {
     this.color=0;
     this.others = '';
     this.amount = 0;
+    this.deliveryCharge = 0;
     this.paymentId = '';
     this.startDate = '';
     this.endDate = '';

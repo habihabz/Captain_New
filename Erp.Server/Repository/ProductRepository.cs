@@ -42,13 +42,14 @@ namespace Erp.Server.Repository
             var p_cre_by = new SqlParameter("p_cre_by", product.p_cre_by ?? (object)DBNull.Value);
             var p_barcodes = new SqlParameter("p_barcodes", product.p_barcodes ?? (object)DBNull.Value);
             var p_sizes = new SqlParameter("p_sizes", product.p_sizes ?? (object)DBNull.Value);
+            var p_packaging_type = new SqlParameter("p_packaging_type", product.p_packaging_type ?? (object)DBNull.Value);
    
 
             // Call stored procedure with additional parameters
             var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateProduct @p_id, @p_name, @p_short_name, @p_description, @p_category, " +
-                "@p_sub_category, @p_division, @p_sub_division, @p_active_yn, @p_cre_by, @p_barcodes, @p_sizes;",
+                "@p_sub_category, @p_division, @p_sub_division, @p_active_yn, @p_cre_by, @p_barcodes, @p_sizes, @p_packaging_type;",
                 p_id, p_name, p_short_name, p_description, p_category, p_sub_category, p_division, p_sub_division, p_active_yn, p_cre_by,
-                p_barcodes, p_sizes)
+                p_barcodes, p_sizes, p_packaging_type)
                 .ToList()
                 .FirstOrDefault() ?? new DbResult();
 

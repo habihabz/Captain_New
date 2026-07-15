@@ -21,6 +21,8 @@ export class Product {
   p_sizes:string;
   p_colors:string;
   p_attachements:string;
+  p_packaging_type?: number;
+  p_packaging_type_name?: string;
   
   constructor() {
     this.p_id = 0;

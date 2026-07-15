@@ -62,6 +62,8 @@ import { ActionRendererComponent } from './directives/action.renderer';
 import { PromocodeComponent } from './pages/promocode/promocode.component';
 import { RefundManagementComponent } from './pages/admin/refund-management/refund-management.component';
 import { UserProfileComponent } from './pages/website/user-profile/user-profile.component';
+import { PackagingTypeComponent } from './pages/admin/packaging-type/packaging-type.component';
+import { WaybillsComponent } from './pages/admin/waybills/waybills.component';
 
 // Define a function to get the token
 export function tokenGetter() {
@@ -114,7 +116,9 @@ const jwtConfig: JwtModuleOptions = {
     ActionRendererComponent,
     PromocodeComponent,
     RefundManagementComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    PackagingTypeComponent,
+    WaybillsComponent
   ],
   imports: [
     BrowserModule,
