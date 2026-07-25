@@ -58,6 +58,7 @@ export class MycartComponent implements OnInit, OnDestroy {
   appliedPromo: Promocode | null = null;
   promoDiscount: number = 0;
   applyingPromo: boolean = false;
+  expectedDeliveryDate: string = '';
 
   isPincodeChecking: boolean = false;
   pincodeMessage: string = '';
@@ -326,9 +327,31 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.netAmount = Math.round((this.totalPrice + this.deliveryCharge - this.promoDiscount) * 100) / 100;
   }
 
+  getExpectedDeliveryDateRange(): string {
+    if (this.expectedDeliveryDate) {
+      return this.expectedDeliveryDate;
+    }
+    const today = new Date();
+    
+    // Add 3 days for start date
+    const startDate = new Date();
+    startDate.setDate(today.getDate() + 3);
+    
+    // Add 5 days for end date
+    const endDate = new Date();
+    endDate.setDate(today.getDate() + 5);
+    
+    const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+    const startStr = startDate.toLocaleDateString('en-US', options);
+    const endStr = endDate.toLocaleDateString('en-US', options);
+    
+    return `${startStr} - ${endStr}`;
+  }
+
   calculateDeliveryCharge() {
     if (!this.selectedAddress || !this.selectedAddress.ad_pincode) {
       this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+      this.expectedDeliveryDate = '';
       this.getCartTotal();
       return;
     }
@@ -340,6 +363,7 @@ export class MycartComponent implements OnInit, OnDestroy {
         next: (res) => {
           if (res && res.cost !== undefined) {
             this.deliveryCharge = res.cost;
+            this.expectedDeliveryDate = res.expectedDeliveryDate || '';
             if (res.success === false) {
               this.snackbarService.showError(res.message || "Failed to calculate delivery charge");
             } else {
@@ -347,12 +371,14 @@ export class MycartComponent implements OnInit, OnDestroy {
             }
           } else {
             this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+            this.expectedDeliveryDate = '';
             this.snackbarService.showError("Failed to calculate delivery charge");
           }
           this.getCartTotal();
         },
         error: (err) => {
           this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
+          this.expectedDeliveryDate = '';
           this.getCartTotal();
           this.snackbarService.showError("Failed to calculate delivery charge");
         }

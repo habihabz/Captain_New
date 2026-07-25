@@ -358,51 +358,54 @@ namespace Erp.Server.Controllers
                 return unusedWb.wb_number;
             }
 
+            var baseUrl = _configuration["DelhiverySettings:BaseUrl"] ?? "https://staging-express.delhivery.com";
             var token = _configuration["DelhiverySettings:Token"];
-            var fetchUrl = _configuration["DelhiverySettings:FetchWaybillUrl"] ?? "https://staging-express.delhivery.com/waybill/api/bulk/json/";
 
             try
             {
-                using (var client = new HttpClient())
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(3); // 3-second timeout limit
+                var clientName = _configuration["DelhiverySettings:ClientName"];
+                var requestUri = $"{baseUrl.TrimEnd('/')}/waybill/api/bulk/json/?count=25&token={token}";
+                if (!string.IsNullOrEmpty(clientName) && clientName != "YOUR_CLIENT_NAME")
                 {
-                    client.Timeout = TimeSpan.FromSeconds(3); // 3-second timeout limit
-                    var requestUri = $"{fetchUrl.TrimEnd('/')}/?count=25";
-                    var requestMsg = new HttpRequestMessage(HttpMethod.Get, requestUri);
-                    requestMsg.Headers.TryAddWithoutValidation("Authorization", $"Token {token}");
-                    requestMsg.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                    requestMsg.Content = new StringContent("", System.Text.Encoding.UTF8, "application/json");
+                    requestUri += $"&cl={clientName}";
+                }
+                var requestMsg = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                requestMsg.Headers.TryAddWithoutValidation("Authorization", $"Token {token}");
+                requestMsg.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                requestMsg.Content = new StringContent("", System.Text.Encoding.UTF8, "application/json");
 
-                    var response = await client.SendAsync(requestMsg);
-                    if (response.IsSuccessStatusCode)
+                var response = await client.SendAsync(requestMsg);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var cleaned = responseContent.Replace("\"", "").Replace("[", "").Replace("]", "").Trim();
+                    var fetchedList = cleaned.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                             .Select(w => w.Trim())
+                                             .Where(w => !string.IsNullOrEmpty(w))
+                                             .ToList();
+
+                    if (fetchedList.Any())
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        var cleaned = responseContent.Replace("\"", "").Replace("[", "").Replace("]", "").Trim();
-                        var fetchedList = cleaned.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                                 .Select(w => w.Trim())
-                                                 .Where(w => !string.IsNullOrEmpty(w))
-                                                 .ToList();
-
-                        if (fetchedList.Any())
+                        var waybillEntities = fetchedList.Select(w => new Waybill
                         {
-                            var waybillEntities = fetchedList.Select(w => new Waybill
-                            {
-                                wb_number = w,
-                                wb_status = "Unused",
-                                wb_created_date = DateTime.Now
-                            }).ToList();
+                            wb_number = w,
+                            wb_status = "Unused",
+                            wb_created_date = DateTime.Now
+                        }).ToList();
 
-                            _dbContext.Waybills.AddRange(waybillEntities);
-                            await _dbContext.SaveChangesAsync();
+                        _dbContext.Waybills.AddRange(waybillEntities);
+                        await _dbContext.SaveChangesAsync();
 
-                            var firstWb = _dbContext.Waybills.FirstOrDefault(w => w.wb_number == fetchedList.First() && w.wb_status == "Unused");
-                            return firstWb?.wb_number ?? fetchedList.First();
-                        }
+                        var firstWb = _dbContext.Waybills.FirstOrDefault(w => w.wb_number == fetchedList.First() && w.wb_status == "Unused");
+                        return firstWb?.wb_number ?? fetchedList.First();
                     }
-                    else
-                    {
-                        var err = await response.Content.ReadAsStringAsync();
-                        logger.LogError($"Failed to fetch waybills from Delhivery during checkout: {response.StatusCode} - {response.ReasonPhrase} - {err}");
-                    }
+                }
+                else
+                {
+                    var err = await response.Content.ReadAsStringAsync();
+                    logger.LogError($"Failed to fetch waybills from Delhivery during checkout: {response.StatusCode} - {response.ReasonPhrase} - {err}");
                 }
             }
             catch (Exception ex)

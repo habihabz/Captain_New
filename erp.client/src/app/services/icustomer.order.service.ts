@@ -61,4 +61,15 @@ export class ICustomerOrder {
     this.refreshSubject.next();
   }
 
+  getDelhiveryWarehouses(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.serverHostAddress}/api/Delhivery/warehouses`);
+  }
+
+  createDelhiveryShipment(payload: any): Observable<any> {
+    return this.http.post<any>(`${environment.serverHostAddress}/api/Delhivery/create-shipment`, payload);
+  }
+
+  calculateOrderWeight(orderId: number): Observable<any> {
+    return this.http.get<any>(`${environment.serverHostAddress}/api/Delhivery/calculate-order-weight/${orderId}`);
+  }
 }

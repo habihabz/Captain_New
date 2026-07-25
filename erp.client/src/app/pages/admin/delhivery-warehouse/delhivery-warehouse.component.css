@@ -1,0 +1,29 @@
+/* Delhivery Warehouse component style */
+.btn-create {
+  background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+
+.btn-create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(17, 205, 239, 0.4);
+}
+
+.grid-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 10rem;
+}

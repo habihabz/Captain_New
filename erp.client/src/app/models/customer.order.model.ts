@@ -37,6 +37,7 @@ export class CustomerOrder extends ProductForExtend {
     co_status_name: string;
     co_is_canceled: string;
     co_completed_yn: string;
+    co_waybill?: string;
 
     co_cre_by: number;
     co_cre_by_name: string;

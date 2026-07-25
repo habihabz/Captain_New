@@ -1,12 +1,14 @@
-<div class="right_col" style="min-height: 99vh;">
-    <div class="row mb-1">
-        <div class="col-md-12">
+<div class="right_col" role="main" style="min-height: 99vh; padding-top: 10px;">
+    <!-- Breadcrumbs & Header Row -->
+    <div class="row mb-3">
+        <div class="col-12 px-4">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb px-0 mb-2" style="background: transparent;">
-                    <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-muted">Home</a></li>
-                    <li class="breadcrumb-item active text-dark fw-bold">Customer Orders</li>
+                <ol class="breadcrumb bg-transparent p-0 m-0">
+                    <li class="breadcrumb-item text-muted small">Admin Console</li>
+                    <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">Customer Orders</li>
                 </ol>
             </nav>
+            <h3 class="fw-bold text-dark mt-1" style="font-size: 1.5rem;">Customer Orders</h3>
         </div>
     </div>
     <div class="row mb-0">
@@ -372,6 +374,61 @@
                 <button type="button" class="btn btn-success" (click)="updateStatusForCustomerOrder()">Update</button>
                 <button type="button" class="btn btn-secondary"
                     (click)="closeModal($event, 'StatusChangeModal')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DelhiveryShipmentModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content border-0 rounded-4 overflow-hidden shadow">
+            <div class="modal-header border-b bg-light py-3 px-4">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa fa-truck me-2 text-info"></i> Create Delhivery Shipment</h5>
+                <button type="button" class="close border-0 bg-transparent text-secondary fs-4" (click)="closeModal($event, 'DelhiveryShipmentModal')" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="form-group mb-3">
+                    <label class="fw-bold text-muted small text-uppercase mb-2">Order ID</label>
+                    <input type="text" class="form-control bg-light fw-bold" [value]="shipmentOrderId" readonly>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="fw-bold text-muted small text-uppercase mb-2">Registered Warehouse (Pickup Location) <span class="text-danger">*</span></label>
+                    <select class="form-control" [(ngModel)]="selectedWarehouse" name="selectedWarehouse" required>
+                        <option value="">-- Select Registered Warehouse --</option>
+                        <option *ngFor="let wh of shipmentWarehouses" [value]="wh.dw_name">{{ wh.dw_name }} ({{ wh.dw_pincode }})</option>
+                    </select>
+                    <div *ngIf="shipmentWarehouses.length === 0" class="text-danger small mt-1">
+                        <i class="fa fa-warning"></i> No registered warehouses. Please add one in Delhivery Settings.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="fw-bold text-muted small text-uppercase mb-2">Payment Mode <span class="text-danger">*</span></label>
+                            <select class="form-control" [(ngModel)]="shipmentPaymentMode" name="shipmentPaymentMode">
+                                <option value="Prepaid">Prepaid</option>
+                                <option value="COD">COD (Cash on Delivery)</option>
+                                <option value="Pickup">Pickup (Reverse)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="fw-bold text-muted small text-uppercase mb-2">Weight (gms)</label>
+                            <input type="number" class="form-control" [(ngModel)]="shipmentWeight" name="shipmentWeight" min="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 py-3 px-4 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary px-3 py-2 fw-semibold" (click)="closeModal($event, 'DelhiveryShipmentModal')">Cancel</button>
+                <button type="button" class="btn btn-info text-white px-4 py-2 fw-semibold d-flex align-items-center gap-2" 
+                    [disabled]="shipmentSubmitting || !selectedWarehouse" (click)="submitDelhiveryShipment()">
+                    <i class="fa" [ngClass]="{'fa-spinner fa-spin': shipmentSubmitting, 'fa-truck': !shipmentSubmitting}"></i>
+                    {{ shipmentSubmitting ? 'Manifesting...' : 'Create Shipment' }}
+                </button>
             </div>
         </div>
     </div>

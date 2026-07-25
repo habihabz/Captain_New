@@ -1,0 +1,21 @@
+/* Custom Sidenav Tabs */
+.custom-tabs .nav-link {
+    background-color: transparent !important;
+    color: #64748b !important;
+    font-size: 13px !important;
+    padding: 10px 24px !important;
+    transition: all 0.25s ease !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.custom-tabs .nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+    color: #334155 !important;
+}
+
+.custom-tabs .nav-link.active {
+    background: linear-gradient(135deg, #1abb9c 0%, #16a085 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(26, 187, 156, 0.15) !important;
+    border-color: transparent !important;
+}

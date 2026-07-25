@@ -64,6 +64,9 @@ import { RefundManagementComponent } from './pages/admin/refund-management/refun
 import { UserProfileComponent } from './pages/website/user-profile/user-profile.component';
 import { PackagingTypeComponent } from './pages/admin/packaging-type/packaging-type.component';
 import { WaybillsComponent } from './pages/admin/waybills/waybills.component';
+import { DelhiveryWarehouseComponent } from './pages/admin/delhivery-warehouse/delhivery-warehouse.component';
+import { DelhiveryPickupRequestComponent } from './pages/admin/delhivery-pickup-request/delhivery-pickup-request.component';
+import { DelhiveryShipmentComponent } from './pages/admin/delhivery-shipment/delhivery-shipment.component';
 
 // Define a function to get the token
 export function tokenGetter() {
@@ -118,7 +121,10 @@ const jwtConfig: JwtModuleOptions = {
     RefundManagementComponent,
     UserProfileComponent,
     PackagingTypeComponent,
-    WaybillsComponent
+    WaybillsComponent,
+    DelhiveryWarehouseComponent,
+    DelhiveryPickupRequestComponent,
+    DelhiveryShipmentComponent
   ],
   imports: [
     BrowserModule,

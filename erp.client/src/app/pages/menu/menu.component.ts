@@ -51,23 +51,38 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   colDefs: ColDef[] = [
-    { headerName: "Id", width: 100, field: "m_id" },
+    { headerName: "Id", width: 80, field: "m_id" },
     { headerName: "Name", field: "m_name" },
     { headerName: "Link", field: "m_link" },
     { headerName: "Fa Icon", field: "m_fa_icon" },
     { headerName: "Parrent", field: "m_parrent_name" },
     { headerName: "Type", field: "m_type" },
     {
-      headerName: 'Edit', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Edit', action: 'onEdit', cssClass: 'btn btn-info', icon: 'fa fa-edit', onEdit: (data: any) => this.onAction('edit', data)
-      },
-    },
-    {
-      headerName: 'Delete', cellRenderer: 'actionRenderer', cellRendererParams:
-      {
-        name: 'Delete', action: 'onDelete', cssClass: 'btn btn-danger', icon: 'fa fa-trash', onDelete: (data: any) => this.onAction('delete', data)
-      },
+      headerName: 'Actions',
+      width: 150,
+      pinned: 'right',
+      cellClass: 'text-center',
+      cellRenderer: 'actionRenderer',
+      cellRendererParams: {
+        actions: [
+          {
+            name: '',
+            tooltip: 'Edit Menu',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
+            icon: 'fa fa-pencil',
+            action: 'onEdit',
+            onEdit: (data: any) => this.onEdit(data)
+          },
+          {
+            name: '',
+            tooltip: 'Delete Menu',
+            cssClass: 'btn btn-outline-danger btn-xs rounded-pill',
+            icon: 'fa fa-trash',
+            action: 'onDelete',
+            onDelete: (data: any) => this.onDelete(data)
+          }
+        ]
+      }
     },
     { headerName: "Created By", field: "m_cre_by_name" },
     { headerName: "Created On", field: "m_cre_date" },

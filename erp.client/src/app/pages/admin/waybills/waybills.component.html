@@ -1,6 +1,6 @@
 <div class="right_col" role="main" style="min-height: 99vh; padding-top: 10px;">
-  <!-- Breadcrumbs -->
-  <div class="row mb-4">
+  <!-- Breadcrumbs & Header Row -->
+  <div class="row mb-3">
     <div class="col-12 px-4">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-transparent p-0 m-0">
@@ -9,12 +9,9 @@
         </ol>
       </nav>
       <div class="d-flex justify-content-between align-items-center mt-2">
-        <h3 class="fw-bold text-dark m-0">Waybills</h3>
-        <div class="d-flex gap-2 align-items-center">
-          <span class="text-muted small fw-bold me-2 mr-2">Total:</span>
-          <span class="badge bg-soft-info text-info px-4 py-2 rounded-pill fw-bold"
-            style="background: rgba(17, 205, 239, 0.15); font-size: 13px;">{{ waybills.length }} Waybills</span>
-        </div>
+        <h3 class="fw-bold text-dark m-0" style="font-size: 1.5rem;">Waybills</h3>
+        <span class="badge bg-soft-info text-info px-4 py-2 rounded-pill fw-bold"
+          style="background: rgba(17, 205, 239, 0.15); font-size: 13px;">{{ waybills.length }} Waybills</span>
       </div>
     </div>
   </div>
@@ -46,6 +43,24 @@
           </div>
         </div>
 
+        <!-- Date From -->
+        <div class="col-md-2 col-sm-6">
+          <div class="form-group">
+            <label for="dateFrom" class="text-muted small fw-bold mb-1">FROM DATE</label>
+            <input type="date" id="dateFrom" class="form-control font-13"
+              [(ngModel)]="dateFrom" (change)="applyFilters()">
+          </div>
+        </div>
+
+        <!-- Date To -->
+        <div class="col-md-2 col-sm-6">
+          <div class="form-group">
+            <label for="dateTo" class="text-muted small fw-bold mb-1">TO DATE</label>
+            <input type="date" id="dateTo" class="form-control font-13"
+              [(ngModel)]="dateTo" (change)="applyFilters()">
+          </div>
+        </div>
+
         <!-- Space filler -->
         <div class="col-md"></div>
 
@@ -68,6 +83,17 @@
             </button>
           </div>
         </div>
+
+        <!-- Export CSV Button -->
+        <div class="col-md-2 col-sm-6 col-xs-6">
+          <div class="form-group">
+            <label class="mb-1">&nbsp;</label>
+            <button class="btn btn-outline-success form-control fw-bold shadow-sm d-flex align-items-center justify-content-center" (click)="exportCsv()">
+              <i class="fa fa-file-text-o me-2 mr-2"></i>
+              EXPORT CSV
+            </button>
+          </div>
+        </div>
       </div>
       <hr class="my-4" />
     </div>
@@ -80,6 +106,7 @@
             <ag-grid-angular #waybillsGrid style="width: 100%;" class="ag-theme-quartz ag-theme-acmecorp"
                 [rowData]="filteredWaybills" [columnDefs]="colDefs" [defaultColDef]="defaultColDef" [pagination]="true"
                 [paginationPageSize]="20" [domLayout]="domLayout" [components]="frameworkComponents"
+                [enableCellTextSelection]="true" [ensureDomOrder]="true"
                 (gridReady)="onGridReady($event)">
             </ag-grid-angular>
           </div>

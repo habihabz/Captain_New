@@ -1,0 +1,103 @@
+<div class="right_col" role="main" style="min-height: 99vh; padding-top: 10px;">
+  <!-- Breadcrumbs & Header Row -->
+  <div class="row mb-3">
+    <div class="col-12 px-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 m-0">
+          <li class="breadcrumb-item text-muted small">Admin Console</li>
+          <li class="breadcrumb-item text-muted small">Delhivery</li>
+          <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">Pickup Request History</li>
+        </ol>
+      </nav>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <h3 class="fw-bold text-dark m-0" style="font-size: 1.5rem;">Delhivery Pickup Requests</h3>
+        <span class="badge bg-soft-info text-info px-4 py-2 rounded-pill fw-bold"
+          style="background: rgba(17, 205, 239, 0.15); font-size: 13px;">{{ history.length }} Requests</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="x_panel border-0 shadow-sm rounded-4 mx-2">
+    <div class="x_title border-0 pb-0 px-3 pt-4">
+      <div class="row align-items-center">
+        <div class="col">
+          <button class="btn-create shadow-sm hover-lift" (click)="openCreateModal()">
+            <i class="fa fa-plus"></i> ADD PICKUP REQUEST
+          </button>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="x_content" style="display: block;">
+      <div class="row">
+        <div class="col-12">
+          <div class="table-responsive">
+            <ag-grid-angular #pickupHistoryGrid style="width: 100%;" class="ag-theme-quartz ag-theme-acmecorp"
+                [rowData]="history" [columnDefs]="colDefs" [defaultColDef]="defaultColDef" [pagination]="true"
+                [paginationPageSize]="20" [domLayout]="domLayout">
+            </ag-grid-angular>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pickup Request Modal -->
+<div class="modal fade" id="pickupRequestModal" tabindex="-1" role="dialog" aria-labelledby="pickupRequestModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pickupRequestModalLabel">
+          Create Pickup Request
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form #pickupForm="ngForm" (ngSubmit)="submitPickupRequest()">
+          
+          <div class="form-group mb-3">
+            <label for="pickup_location">Pickup Location (Registered Warehouse) <span class="text-danger">*</span></label>
+            <select class="form-control form-select border-0 bg-light rounded-3 shadow-xs py-2 px-3" 
+                    style="height: auto;" 
+                    id="pickup_location" 
+                    name="pickup_location" 
+                    [(ngModel)]="pickupData.pickup_location" 
+                    required>
+              <option *ngFor="let wh of warehouses" [value]="wh.dw_name">{{ wh.dw_name }} ({{ wh.dw_city }}, {{ wh.dw_pincode }})</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label for="pickup_date">Pickup Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3" id="pickup_date" name="pickup_date" [(ngModel)]="pickupData.pickup_date" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label for="pickup_time">Pickup Time <span class="text-danger">*</span></label>
+                <input type="time" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3" id="pickup_time" name="pickup_time" step="1" [(ngModel)]="pickupData.pickup_time" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="expected_package_count">Expected Package Count <span class="text-danger">*</span></label>
+            <input type="number" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3" id="expected_package_count" name="expected_package_count" [(ngModel)]="pickupData.expected_package_count" required min="1">
+          </div>
+
+          <div class="modal-footer px-0 pb-0 pt-3">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary rounded-pill px-4" [disabled]="!pickupForm.valid || submitting">
+              {{ submitting ? 'Creating...' : 'Create Request' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

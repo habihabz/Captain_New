@@ -30,11 +30,14 @@ export class GeolocationService {
         const masterData: MasterData = JSON.parse(currentCountryJson);
         return masterData;
       } catch (error) {
-
         console.error('Failed to parse user data:', error);
-        return new MasterData(); // Return null or handle the error as needed
       }
     }
-    return new MasterData(); // Return null if no user data is found
+    const defaultCountry = new MasterData();
+    defaultCountry.md_id = 24;
+    defaultCountry.md_name = 'India';
+    defaultCountry.md_active_yn = 'Y';
+    defaultCountry.md_type = 'Country';
+    return defaultCountry;
   }
 }

@@ -9,14 +9,15 @@ import { ICellRendererParams } from 'ag-grid-community';
               [class]="act.cssClass" 
               (click)="onActionClick(act)" 
               [title]="act.tooltip || act.name"
-              class="action-btn">
+              class="action-btn"
+              [class.has-text]="!!act.name">
         <i [class]="act.icon"></i> 
         <span *ngIf="act.name" class="ms-2">{{ act.name }}</span>
       </button>
     </div>
     <ng-template #singleButton>
       <div class="d-flex align-items-center justify-content-center h-100">
-        <button [class]="cssClass" (click)="onButtonClick()" [title]="name" class="action-btn">
+        <button [class]="cssClass" (click)="onButtonClick()" [title]="name" class="action-btn" [class.has-text]="!!name">
           <i [class]="icon"></i> 
           <span *ngIf="name" class="ms-2">{{ name }}</span>
         </button>
@@ -26,6 +27,36 @@ import { ICellRendererParams } from 'ag-grid-community';
   styles: [`
     .gap-2 { gap: 0.5rem; }
     .action-btn { transition: all 0.3s ease; }
+    .action-btn.has-text {
+        width: auto !important;
+        height: auto !important;
+        padding: 5px 14px !important;
+        border-radius: 50px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: normal !important;
+    }
+    .action-btn.btn-outline-primary:hover {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border-color: #0d6efd !important;
+    }
+    .action-btn.btn-outline-success:hover {
+        background-color: #198754 !important;
+        color: #fff !important;
+        border-color: #198754 !important;
+    }
+    .action-btn.btn-outline-danger:hover {
+        background-color: #dc3545 !important;
+        color: #fff !important;
+        border-color: #dc3545 !important;
+    }
+    .action-btn.btn-outline-info:hover {
+        background-color: #0dcaf0 !important;
+        color: #000 !important;
+        border-color: #0dcaf0 !important;
+    }
   `]
 })
 export class ActionRendererComponent {

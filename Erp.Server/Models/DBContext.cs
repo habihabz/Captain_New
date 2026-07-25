@@ -42,6 +42,8 @@ namespace Erp.Server.Models
         public DbSet<DashboardStats> DashboardStats { get; set; }
         public DbSet<PackagingType> PackagingTypes { get; set; }
         public DbSet<Waybill> Waybills { get; set; }
+        public DbSet<DelhiveryWarehouse> DelhiveryWarehouses { get; set; }
+        public DbSet<DelhiveryPickupRequestHistory> DelhiveryPickupRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +51,8 @@ namespace Erp.Server.Models
             modelBuilder.Entity<Cart>().ToTable("carts");
             modelBuilder.Entity<Address>().ToTable("address");
             modelBuilder.Entity<Waybill>().ToTable("Waybills");
+            modelBuilder.Entity<DelhiveryWarehouse>().ToTable("DelhiveryWarehouses");
+            modelBuilder.Entity<DelhiveryPickupRequestHistory>().ToTable("DelhiveryPickupRequests");
         }
 
 

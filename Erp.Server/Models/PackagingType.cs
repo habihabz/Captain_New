@@ -24,6 +24,9 @@ namespace Erp.Server.Models
         [Display(Name = "Package Type")]
         public string? pt_pkg_type { get; set; } = "box";
 
+        [Display(Name = "Weight (Grams)")]
+        public int pt_weight { get; set; } = 100;
+
         [Display(Name = "Active")]
         public string? pt_active_yn { get; set; } = "Y";
 

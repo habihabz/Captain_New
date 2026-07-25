@@ -56,6 +56,15 @@ export class CustomerOrderComponent {
     headerCheckbox: true,
     enableClickSelection: false,
   };
+  
+  // Delhivery Shipment variables
+  shipmentOrderId: number = 0;
+  shipmentPaymentMode: string = 'Prepaid';
+  shipmentWeight: number = 100;
+  shipmentWarehouses: any[] = [];
+  selectedWarehouse: string = '';
+  shipmentSubmitting: boolean = false;
+
   @ViewChild('customerOrderGrid') customerOrderGrid!: AgGridAngular;
   constructor(
 
@@ -86,7 +95,7 @@ export class CustomerOrderComponent {
     },
     {
       headerName: 'Actions',
-      width: 150,
+      width: 180,
       pinned: 'right',
       headerClass: 'text-center',
       cellClass: 'text-center',
@@ -108,6 +117,14 @@ export class CustomerOrderComponent {
             icon: 'fa fa-refresh',
             action: 'statusChange',
             statusChange: (data: any) => this.onAction('statusChange', data)
+          },
+          {
+            name: '',
+            tooltip: 'Create Delhivery Shipment',
+            cssClass: 'btn btn-outline-info btn-xs rounded-pill ms-1',
+            icon: 'fa fa-truck',
+            action: 'createShipment',
+            createShipment: (data: any) => this.onAction('createShipment', data)
           }
         ]
       }
@@ -156,6 +173,14 @@ export class CustomerOrderComponent {
         const color = isCanceled ? '#dc3545' : (isDelivered ? '#198754' : (isReturned ? '#fd7e14' : '#6c757d'));
         return `<span style="background-color: ${color}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">${p.value}</span>`;
       }
+    },
+    {
+      headerName: "Waybill",
+      field: "co_waybill",
+      width: 140,
+      headerClass: 'text-center',
+      cellClass: 'text-center',
+      cellRenderer: (p: any) => p.value ? `<span class="badge bg-primary px-2 py-1">${p.value}</span>` : '<span class="text-muted">-</span>'
     },
     { headerName: "Email", field: "co_customer_email", width: 180, headerClass: 'text-start' },
     { headerName: "Address", field: "co_c_address_details", width: 250, headerClass: 'text-start' }
@@ -212,9 +237,81 @@ export class CustomerOrderComponent {
       case 'statusChange':
         this.onStatusChange(data);
         break;
+      case 'createShipment':
+        this.onCreateShipment(data);
+        break;
       default:
         this.snackBarService.showError("Unknown Action " + action);;
     }
+  }
+
+  onCreateShipment(data: any) {
+    if (data.co_waybill) {
+      this.snackBarService.showError("Shipment already created for this order with Waybill: " + data.co_waybill);
+      return;
+    }
+    this.shipmentOrderId = data.co_id;
+    this.shipmentPaymentMode = data.co_payment_id ? 'Prepaid' : 'COD';
+    this.shipmentWeight = 100; // default fallback
+    this.selectedWarehouse = '';
+
+    // Fetch volumetric packaging weight for this order
+    this.icustomerOrder.calculateOrderWeight(data.co_id).subscribe({
+      next: (res) => {
+        if (res && res.success) {
+          this.shipmentWeight = res.weight;
+        }
+      }
+    });
+
+    this.icustomerOrder.getDelhiveryWarehouses().subscribe({
+      next: (res) => {
+        this.shipmentWarehouses = res;
+        if (res && res.length > 0) {
+          this.selectedWarehouse = res[0].dw_name; // default select first warehouse
+        } else {
+          this.snackBarService.showError("No registered Delhivery warehouses found. Please configure a warehouse first.");
+        }
+      },
+      error: () => {
+        this.snackBarService.showError("Failed to load registered Delhivery warehouses.");
+      }
+    });
+
+    $("#DelhiveryShipmentModal").modal("show");
+  }
+
+  submitDelhiveryShipment() {
+    if (!this.selectedWarehouse) {
+      this.snackBarService.showError("Please select a registered pickup location.");
+      return;
+    }
+    this.shipmentSubmitting = true;
+    const payload = {
+      order_id: this.shipmentOrderId,
+      pickup_location: this.selectedWarehouse,
+      payment_mode: this.shipmentPaymentMode,
+      weight: this.shipmentWeight,
+      cre_by: this.currentUser.u_id
+    };
+
+    this.icustomerOrder.createDelhiveryShipment(payload).subscribe({
+      next: (res) => {
+        this.shipmentSubmitting = false;
+        if (res && res.success) {
+          this.snackBarService.showSuccess(res.message);
+          $("#DelhiveryShipmentModal").modal("hide");
+          this.getCustomerOrders(); // refresh order grid!
+        } else {
+          this.snackBarService.showError(res.message || "Failed to create Delhivery shipment.");
+        }
+      },
+      error: (err) => {
+        this.shipmentSubmitting = false;
+        const errMsg = err.error && err.error.message ? err.error.message : "Failed to create Delhivery shipment.";
+        this.snackBarService.showError(errMsg);
+      }
+    });
   }
 
   onDetails(data: any) {

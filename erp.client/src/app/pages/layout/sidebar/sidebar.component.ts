@@ -1,12 +1,15 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { User } from '../../../models/user.model';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { IuserService } from '../../../services/iuser.service';
 import { Menu } from '../../../models/menu.model';
 import { IMenuService } from '../../../services/imenu.service';
 import { ScriptLoaderService } from '../../../services/script.loader.service';
 import { ILoginService } from '../../../services/ilogin.service';
 import { environment } from '../../../../environments/environment';
+
+declare var $: any;
 
 
 @Component({
@@ -36,6 +39,17 @@ export class SidebarComponent implements OnInit {
     if (this.currentUser.u_is_admin != 'Y') {
       this.router.navigate(['access-denied']);
     }
+
+    // Clear stale jQuery-assigned active classes on child menu items on route navigation
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      setTimeout(() => {
+        if (typeof $ !== 'undefined') {
+          $('#sidebar-menu').find('ul.child_menu li').removeClass('active');
+        }
+      }, 50);
+    });
   }
 
   ngOnInit(): void {
@@ -98,7 +112,10 @@ export class SidebarComponent implements OnInit {
   }
 
   isActive(route: string): boolean {
-    return this.router.url.includes(route);
+    if (!route) return false;
+    const currentUrl = this.router.url.split('?')[0].replace(/^\/+|\/+$/g, '');
+    const targetRoute = route.split('?')[0].replace(/^\/+|\/+$/g, '');
+    return currentUrl === targetRoute;
   }
 
   logout() {

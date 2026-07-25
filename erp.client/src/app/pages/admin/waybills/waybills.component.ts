@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { SnackBarService } from '../../../services/isnackbar.service';
-import { ColDef, DomLayoutType } from 'ag-grid-community';
+import { ColDef, DomLayoutType, GridApi, GridReadyEvent } from 'ag-grid-community';
 
 @Component({
   selector: 'app-waybills',
@@ -19,63 +19,79 @@ export class WaybillsComponent implements OnInit {
   loading: boolean = false;
   fetching: boolean = false;
 
+  // Date filter — default to 1st of current month → today
+  dateFrom: string = (() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+  })();
+  dateTo: string = new Date().toISOString().split('T')[0];
+
   domLayout: DomLayoutType = 'autoHeight';
   frameworkComponents = {};
+  private gridApi!: GridApi;
   defaultColDef = {
     sortable: true,
     filter: true
   };
 
   colDefs: ColDef[] = [
-    { 
-      headerName: "ID", 
-      field: "wb_id", 
-      width: 80, 
+    {
+      headerName: "ID",
+      field: "wb_id",
+      width: 80,
       cellClass: 'text-center fw-bold text-muted'
     },
-    { 
-      headerName: "Waybill Number", 
-      field: "wb_number", 
+    {
+      headerName: "Waybill Number",
+      field: "wb_number",
       flex: 1.5,
       cellClass: 'font-monospace fw-bold text-dark'
     },
-    { 
-      headerName: "Status", 
-      field: "wb_status", 
+    {
+      headerName: "Status",
+      field: "wb_status",
       width: 120,
       cellRenderer: (p: any) => {
         const isUsed = p.value === 'Used';
         return `<span class="grid-badge ${isUsed ? 'bg-success' : 'bg-warning'} text-white shadow-xs">${p.value || ''}</span>`;
       }
     },
-    { 
-      headerName: "Order ID", 
-      field: "wb_order_id", 
-      width: 120,
-      cellRenderer: (p: any) => p.value ? `<span class="badge bg-secondary">Order #${p.value}</span>` : '<span class="text-muted">-</span>'
+    {
+      headerName: "Order ID",
+      field: "wb_order_id",
+      width: 110,
+      cellClass: 'text-center fw-bold text-muted',
+      cellRenderer: (p: any) => p.value ? `<span style="user-select: all; cursor: text;">${p.value}</span>` : '<span class="text-muted">-</span>'
     },
-    { 
-      headerName: "Used Date", 
-      field: "wb_used_date", 
+    {
+      headerName: "Used Date",
+      field: "wb_used_date",
       flex: 1.5,
       cellRenderer: (p: any) => p.value ? new Date(p.value).toLocaleString() : '<span class="text-muted">-</span>'
     },
-    { 
-      headerName: "Created Date", 
-      field: "wb_created_date", 
+    {
+      headerName: "Created Date",
+      field: "wb_created_date",
       flex: 1.5,
       cellRenderer: (p: any) => p.value ? new Date(p.value).toLocaleString() : '<span class="text-muted">-</span>'
     }
   ];
 
-  constructor(private http: HttpClient, private snackbar: SnackBarService) {}
+  constructor(private http: HttpClient, private snackbar: SnackBarService) { }
 
   ngOnInit(): void {
     this.loadWaybills();
   }
 
-  onGridReady(params: any) {
-    params.api.sizeColumnsToFit();
+  onGridReady(event: GridReadyEvent) {
+    this.gridApi = event.api;
+    event.api.sizeColumnsToFit();
+  }
+
+  exportCsv() {
+    this.gridApi.exportDataAsCsv({
+      fileName: `waybills_${new Date().toISOString().split('T')[0]}.csv`
+    });
   }
 
   loadWaybills() {
@@ -94,12 +110,25 @@ export class WaybillsComponent implements OnInit {
   }
 
   applyFilters() {
+    const from = this.dateFrom ? new Date(this.dateFrom) : null;
+    const to = this.dateTo ? new Date(this.dateTo + 'T23:59:59') : null;
+
     this.filteredWaybills = this.waybills.filter(wb => {
-      const matchSearch = !this.searchTerm || 
-                          wb.wb_number.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                          (wb.wb_order_id && String(wb.wb_order_id).includes(this.searchTerm));
+      // Search
+      const matchSearch = !this.searchTerm ||
+        wb.wb_number.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        (wb.wb_order_id && String(wb.wb_order_id).includes(this.searchTerm));
+
+      // Status
       const matchStatus = this.statusFilter === 'All' || wb.wb_status === this.statusFilter;
-      return matchSearch && matchStatus;
+
+      // Date — use wb_used_date for Used, wb_created_date for others
+      const dateField = wb.wb_status === 'Used' ? wb.wb_used_date : wb.wb_created_date;
+      const rowDate = dateField ? new Date(dateField) : null;
+      const matchDate = (!from && !to) ||
+        (rowDate ? ((!from || rowDate >= from) && (!to || rowDate <= to)) : false);
+
+      return matchSearch && matchStatus && matchDate;
     });
   }
 

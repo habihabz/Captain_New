@@ -24,9 +24,10 @@ namespace Erp.Server.Repository
             var pt_pkg_type = new SqlParameter("pt_pkg_type", packagingType.pt_pkg_type + "");
             var pt_active_yn = new SqlParameter("pt_active_yn", packagingType.pt_active_yn + "");
             var pt_cre_by = new SqlParameter("pt_cre_by", packagingType.pt_cre_by + "");
+            var pt_weight = new SqlParameter("pt_weight", packagingType.pt_weight + "");
 
-            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdatePackagingType @pt_id,@pt_name,@pt_length,@pt_breadth,@pt_height,@pt_pkg_type,@pt_active_yn,@pt_cre_by;",
-                pt_id, pt_name, pt_length, pt_breadth, pt_height, pt_pkg_type, pt_active_yn, pt_cre_by).ToList().FirstOrDefault() ?? new DbResult();
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdatePackagingType @pt_id,@pt_name,@pt_length,@pt_breadth,@pt_height,@pt_pkg_type,@pt_active_yn,@pt_cre_by,@pt_weight;",
+                pt_id, pt_name, pt_length, pt_breadth, pt_height, pt_pkg_type, pt_active_yn, pt_cre_by, pt_weight).ToList().FirstOrDefault() ?? new DbResult();
             
             return dbresult;
         }

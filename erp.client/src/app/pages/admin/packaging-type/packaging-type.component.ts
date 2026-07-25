@@ -57,6 +57,12 @@ export class PackagingTypeComponent implements OnInit, OnDestroy {
       cellClass: 'text-center'
     },
     { 
+      headerName: "Weight (g)", 
+      field: "pt_weight", 
+      width: 120,
+      cellClass: 'text-center fw-semibold text-primary'
+    },
+    { 
       headerName: "Pkg Type", 
       field: "pt_pkg_type", 
       width: 120,

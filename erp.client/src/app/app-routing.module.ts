@@ -46,6 +46,9 @@ import { PaymentFailureComponent } from './pages/website/payment.failure/payment
 import { UserProfileComponent } from './pages/website/user-profile/user-profile.component';
 import { PackagingTypeComponent } from './pages/admin/packaging-type/packaging-type.component';
 import { WaybillsComponent } from './pages/admin/waybills/waybills.component';
+import { DelhiveryWarehouseComponent } from './pages/admin/delhivery-warehouse/delhivery-warehouse.component';
+import { DelhiveryPickupRequestComponent } from './pages/admin/delhivery-pickup-request/delhivery-pickup-request.component';
+import { DelhiveryShipmentComponent } from './pages/admin/delhivery-shipment/delhivery-shipment.component';
 
 const routes: Routes = [
   // Redirect empty path to login
@@ -223,8 +226,19 @@ const routes: Routes = [
       {
         path: 'waybills',
         component: WaybillsComponent
+      },
+      {
+        path: 'delhivery-warehouses',
+        component: DelhiveryWarehouseComponent
+      },
+      {
+        path: 'delhivery-pickup-request',
+        component: DelhiveryPickupRequestComponent
+      },
+      {
+        path: 'delhivery-shipments',
+        component: DelhiveryShipmentComponent
       }
-
     ]
   }
 ];

@@ -70,5 +70,12 @@ namespace Erp.Server.Models
 
         [NotMapped]
         public List<CustomerOrderDetail>? details { get; set; } = new List<CustomerOrderDetail>();
+
+        // Shipment creator from OrderMovementHistory (status 2 = Shipped)
+        [NotMapped]
+        public string? omh_cre_by_name { get; set; } = string.Empty;
+
+        [NotMapped]
+        public DateTime? omh_cre_date { get; set; }
     }
 }

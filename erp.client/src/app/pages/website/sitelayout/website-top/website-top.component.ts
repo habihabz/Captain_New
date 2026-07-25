@@ -72,12 +72,18 @@ export class WebsiteTopComponent {
       this.requestParms.name = this.currentCountry;
       this.geolocationService.getCountry(this.requestParms).subscribe(
         (data: MasterData) => {
-          this.country = data;
-
-          sessionStorage.setItem('country', JSON.stringify(data))
+          const existingCountry = this.geolocationService.getCurrentCountry();
+          if (!existingCountry || existingCountry.md_id !== data.md_id) {
+            this.country = data;
+            sessionStorage.setItem('country', JSON.stringify(data));
+            window.location.reload();
+          } else {
+            this.country = data;
+            sessionStorage.setItem('country', JSON.stringify(data));
+          }
         },
         (error: any) => {
-          console.error('Error fetching roles', error);
+          console.error('Error fetching country', error);
         }
       );
     } catch (error) {

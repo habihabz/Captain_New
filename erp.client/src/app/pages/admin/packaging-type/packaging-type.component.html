@@ -1,6 +1,6 @@
 <div class="right_col" role="main" style="min-height: 99vh; padding-top: 10px;">
-  <!-- Breadcrumbs -->
-  <div class="row mb-4">
+  <!-- Breadcrumbs & Header Row -->
+  <div class="row mb-3">
     <div class="col-12 px-4">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-transparent p-0 m-0">
@@ -9,12 +9,9 @@
         </ol>
       </nav>
       <div class="d-flex justify-content-between align-items-center mt-2">
-        <h3 class="fw-bold text-dark m-0">Packaging Types</h3>
-        <div class="d-flex gap-2 align-items-center">
-          <span class="text-muted small fw-bold">Active Types:</span>
-          <span class="badge bg-soft-info text-info px-4 py-2 rounded-pill fw-bold"
-            style="background: rgba(17, 205, 239, 0.15); font-size: 13px;">{{ packagingTypes.length }} Types</span>
-        </div>
+        <h3 class="fw-bold text-dark m-0" style="font-size: 1.5rem;">Packaging Types</h3>
+        <span class="badge bg-soft-info text-info px-4 py-2 rounded-pill fw-bold"
+          style="background: rgba(17, 205, 239, 0.15); font-size: 13px;">{{ packagingTypes.length }} Types</span>
       </div>
     </div>
   </div>
@@ -87,6 +84,11 @@
               </div>
             </div>
   
+            <div class="form-group mb-3">
+              <label for="weight">Weight (grams) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="weight" name="weight" [(ngModel)]="packagingType.pt_weight" required placeholder="e.g. 500">
+            </div>
+
             <div class="form-group mb-3">
               <label for="iPkgType">Package Type</label>
               <select class="form-control" id="iPkgType" name="iPkgType" [(ngModel)]="packagingType.pt_pkg_type">

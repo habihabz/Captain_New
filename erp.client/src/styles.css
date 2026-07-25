@@ -2498,3 +2498,21 @@ body.nav-sm .sidebar-footer {
         padding: 4px 0 !important;
     }
 }
+
+/* --- SIDEBAR WIDTH ENHANCEMENT --- */
+@media (min-width: 992px) {
+    /* Increase left sidebar width to 265px (from 230px) to prevent wrapping */
+    body.nav-md .left_col {
+        width: 265px !important;
+    }
+    body.nav-md .nav_title {
+        width: 265px !important;
+    }
+    body.nav-md .container.body .top_nav,
+    body.nav-md .container.body .right_col {
+        margin-left: 265px !important;
+    }
+    body.nav-md .sidebar-footer {
+        width: 265px !important;
+    }
+}

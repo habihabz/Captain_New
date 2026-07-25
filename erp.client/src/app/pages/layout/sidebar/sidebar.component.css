@@ -38,3 +38,37 @@
 .search-container {
     transition: all 0.3s ease;
 }
+
+/* Child Menu Item Styling */
+.nav.side-menu li .child_menu li a {
+    color: rgba(255, 255, 255, 0.65) !important;
+    background: transparent !important;
+    font-size: 13px !important;
+    padding: 8px 15px 8px 20px !important;
+    display: block !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out !important;
+    font-weight: 500 !important;
+}
+
+.nav.side-menu li .child_menu li a:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    padding-left: 25px !important; /* smooth slide-in effect */
+}
+
+/* Active Child Menu Item */
+.nav.side-menu li .child_menu li.active a {
+    color: #1abc9c !important; /* matching the Gentelella/Captain theme green/teal */
+    font-weight: 600 !important;
+    background: rgba(26, 187, 156, 0.08) !important;
+}
+
+/* Fix active parent border-right extending along child menu dropdown */
+.nav.side-menu > li.active {
+    border-right: none !important;
+}
+
+.nav.side-menu > li.active > a {
+    border-right: 5px solid #1abc9c !important;
+}
