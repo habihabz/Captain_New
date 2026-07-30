@@ -1,13 +1,13 @@
 <div class="global-breadcrumb-wrapper">
-  <div class="container-fluid px-lg-5">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
-        <li class="breadcrumb-item"><a routerLink="/shop">Shop</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ product.p_name }}</li>
-      </ol>
-    </nav>
-  </div>
+    <div class="container-fluid px-lg-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="/web-home">Home</a></li>
+                <li class="breadcrumb-item"><a routerLink="/shop">Shop</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.p_name }}</li>
+            </ol>
+        </nav>
+    </div>
 </div>
 
 <div class="container-fluid px-lg-5 py-4">
@@ -112,8 +112,11 @@
                     </div>
                 </div>
 
-                <button class="btn btn-success px-4 py-2" style="font-size: 14px;" (click)="addToCart()"><i
+                <button class="btn btn-success px-4 py-2" style="font-size: 14px;" (click)="addToCart(false)"><i
                         class="fa fa-shopping-bag me-1"></i> Add to Bag</button>
+                <button class="btn btn-dark px-4 py-2 ms-2 shadow-sm"
+                    style="font-size: 14px; background-color: #111; color: #fff; border: none; font-weight: 600;"
+                    (click)="buyNow()"><i class="fa fa-bolt me-1 text-warning"></i> Buy Now</button>
                 <button class="btn btn-white border px-4 py-2 ms-2 shadow-sm" style="font-size: 14px;"
                     (click)="addToFavourites(product.p_id)">
                     <i class="fa me-1"

@@ -11,10 +11,12 @@ export class RequestParms {
   amount:number;
   deliveryCharge: number;
   paymentId: string;
+  paymentMethod: number;
   startDate: string;
   endDate: string;
   completedYn: string;
   refundId: string;
+  address: number;
 
   constructor() {
     this.id = 0;
@@ -29,10 +31,12 @@ export class RequestParms {
     this.amount = 0;
     this.deliveryCharge = 0;
     this.paymentId = '';
+    this.paymentMethod = 0;
     this.startDate = '';
     this.endDate = '';
     this.completedYn = 'N';
     this.refundId = '';
+    this.address = 0;
   }
 
 }

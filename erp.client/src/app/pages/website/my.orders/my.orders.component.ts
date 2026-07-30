@@ -187,6 +187,26 @@ export class MyOrdersComponent implements OnInit {
     this.pagedOrders = this.filteredOrders.slice(start, end);
   }
 
+  getStatusBadgeClass(order: any): string {
+    if (order.co_is_canceled === 'Y' || (order.co_status_name || '').toLowerCase().includes('cancel') || (order.co_status_name || '').toLowerCase().includes('reject')) {
+      return 'bg-danger text-white';
+    }
+    const status = (order.co_status_name || '').toLowerCase();
+    if (status.includes('confirm') || status.includes('pending')) {
+      return 'bg-info text-white';
+    }
+    if (status.includes('ship') || status.includes('create')) {
+      return 'bg-primary text-white';
+    }
+    if (status.includes('deliver') || status.includes('complete')) {
+      return 'bg-success text-white';
+    }
+    if (status.includes('return')) {
+      return 'bg-warning text-dark';
+    }
+    return 'bg-secondary text-white';
+  }
+
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;

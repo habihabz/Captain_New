@@ -239,24 +239,24 @@
                 <!-- RIGHT COLUMN: Price Details -->
                 <div class="col-lg-4">
                     <!-- PROMO CODE SECTION -->
-                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" *ngIf="this.carts.length > 0">
-                        <div class="card-body p-4 bg-white">
-                            <h6 class="small fw-bold text-muted mb-3 text-uppercase"
-                                style="letter-spacing: 1.5px; font-size: 10px;">PROMOTIONAL CODE</h6>
+                    <div class="card border-0 shadow-sm rounded-4 mb-3 overflow-hidden" *ngIf="this.carts.length > 0">
+                        <div class="card-body p-3 bg-white">
+                            <h6 class="small fw-bold text-muted mb-2 text-uppercase"
+                                style="letter-spacing: 1px; font-size: 10px;">PROMOTIONAL CODE</h6>
 
                              <!-- Input State (Not Applied) -->
                              <div *ngIf="!appliedPromo"
                                  class="input-group shadow-none rounded-pill overflow-hidden bg-white border"
-                                 style="border-color: #e2e8f0 !important; height: 48px;">
-                                 <span class="input-group-text bg-white border-0 ps-3 pe-0">
-                                     <i class="fa fa-ticket text-teal" style="font-size: 16px;"></i>
+                                 style="border-color: #e2e8f0 !important; height: 38px;">
+                                 <span class="input-group-text bg-white border-0 ps-3 pe-0 py-0">
+                                     <i class="fa fa-ticket text-teal" style="font-size: 14px;"></i>
                                  </span>
-                                 <input type="text" class="form-control border-0 shadow-none px-3"
+                                 <input type="text" class="form-control border-0 shadow-none px-2"
                                      placeholder="Enter Code" [(ngModel)]="promoCode" [disabled]="applyingPromo"
-                                     style="height: 100%; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">
-                                 <button class="btn bg-teal text-white fw-bold px-4 border-0 d-flex align-items-center justify-content-center"
+                                     style="height: 100%; font-size: 12px; font-weight: 500;">
+                                 <button class="btn bg-teal text-white fw-bold px-3 border-0 d-flex align-items-center justify-content-center"
                                      (click)="applyPromoCode()" [disabled]="!promoCode || applyingPromo"
-                                     style="font-size: 11px; height: calc(100% + 2px); margin: -1px; border-radius: 0 50px 50px 0 !important; min-width: 90px; letter-spacing: 1px; transition: all 0.3s ease;">
+                                     style="font-size: 11px; height: 100%; border-radius: 0 50px 50px 0 !important; min-width: 75px; letter-spacing: 0.5px;">
                                      <span *ngIf="!applyingPromo">APPLY</span>
                                      <div *ngIf="applyingPromo" class="spinner-border spinner-border-sm text-white" role="status">
                                          <span class="visually-hidden">Loading...</span>
@@ -266,90 +266,132 @@
 
                             <!-- Success State (Applied) -->
                             <div *ngIf="appliedPromo"
-                                class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 border border-teal animate__animated animate__fadeIn">
+                                class="d-flex justify-content-between align-items-center bg-white p-2 rounded-3 border border-teal animate__animated animate__fadeIn">
                                 <div class="d-flex align-items-center">
-                                    <div class="promo-icon-circle bg-teal-soft text-teal me-3 d-flex align-items-center justify-content-center"
-                                        style="width: 42px; height: 42px; border-radius: 12px;">
-                                        <i class="fa fa-check-circle fs-5"></i>
+                                    <div class="promo-icon-circle bg-teal-soft text-teal me-2 d-flex align-items-center justify-content-center"
+                                        style="width: 32px; height: 32px; border-radius: 8px;">
+                                        <i class="fa fa-check-circle fs-6"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0 fw-bold text-dark" style="font-size: 15px;">
+                                        <h6 class="mb-0 fw-bold text-dark" style="font-size: 13px;">
                                             {{appliedPromo.pc_code}}</h6>
-                                        <small class="text-teal fw-bold" style="font-size: 11px;">PROMO APPLIED</small>
+                                        <small class="text-teal fw-bold" style="font-size: 10px;">PROMO APPLIED</small>
                                     </div>
                                 </div>
                                 <button
-                                    class="btn btn-outline-danger btn-sm rounded-pill fw-bold px-3 py-1 me-2 shadow-none"
+                                    class="btn btn-outline-danger btn-sm rounded-pill fw-bold px-2 py-0 me-1 shadow-none"
                                     (click)="removePromo()"
-                                    style="font-size: 10px; letter-spacing: 0.8px; border-width: 1.5px;">
+                                    style="font-size: 10px;">
                                     REMOVE
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <h6 class="section-header mb-0 ms-1">Price Details</h6>
-                    <div class="sticky-top mb-4" style="top: 100px;">
+                    <h6 class="section-header mb-2 ms-1" style="font-size: 13px;">Price Details</h6>
+                    <div class="mb-3">
                         <!-- PRICE DETAILS -->
                         <div class="card border-0 shadow-sm rounded-4">
 
-                            <div class="card-body p-4 pt-3">
-                                <div class="d-flex justify-content-between mb-3 small">
+                            <div class="card-body p-3 pt-2">
+                                <div class="d-flex justify-content-between mb-2 small">
                                     <span class="text-muted">Price ({{this.totalQty}} items)</span>
                                     <span class="fw-bold">₹{{this.totalPrice}}</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-3 small">
+                                <div class="d-flex justify-content-between mb-2 small">
                                     <span class="text-muted">Discount
                                         ({{this.discountPercentConstant.cv_value}}%)</span>
                                     <span class="text-success fw-bold">-₹{{this.discount | number:'1.2-2' }}</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-3 small">
+                                <div class="d-flex justify-content-between mb-2 small">
                                     <span class="text-muted">Delivery Charges</span>
                                     <span class="fw-bold text-success"
                                         *ngIf="this.deliveryCharge === 0">FREE</span>
                                     <span class="fw-bold"
                                         *ngIf="this.deliveryCharge !== 0">₹{{this.deliveryCharge | number:'1.2-2'}}</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-3 small" *ngIf="selectedAddress">
+                                <div class="d-flex justify-content-between mb-2 small" *ngIf="selectedAddress">
                                     <span class="text-muted">Expected Delivery</span>
-                                    <span class="fw-bold text-teal">{{ getExpectedDeliveryDateRange() }}</span>
+                                    <span class="fw-bold text-teal" style="font-size: 11px;">{{ getExpectedDeliveryDateRange() }}</span>
                                 </div>
                                 <div
-                                    class="d-flex justify-content-between mb-3 border-bottom border-light pb-3 small text-muted">
+                                    class="d-flex justify-content-between mb-2 border-bottom border-light pb-2 small text-muted">
                                     <span>Total Price <small class="opacity-75">(Incl. Tax)</small></span>
                                     <span class="fw-bold">₹{{totalPrice | number:'1.2-2'}}</span>
                                 </div>
                                 <div
-                                    class="d-flex justify-content-between mb-3 border-bottom border-light pb-3 small text-muted">
+                                    class="d-flex justify-content-between mb-2 border-bottom border-light pb-2 small text-muted">
                                     <span>GST ({{this.taxPercentConstant.cv_value}}%) <small
                                             class="opacity-75">(Included)</small></span>
                                     <span class="fw-bold">₹{{taxAmount| number:'1.2-2'}}</span>
                                 </div>
 
                                 <!-- PROMO ROW -->
-                                <div class="d-flex justify-content-between mb-3 py-2 px-3 rounded-3 bg-teal-soft"
+                                <div class="d-flex justify-content-between mb-2 py-1 px-2 rounded-3 bg-teal-soft"
                                     *ngIf="promoDiscount > 0" style="border: 1px dashed #1abb9c;">
                                     <div class="d-flex flex-column">
-                                        <span class="text-teal fw-bold" style="font-size: 11px;">PROMO DISCOUNT</span>
+                                        <span class="text-teal fw-bold" style="font-size: 10px;">PROMO DISCOUNT</span>
                                         <span class="text-muted"
-                                            style="font-size: 10px;">{{appliedPromo?.pc_code}}</span>
+                                            style="font-size: 9px;">{{appliedPromo?.pc_code}}</span>
                                     </div>
                                     <span class="text-teal fw-bold fw-bold">-₹{{promoDiscount | number:'1.2-2'}}</span>
                                 </div>
 
-                                <div class="d-flex justify-content-between align-items-center pt-2">
-                                    <span class="fw-bold text-dark" style="font-size: 16px;">Total Amount</span>
-                                    <span class="fw-bold h4 mb-0 text-teal">₹{{this.netAmount | number:'1.2-2'}}</span>
+                                <div class="d-flex justify-content-between align-items-center pt-1">
+                                    <span class="fw-bold text-dark" style="font-size: 15px;">Total Amount</span>
+                                    <span class="fw-bold h5 mb-0 text-teal">₹{{this.netAmount | number:'1.2-2'}}</span>
                                 </div>
 
-                                <div class="small fw-bold mt-4 text-center py-2 rounded-pill"
+                                <div class="small fw-bold mt-2 text-center py-1 rounded-pill"
                                     *ngIf="discount + promoDiscount > 0"
-                                    style="background-color: rgba(25, 135, 84, 0.08); color: #198754; font-size: 11px;">
-                                    <i class="fa fa-shield me-2"></i> You will save ₹{{discount + promoDiscount |
-                                    number:'1.2-2' }} on this order
+                                    style="background-color: rgba(25, 135, 84, 0.08); color: #198754; font-size: 10px;">
+                                    <i class="fa fa-shield me-1"></i> Saving ₹{{discount + promoDiscount | number:'1.2-2' }} on this order
                                 </div>
 
-                                <button class="btn btn-dark w-100 place-order-btn mt-4 shadow-sm py-2" (click)="pay()">
+                                <!-- COMPACT SIDE-BY-SIDE PAYMENT METHOD SELECTION -->
+                                <div class="mt-3 pt-2 border-top">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark" style="font-size: 12px;">Payment Method <span class="text-danger">*</span></span>
+                                        <small class="text-danger fw-bold" *ngIf="showPaymentError || selectedPaymentMethod === 0" style="font-size: 10px;">
+                                            <i class="fa fa-exclamation-circle me-1"></i> Selection Required
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="row g-2 mb-1" [class.p-1]="showPaymentError && selectedPaymentMethod === 0" [class.border]="showPaymentError && selectedPaymentMethod === 0" [class.border-danger]="showPaymentError && selectedPaymentMethod === 0" [class.rounded-3]="showPaymentError && selectedPaymentMethod === 0">
+                                        <!-- Option 1: Online / UPI (Prepaid - 38) -->
+                                        <div class="col-6">
+                                            <div class="p-2 border rounded-3 text-center position-relative h-100 d-flex flex-column justify-content-center align-items-center"
+                                                 [class.border-teal]="selectedPaymentMethod === 38"
+                                                 [style.border-width]="selectedPaymentMethod === 38 ? '2px' : '1px'"
+                                                 [style.background-color]="selectedPaymentMethod === 38 ? 'rgba(26, 187, 156, 0.08)' : '#fff'"
+                                                 style="cursor: pointer; transition: all 0.2s;"
+                                                 (click)="selectPaymentMethod(38)">
+                                                <i class="fa fa-qrcode text-teal mb-1" style="font-size: 16px;"></i>
+                                                <span class="fw-bold text-dark d-block" style="font-size: 11px; line-height: 1.2;">Online / UPI</span>
+                                                <small class="text-muted" style="font-size: 9px;">Prepaid</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Option 2: Cash on Delivery (Cash - 39) -->
+                                        <div class="col-6">
+                                            <div class="p-2 border rounded-3 text-center position-relative h-100 d-flex flex-column justify-content-center align-items-center"
+                                                 [class.border-teal]="selectedPaymentMethod === 39"
+                                                 [style.border-width]="selectedPaymentMethod === 39 ? '2px' : '1px'"
+                                                 [style.background-color]="selectedPaymentMethod === 39 ? 'rgba(26, 187, 156, 0.08)' : '#fff'"
+                                                 style="cursor: pointer; transition: all 0.2s;"
+                                                 (click)="selectPaymentMethod(39)">
+                                                <i class="fa fa-money text-success mb-1" style="font-size: 16px;"></i>
+                                                <span class="fw-bold text-dark d-block" style="font-size: 11px; line-height: 1.2;">Cash on Delivery</span>
+                                                <small class="text-muted" style="font-size: 9px;">COD</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="showPaymentError && selectedPaymentMethod === 0" class="text-danger small mt-1 fw-bold" style="font-size: 10px;">
+                                        <i class="fa fa-exclamation-circle me-1"></i> Please choose Online/UPI or Cash on Delivery
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-dark w-100 place-order-btn mt-2 shadow-sm py-2" (click)="pay()" style="font-size: 13px; letter-spacing: 0.5px;">
                                     PLACE ORDER <i class="fa fa-arrow-right ms-2 animate-arrow"></i>
                                 </button>
                             </div>

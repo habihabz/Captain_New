@@ -38,10 +38,15 @@ export class CustomerOrder extends ProductForExtend {
     co_is_canceled: string;
     co_completed_yn: string;
     co_waybill?: string;
+    co_payment_id?: string;
+    co_payment_method?: number;
+    co_payment_method_name?: string;
 
     co_cre_by: number;
     co_cre_by_name: string;
     co_cre_date: string;
+    co_shipment_cre_by?: string;
+    co_shipment_cre_on?: string;
     resolvedImageUrl?: string;
 
     constructor() {

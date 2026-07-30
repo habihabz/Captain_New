@@ -125,6 +125,14 @@ export class CustomerOrderComponent {
             icon: 'fa fa-truck',
             action: 'createShipment',
             createShipment: (data: any) => this.onAction('createShipment', data)
+          },
+          {
+            name: '',
+            tooltip: 'Track Delhivery Shipment',
+            cssClass: 'btn btn-outline-warning btn-xs rounded-pill ms-1',
+            icon: 'fa fa-map-marker',
+            action: 'trackShipment',
+            trackShipment: (data: any) => this.onAction('trackShipment', data)
           }
         ]
       }
@@ -177,10 +185,10 @@ export class CustomerOrderComponent {
     {
       headerName: "Waybill",
       field: "co_waybill",
-      width: 140,
+      width: 150,
       headerClass: 'text-center',
       cellClass: 'text-center',
-      cellRenderer: (p: any) => p.value ? `<span class="badge bg-primary px-2 py-1">${p.value}</span>` : '<span class="text-muted">-</span>'
+      cellRenderer: (p: any) => p.value ? `<span class="badge bg-primary px-2 py-1" style="cursor: pointer;" title="Click to Track Shipment"><i class="fa fa-location-arrow me-1"></i>${p.value}</span>` : '<span class="text-muted">-</span>'
     },
     { headerName: "Email", field: "co_customer_email", width: 180, headerClass: 'text-start' },
     { headerName: "Address", field: "co_c_address_details", width: 250, headerClass: 'text-start' }
@@ -239,6 +247,9 @@ export class CustomerOrderComponent {
         break;
       case 'createShipment':
         this.onCreateShipment(data);
+        break;
+      case 'trackShipment':
+        this.onTrackShipment(data);
         break;
       default:
         this.snackBarService.showError("Unknown Action " + action);;
@@ -321,12 +332,41 @@ export class CustomerOrderComponent {
         this.customerOrder = data;
         // Resolve High-Resolution Variant Image
         this.resolveOrderItemImage(this.customerOrder);
+        
+        // Auto-load Delhivery shipment tracking inline if waybill exists
+        if (this.customerOrder.co_waybill) {
+          this.loadTrackingForOrder(this.customerOrder.co_waybill, this.customerOrder.co_id);
+        } else {
+          this.trackingDetails = null;
+          this.trackingError = '';
+          this.trackingLoading = false;
+        }
+
         $("#customerOrderDetailModal").modal("show");
       },
       (error: any) => {
 
       }
     );
+  }
+
+  loadTrackingForOrder(waybill: string, refId: any = '') {
+    if (!waybill) return;
+    this.trackingWaybill = waybill;
+    this.trackingLoading = true;
+    this.trackingError = '';
+    this.trackingDetails = null;
+
+    this.icustomerOrder.trackDelhiveryShipment(waybill, String(refId || '')).subscribe({
+      next: (res) => {
+        this.trackingLoading = false;
+        this.parseTrackingResponse(res, waybill);
+      },
+      error: (err) => {
+        this.trackingLoading = false;
+        this.trackingError = err.error?.message || "Failed to fetch tracking details from Delhivery.";
+      }
+    });
   }
 
   onStatusChange(data: any) {
@@ -551,6 +591,102 @@ export class CustomerOrderComponent {
 
   isOrderCanceled(): boolean {
     return !!(this.customerOrder && (this.customerOrder.co_is_canceled === 'Y' || this.customerOrder.co_status_name === 'Canceled'));
+  }
+
+  printShippingLabel(waybill: string, pdfSize: string = '4R') {
+    if (!waybill) return;
+    this.icustomerOrder.printShippingLabelInNewTab(waybill, pdfSize);
+  }
+
+  // Tracking Modal State
+  trackingWaybill: string = '';
+  trackingLoading: boolean = false;
+  trackingError: string = '';
+  trackingDetails: any = null;
+
+  onCellClicked(event: any) {
+    if (event.colDef && event.colDef.field === 'co_waybill' && event.value) {
+      this.openTrackingModal(event.value, event.data?.co_id || '');
+    }
+  }
+
+  onTrackShipment(data: any) {
+    if (!data || !data.co_waybill) {
+      this.snackBarService.showError("No waybill assigned to this order yet.");
+      return;
+    }
+    this.openTrackingModal(data.co_waybill, data.co_id);
+  }
+
+  openTrackingModal(waybill: string, refId: any = '') {
+    this.trackingWaybill = waybill;
+    this.trackingLoading = true;
+    this.trackingError = '';
+    this.trackingDetails = null;
+
+    $("#DelhiveryTrackingModal").modal("show");
+
+    this.icustomerOrder.trackDelhiveryShipment(waybill, String(refId || '')).subscribe({
+      next: (res) => {
+        this.trackingLoading = false;
+        this.parseTrackingResponse(res, waybill);
+      },
+      error: (err) => {
+        this.trackingLoading = false;
+        this.trackingError = err.error?.message || "Failed to fetch tracking details from Delhivery.";
+      }
+    });
+  }
+
+  parseTrackingResponse(res: any, waybill: string) {
+    if (!res || !res.success || !res.data) {
+      this.trackingError = res?.message || "No tracking data found for waybill: " + waybill;
+      return;
+    }
+
+    const data = res.data;
+    let shipmentData = null;
+
+    if (data.ShipmentData && Array.isArray(data.ShipmentData) && data.ShipmentData.length > 0) {
+      shipmentData = data.ShipmentData[0].Shipment;
+    } else if (data.packages && Array.isArray(data.packages) && data.packages.length > 0) {
+      shipmentData = data.packages[0];
+    } else if (typeof data === 'object') {
+      shipmentData = data;
+    }
+
+    if (!shipmentData) {
+      this.trackingError = "No tracking information found for waybill: " + waybill;
+      return;
+    }
+
+    const statusObj = shipmentData.Status || {};
+    const consigneeObj = shipmentData.Consignee || {};
+    const originObj = shipmentData.OriginRec || {};
+
+    const rawScans = shipmentData.Scans || shipmentData.scans || [];
+    const scansList = rawScans.map((s: any) => {
+      const detail = s.ScanDetail || s;
+      return {
+        Scan: detail.Scan || detail.scan || detail.instructions || detail.ScanType || 'Scanned',
+        ScanType: detail.ScanType || '',
+        ScanDateTime: detail.ScanDateTime || detail.scan_date_time || detail.date,
+        ScannedLocation: detail.ScannedLocation || detail.location || detail.scanned_location || '',
+        Instructions: detail.Instructions || detail.instructions || detail.remarks || ''
+      };
+    });
+
+    this.trackingDetails = {
+      awb: shipmentData.AWB || shipmentData.waybill || waybill,
+      status: statusObj.Status || statusObj.status || shipmentData.status || 'Manifested',
+      statusDate: statusObj.StatusDateTime || statusObj.status_date_time,
+      instructions: statusObj.Instructions || statusObj.instructions || statusObj.remarks || '',
+      expectedDate: shipmentData.ExpectedDeliveryDate || shipmentData.expected_delivery_date,
+      origin: originObj.City || shipmentData.Origin || shipmentData.origin || '',
+      destination: consigneeObj.City || shipmentData.Destination || shipmentData.destination || '',
+      consigneeName: consigneeObj.Name || shipmentData.consignee_name || '',
+      scans: scansList
+    };
   }
 
   closeModal(event: any, modalId: string) {

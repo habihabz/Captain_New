@@ -4,6 +4,7 @@ using Erp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace Erp.Server.Controllers
@@ -41,6 +42,24 @@ namespace Erp.Server.Controllers
         {
             List<CustomerOrder> customerorders =new List<CustomerOrder>();
             customerorders = icustomerOrder.getCustomerOrders(requestParms);
+            return customerorders;
+        }
+
+        [HttpPost("getCreatedShipments")]
+        [Authorize]
+        public List<CustomerOrder> getCreatedShipments([FromBody] RequestParams requestParms)
+        {
+            List<CustomerOrder> customerorders = new List<CustomerOrder>();
+            customerorders = icustomerOrder.getCreatedShipments(requestParms);
+            return customerorders;
+        }
+
+        [HttpPost("getOrdersForShipment")]
+        [Authorize]
+        public List<CustomerOrder> getOrdersForShipment([FromBody] RequestParams requestParms)
+        {
+            List<CustomerOrder> customerorders = new List<CustomerOrder>();
+            customerorders = icustomerOrder.getOrdersForShipment(requestParms);
             return customerorders;
         }
         [HttpPost("deleteCustomerOrder")]
@@ -83,7 +102,11 @@ namespace Erp.Server.Controllers
                 {
                     if (requestParams.id == 0)
                     {
-                        var newOrders = _dbContext.CustomerOrders.Where(o => o.co_cre_by == requestParams.user && (o.co_waybill == null || o.co_waybill == "") && o.co_cre_date >= DateTime.Now.AddSeconds(-15)).ToList();
+                        var newOrders = _dbContext.Set<CustomerOrder>()
+                            .FromSqlRaw("EXEC dbo.getCustomerOrders @id=0, @user={0}, @completedYn=NULL, @startDate=NULL, @endDate=NULL, @status=0;", requestParams.user)
+                            .AsEnumerable()
+                            .Where(o => o.co_cre_by == requestParams.user && string.IsNullOrEmpty(o.co_waybill) && o.co_cre_date >= DateTime.Now.AddSeconds(-15))
+                            .ToList();
                         if (newOrders.Any())
                         {
                             string waybillNumber = await GetUnusedWaybillAsync();
@@ -136,7 +159,8 @@ namespace Erp.Server.Controllers
                                     {
                                         int pId = prodProp.GetInt32();
                                         int qty = qtyProp.GetInt32();
-                                        var prod = _dbContext.Products.FirstOrDefault(p => p.p_id == pId);
+                                        var prodIdParam = new Microsoft.Data.SqlClient.SqlParameter("id", pId);
+                                        var prod = _dbContext.Set<Product>().FromSqlRaw("EXEC dbo.getProduct @id;", prodIdParam).AsEnumerable().FirstOrDefault();
                                         string pName = prod?.p_name ?? $"Product #{pId}";
 
                                         int colorId = 0;

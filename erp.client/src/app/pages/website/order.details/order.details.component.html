@@ -132,7 +132,22 @@
 
             <!-- PAYMENT SUMMARY -->
             <div class="card border-0 bg-light rounded-4 p-4 mb-4">
-                <h6 class="fw-bold mb-4" style="font-size: 13px;">Payment Summary</h6>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0" style="font-size: 13px;">Payment Summary</h6>
+                    <span class="badge px-3 py-2 rounded-pill fw-bold" *ngIf="customerOrder.co_payment_method_name && customerOrder.co_payment_method_name !== ''"
+                          [ngClass]="(customerOrder.co_payment_method === 39 || customerOrder.co_payment_method_name === 'Cash' || customerOrder.co_payment_method_name === 'Cash on Delivery') ? 'bg-warning text-dark' : 'bg-success text-white'"
+                          style="font-size: 11px;">
+                        <i class="fa me-1" [ngClass]="(customerOrder.co_payment_method === 39 || customerOrder.co_payment_method_name === 'Cash' || customerOrder.co_payment_method_name === 'Cash on Delivery') ? 'fa-money' : 'fa-qrcode'"></i>
+                        {{ customerOrder.co_payment_method_name }}
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2 small text-muted" *ngIf="customerOrder.co_payment_method_name && customerOrder.co_payment_method_name !== ''">
+                    <span>Payment Mode</span>
+                    <span class="fw-bold text-dark">
+                        {{ customerOrder.co_payment_method_name }}
+                    </span>
+                </div>
 
                 <div class="d-flex justify-content-between mb-2 small text-muted">
                     <span>Item Total <small>(Incl. Tax)</small></span>

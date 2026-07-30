@@ -123,11 +123,14 @@
         </form>
       </div>
       <div class="modal-footer border-0 bg-light p-3">
-        <button type="button" class="btn btn-light px-4 fw-bold" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-light px-4 fw-bold" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-warning px-4 fw-bold shadow-sm" [disabled]="!statusForm.valid"
           (click)="createOrUpdateStatus()">
           {{ status.s_id ? 'Save Changes' : 'Create Status' }}
         </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Premium Delete Confirmation Modal -->

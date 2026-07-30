@@ -59,6 +59,8 @@ export class MycartComponent implements OnInit, OnDestroy {
   promoDiscount: number = 0;
   applyingPromo: boolean = false;
   expectedDeliveryDate: string = '';
+  selectedPaymentMethod: number = 0; // 0 = mandatory to select before placing order (38 = Prepaid, 39 = Cash)
+  showPaymentError: boolean = false;
 
   isPincodeChecking: boolean = false;
   pincodeMessage: string = '';
@@ -246,6 +248,7 @@ export class MycartComponent implements OnInit, OnDestroy {
     if (cartItem) {
       cartItem.c_qty++;
       cartItem.c_price = Math.round(cartItem.c_qty * cartItem.p_price * 100) / 100;
+      this.getCartTotal();
     }
     this.updateCart(cartItem!);
   }
@@ -255,10 +258,10 @@ export class MycartComponent implements OnInit, OnDestroy {
     if (cartItem && cartItem.c_qty > 1) {
       cartItem.c_qty--;
       cartItem.c_price = Math.round(cartItem.c_qty * cartItem.p_price * 100) / 100;
+      this.getCartTotal();
     }
 
     this.updateCart(cartItem!);
-
   }
 
   saveForLater(c_id: number): void {
@@ -366,8 +369,6 @@ export class MycartComponent implements OnInit, OnDestroy {
             this.expectedDeliveryDate = res.expectedDeliveryDate || '';
             if (res.success === false) {
               this.snackbarService.showError(res.message || "Failed to calculate delivery charge");
-            } else {
-              this.snackbarService.showSuccess("Delivery charge calculated successfully");
             }
           } else {
             this.deliveryCharge = Number(this.deliveryChargeConstant?.cv_value || 0);
@@ -433,7 +434,14 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.snackbarService.showSuccess("Promo code removed");
   }
 
-  placeOrder(paymentId: string = '') {
+  placeOrder(paymentId: string = '', paymentMethodId: number = 0) {
+    if (!this.selectedAddress || !this.selectedAddress.ad_id) {
+      this.snackbarService.showError("Please select or add a delivery address before placing your order.");
+      return;
+    }
+
+    const pMethod = paymentMethodId > 0 ? paymentMethodId : (this.selectedPaymentMethod || (paymentId ? 38 : 39));
+
     const cartOnly = this.carts.map((c: any) => ({
       c_id: c.c_id,
       c_product: c.c_product,
@@ -444,10 +452,12 @@ export class MycartComponent implements OnInit, OnDestroy {
       c_price: Math.round(c.c_price * 100) / 100
     }));
 
+    this.requestParms.address = this.selectedAddress.ad_id;
     this.requestParms.details = JSON.stringify(cartOnly);
     this.requestParms.user = this.currentUser.u_id;
     this.requestParms.others = this.appliedPromo ? this.appliedPromo.pc_code : '';
     this.requestParms.paymentId = paymentId; 
+    this.requestParms.paymentMethod = pMethod;
     this.requestParms.amount = this.promoDiscount; 
     this.requestParms.deliveryCharge = this.deliveryCharge;
 
@@ -456,7 +466,8 @@ export class MycartComponent implements OnInit, OnDestroy {
         if (data.message === 'Success') {
           this.carts = [];
           this.getCartTotal();
-          this.snackbarService.showSuccess("Success");
+          const msg = (pMethod === 39) ? "Order Placed Successfully via Cash on Delivery!" : "Order Placed Successfully!";
+          this.snackbarService.showSuccess(msg);
           this.router.navigate(['/payment-success']);
 
         } else {
@@ -686,12 +697,10 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.icartService.createOrUpdateCart(cart).subscribe(
       (data: DbResult) => {
         if (data.message === 'Success') {
-          this.snackbarService.showSuccess("Cart Updated");
-
+          this.calculateDeliveryCharge();
         } else {
           this.snackbarService.showError("Failed to update cart");
         }
-        this.calculateDeliveryCharge();
       },
       (error: any) => {
       }
@@ -739,43 +748,62 @@ export class MycartComponent implements OnInit, OnDestroy {
     this.cleanupRazorpay();
   }
 
+  selectPaymentMethod(methodId: number) {
+    this.selectedPaymentMethod = methodId;
+    this.showPaymentError = false;
+  }
+
   async pay() {
     if (!this.selectedAddress) {
       this.snackbarService.showError("Please add a delivery address before placing an order.");
       return;
     }
 
-    await this.loadRazorpay();
+    if (!this.selectedPaymentMethod || this.selectedPaymentMethod === 0) {
+      this.showPaymentError = true;
+      this.snackbarService.showError("Please select a payment method before placing your order.");
+      return;
+    }
 
-    const Razorpay = (window as any).Razorpay;
+    this.showPaymentError = false;
 
-    this.http.post<any>(this.paymentUrl, { amount: this.netAmount })
-      .subscribe(order => {
-        const options = {
-          key: order.key,
-          amount: order.amount * 100,
-          currency: order.currency,
-          name: 'Captain',
-          description: 'Test Transaction',
-          order_id: order.orderId,
-          method: {
-            upi: true
-          },
-          handler: (response: any) => {
-            this.placeOrder(response.razorpay_payment_id);
-          },
-          prefill: {
-            email: 'abimanjeri@gmail.com',
-            contact: '9744764030'
-          },
-          theme: {
-            color: '#3399cc'
-          }
-        };
+    if (this.selectedPaymentMethod === 39) {
+      // Cash on Delivery (COD)
+      this.placeOrder('', 39);
+    } else {
+      // Online / UPI / Razorpay (Prepaid - 38)
+      await this.loadRazorpay();
 
-        const rzp = new Razorpay(options);
-        rzp.open();
-      });
+      const Razorpay = (window as any).Razorpay;
+
+      this.http.post<any>(this.paymentUrl, { amount: this.netAmount })
+        .subscribe(order => {
+          const options = {
+            key: order.key,
+            amount: order.amount * 100,
+            currency: order.currency,
+            name: 'Captain',
+            description: 'Order Payment',
+            order_id: order.orderId,
+            method: {
+              upi: true
+            },
+            handler: (response: any) => {
+              this.placeOrder(response.razorpay_payment_id, 38);
+            },
+            prefill: {
+              email: this.currentUser.u_username || '',
+              contact: this.selectedAddress?.ad_phone || ''
+            },
+            theme: {
+              color: '#1abb9c'
+            }
+          };
+
+          const rzp = new Razorpay(options);
+          rzp.open();
+        });
+    }
   }
   getProductAttachementsByColor(productId: number, colorId: number) {
     return this.iproductService.getProductAttachementsByColor({

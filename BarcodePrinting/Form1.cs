@@ -111,7 +111,7 @@ namespace BarcodePrinting
             
             // Filter Panel
             pnlFilters = new Panel { Dock = DockStyle.Top, Height = 65, BackColor = Color.FromArgb(39, 39, 42) };
-            string[] filterCols = { "co_id:Order ID", "co_customer_name:Customer", "co_customer_phone:Phone", "co_product_name:Product", "co_status_name:Status" };
+            string[] filterCols = { "co_id:Order ID", "co_customer_name:Customer", "co_customer_phone:Phone", "co_product_name:Product", "co_status_name:Status", "co_waybill:Waybill" };
             
             int xPos = 10;
             foreach (var colDef in filterCols)
@@ -599,7 +599,7 @@ namespace BarcodePrinting
                     
                     var requestParams = new RequestParams
                     {
-                        completedYn = "N", // 'N' for Active Orders
+                        completedYn = "A", // 'A' for All Orders (including created shipments)
                         startDate = "",
                         endDate = ""
                     };
@@ -800,10 +800,16 @@ namespace BarcodePrinting
                 dataGridViewOrders.Columns["co_status_name"].HeaderText = "Status";
                 dataGridViewOrders.Columns["co_status_name"].DisplayIndex = 4;
             }
+            if (dataGridViewOrders.Columns.Contains("co_waybill"))
+            {
+                dataGridViewOrders.Columns["co_waybill"].Visible = true;
+                dataGridViewOrders.Columns["co_waybill"].HeaderText = "Waybill";
+                dataGridViewOrders.Columns["co_waybill"].DisplayIndex = 5;
+            }
 
-            dataGridViewOrders.Columns["btnDetails"].DisplayIndex = 5;
-            dataGridViewOrders.Columns["btnPrintInd"].DisplayIndex = 6;
-            dataGridViewOrders.Columns["btnRemove"].DisplayIndex = 7;
+            dataGridViewOrders.Columns["btnDetails"].DisplayIndex = 6;
+            dataGridViewOrders.Columns["btnPrintInd"].DisplayIndex = 7;
+            dataGridViewOrders.Columns["btnRemove"].DisplayIndex = 8;
         }
 
         private void DataGridViewOrders_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -855,6 +861,28 @@ namespace BarcodePrinting
 
         private bool PrintSingleOrder(CustomerOrder order)
         {
+            if (order == null) return false;
+
+            // If order has a Delhivery Waybill (Created Shipment), open the 4x6 Barcode Shipping Label in a new browser tab
+            if (!string.IsNullOrWhiteSpace(order.co_waybill))
+            {
+                try
+                {
+                    string labelUrl = $"https://localhost:7299/api/Delhivery/generateShippingLabel/{order.co_waybill.Trim()}?pdf_size=4R";
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = labelUrl,
+                        UseShellExecute = true
+                    });
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    CustomMessageBox.Show("Failed to open shipping label: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
+
             try
             {
                 string FilePath = @"C:\PRINT\";
@@ -913,61 +941,38 @@ namespace BarcodePrinting
 
             try
             {
-                string FilePath = @"C:\PRINT\";
-
-                if (!Directory.Exists(FilePath))
-                    Directory.CreateDirectory(FilePath);
-
-                File.WriteAllLines(@"C:\PRINT\print.txt", new string[] { "" });
+                int waybillCount = 0;
+                int localCount = 0;
 
                 foreach (DataGridViewRow row in dataGridViewOrders.Rows)
                 {
                     var order = row.DataBoundItem as CustomerOrder;
                     if (order == null) continue;
 
-                    try
+                    if (!string.IsNullOrWhiteSpace(order.co_waybill))
                     {
-                        string[] format = File.ReadAllLines(@"C:\PRINT\CustomerOrderFormat.txt");
-
-                        for (int count = 0; count < format.Length; count++)
+                        string labelUrl = $"https://localhost:7299/api/Delhivery/generateShippingLabel/{order.co_waybill.Trim()}?pdf_size=4R";
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                         {
-                            // Dynamic API configuration replacements FIRST (prevents substring conflicts like COMPANYADDRESS vs ADDRESS)
-                            format[count] = format[count].Replace("COMPANYNAME", appConstants.ContainsKey("Company Name") ? appConstants["Company Name"] : "Captain");
-                            format[count] = format[count].Replace("COMPANYADDRESS", appConstants.ContainsKey("Company Address") ? appConstants["Company Address"].Replace(",", ", ") : "United Arab Emirates");
-                            format[count] = format[count].Replace("GSTNUMBER", appConstants.ContainsKey("Company Tax Reg Number") ? appConstants["Company Tax Reg Number"] : "N/A");
-
-                            format[count] = format[count].Replace("ORDERID", order.co_id.ToString());
-                            format[count] = format[count].Replace("CUSTOMERNAME", order.co_customer_name ?? "");
-                            format[count] = format[count].Replace("PHONE", order.co_customer_phone ?? "");
-                            format[count] = format[count].Replace("ADDRESS", order.co_c_address_details ?? "");
-                            format[count] = format[count].Replace("BARCODEPRINT", order.co_id.ToString("D8"));
-                            format[count] = format[count].Replace("BARCODE", order.co_id.ToString("D8"));
-                            format[count] = format[count].Replace("QUANTITY", order.co_qty.ToString());
-                            
-                            // New order details replacements
-                            string currency = appConstants.ContainsKey("Default Currency") ? appConstants["Default Currency"] : "";
-                            if (currency.Contains("₹")) currency = currency.Replace("₹", "Rs.");
-                            currency = currency + " ";
-                            format[count] = format[count].Replace("PRODUCTINFO", $"{order.co_product_name} (Size: {order.co_size_name}, Color: {order.co_color_name})");
-                            format[count] = format[count].Replace("GSTPERC", order.co_gst_perc?.ToString("0.##") ?? "0");
-                            format[count] = format[count].Replace("TAXAMOUNT", $"{currency}{order.co_gst_amount?.ToString("0.00") ?? "0.00"}");
-                            format[count] = format[count].Replace("TOTALAMOUNT", $"{currency}{order.co_net_amount?.ToString("0.00") ?? "0.00"}");
-                        }
-
-                        File.AppendAllLines(@"C:\PRINT\print.txt", format);
+                            FileName = labelUrl,
+                            UseShellExecute = true
+                        });
+                        waybillCount++;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        CustomMessageBox.Show("Error processing order: " + order.co_id + "\n" + ex.Message);
+                        if (PrintSingleOrder(order))
+                        {
+                            localCount++;
+                        }
                     }
                 }
 
-                string printerAddress = File.ReadAllText(@"C:\PRINT\printerAddress.txt");
-                File.Copy(@"C:\PRINT\print.txt", printerAddress, true);
-                
-                CustomMessageBox.Show("Sent to printer successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (waybillCount > 0)
+                {
+                    CustomMessageBox.Show($"Opened {waybillCount} shipping label(s) in new browser tab(s).", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
 
-                // Auto clear grid after printing successfully
                 allOrders?.Clear();
                 ApplyFilters();
             }

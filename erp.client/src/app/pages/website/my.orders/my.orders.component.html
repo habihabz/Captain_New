@@ -115,7 +115,7 @@
   
                 <div class="text-end">
                    <span class="badge rounded-pill px-3 py-2 shadow-sm border-0" 
-                        [ngClass]="(order.co_is_canceled === 'Y' || order.co_status_name === 'Canceled' || (order.co_status_name || '').toLowerCase().includes('reject')) ? 'bg-danger text-white' : 'bg-success text-white'" 
+                        [ngClass]="getStatusBadgeClass(order)" 
                         style="font-size: 9px; font-weight: 700; min-width: 120px; letter-spacing: 0.8px;">
                       {{ (order.co_status_name || 'Return Initiated') | uppercase }}
                     </span>
@@ -123,12 +123,20 @@
               </div>
   
               <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-light">
-                <div class="d-flex align-items-center gap-4">
+                <div class="d-flex align-items-center gap-3">
                   <div class="d-flex flex-column">
                     <span class="text-muted fw-bold mb-0" style="font-size: 9px; letter-spacing: 0.8px;">TOTAL PAID</span>
-                    <h5 class="fw-bold text-dark mb-0">₹ {{ order.co_net_amount | number:'1.2-2' }} <small class="text-muted fw-normal" style="font-size: 9px;">(Incl. Tax)</small></h5>
+                    <div class="d-flex align-items-center gap-2">
+                      <h5 class="fw-bold text-dark mb-0">₹ {{ order.co_net_amount | number:'1.2-2' }} <small class="text-muted fw-normal" style="font-size: 9px;">(Incl. Tax)</small></h5>
+                      <span class="badge rounded-pill px-2 py-1 ms-1" *ngIf="order.co_payment_method_name && order.co_payment_method_name.trim() !== ''"
+                            [ngClass]="(order.co_payment_method === 39 || (order.co_payment_method_name || '').toLowerCase().includes('cash')) ? 'bg-warning text-dark' : 'bg-success text-white'"
+                            style="font-size: 9px; font-weight: 700;">
+                         <i class="fa me-1" [ngClass]="(order.co_payment_method === 39 || (order.co_payment_method_name || '').toLowerCase().includes('cash')) ? 'fa-money' : 'fa-qrcode'"></i>
+                         {{ order.co_payment_method_name }}
+                      </span>
+                    </div>
                   </div>
-                  
+
                   <div class="d-flex align-items-center gap-2 p-1 px-2 rounded-2 bg-success-soft text-success border border-success border-opacity-10" *ngIf="order.co_discount_amount > 0">
                      <i class="fa fa-ticket" style="font-size: 11px;"></i>
                      <span class="fw-bold text-uppercase" style="font-size: 9px; letter-spacing: 0.5px;">Saved: ₹{{ order.co_discount_amount | number:'1.2-2' }}</span>

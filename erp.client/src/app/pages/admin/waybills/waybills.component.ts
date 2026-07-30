@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { SnackBarService } from '../../../services/isnackbar.service';
 import { ColDef, DomLayoutType, GridApi, GridReadyEvent } from 'ag-grid-community';
+import { ICustomerOrder } from '../../../services/icustomer.order.service';
+
+declare var $: any;
 
 @Component({
   selector: 'app-waybills',
@@ -45,7 +48,10 @@ export class WaybillsComponent implements OnInit {
       headerName: "Waybill Number",
       field: "wb_number",
       flex: 1.5,
-      cellClass: 'font-monospace fw-bold text-dark'
+      cellClass: 'font-monospace fw-bold text-primary',
+      cellRenderer: (p: any) => p.value
+        ? `<span class="badge bg-primary px-2 py-1" style="cursor: pointer;" title="Click to Track Shipment"><i class="fa fa-location-arrow me-1"></i>${p.value}</span>`
+        : '<span class="text-muted">-</span>'
     },
     {
       headerName: "Status",
@@ -77,7 +83,11 @@ export class WaybillsComponent implements OnInit {
     }
   ];
 
-  constructor(private http: HttpClient, private snackbar: SnackBarService) { }
+  constructor(
+    private http: HttpClient, 
+    private snackbar: SnackBarService,
+    private icustomerOrder: ICustomerOrder
+  ) { }
 
   ngOnInit(): void {
     this.loadWaybills();
@@ -153,5 +163,93 @@ export class WaybillsComponent implements OnInit {
         this.snackbar.showError("Failed to fetch waybills.");
       }
     });
+  }
+
+  // Tracking Modal State
+  trackingWaybill: string = '';
+  trackingLoading: boolean = false;
+  trackingError: string = '';
+  trackingDetails: any = null;
+
+  onCellClicked(event: any) {
+    if (event.colDef && event.colDef.field === 'wb_number' && event.value) {
+      this.openTrackingModal(event.value, event.data?.wb_order_id || '');
+    }
+  }
+
+  openTrackingModal(waybill: string, refId: string = '') {
+    if (!waybill) return;
+    this.trackingWaybill = waybill;
+    this.trackingLoading = true;
+    this.trackingError = '';
+    this.trackingDetails = null;
+
+    $("#DelhiveryTrackingModal").modal("show");
+
+    this.icustomerOrder.trackDelhiveryShipment(waybill, refId).subscribe({
+      next: (res) => {
+        this.trackingLoading = false;
+        this.parseTrackingResponse(res, waybill);
+      },
+      error: (err) => {
+        this.trackingLoading = false;
+        this.trackingError = err.error?.message || "Failed to fetch tracking details from Delhivery.";
+      }
+    });
+  }
+
+  parseTrackingResponse(res: any, waybill: string) {
+    if (!res || !res.success || !res.data) {
+      this.trackingError = res?.message || "No tracking data found for waybill: " + waybill;
+      return;
+    }
+
+    const data = res.data;
+    let shipmentData = null;
+
+    if (data.ShipmentData && Array.isArray(data.ShipmentData) && data.ShipmentData.length > 0) {
+      shipmentData = data.ShipmentData[0].Shipment;
+    } else if (data.packages && Array.isArray(data.packages) && data.packages.length > 0) {
+      shipmentData = data.packages[0];
+    } else if (typeof data === 'object') {
+      shipmentData = data;
+    }
+
+    if (!shipmentData) {
+      this.trackingError = "No tracking information found for waybill: " + waybill;
+      return;
+    }
+
+    const statusObj = shipmentData.Status || {};
+    const consigneeObj = shipmentData.Consignee || {};
+    const originObj = shipmentData.OriginRec || {};
+
+    const rawScans = shipmentData.Scans || shipmentData.scans || [];
+    const scansList = rawScans.map((s: any) => {
+      const detail = s.ScanDetail || s;
+      return {
+        Scan: detail.Scan || detail.scan || detail.instructions || detail.ScanType || 'Scanned',
+        ScanType: detail.ScanType || '',
+        ScanDateTime: detail.ScanDateTime || detail.scan_date_time || detail.date,
+        ScannedLocation: detail.ScannedLocation || detail.location || detail.scanned_location || '',
+        Instructions: detail.Instructions || detail.instructions || detail.remarks || ''
+      };
+    });
+
+    this.trackingDetails = {
+      awb: shipmentData.AWB || shipmentData.waybill || waybill,
+      status: statusObj.Status || statusObj.status || shipmentData.status || 'Manifested',
+      statusDate: statusObj.StatusDateTime || statusObj.status_date_time,
+      instructions: statusObj.Instructions || statusObj.instructions || statusObj.remarks || '',
+      expectedDate: shipmentData.ExpectedDeliveryDate || shipmentData.expected_delivery_date,
+      origin: originObj.City || shipmentData.Origin || shipmentData.origin || '',
+      destination: consigneeObj.City || shipmentData.Destination || shipmentData.destination || '',
+      consigneeName: consigneeObj.Name || shipmentData.consignee_name || '',
+      scans: scansList
+    };
+  }
+
+  closeModal(event: any, modalId: string) {
+    $(`#${modalId}`).modal("hide");
   }
 }

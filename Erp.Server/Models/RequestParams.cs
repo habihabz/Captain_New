@@ -14,9 +14,11 @@ namespace Erp.Server.Models
         public decimal amount { get; set; } = 0;
         public decimal deliveryCharge { get; set; } = 0;
         public string paymentId { get; set; } = string.Empty;
+        public int paymentMethod { get; set; } = 0;
         public string startDate { get; set; } = string.Empty;
         public string endDate { get; set; } = string.Empty;
         public string completedYn { get; set; } = string.Empty;
         public string refundId { get; set; } = string.Empty;
+        public int address { get; set; } = 0;
     }
 }

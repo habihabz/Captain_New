@@ -29,9 +29,11 @@ namespace Erp.Server.Repository
             var promo = new SqlParameter("promo", requestParams.others + "");
             var paymentId = new SqlParameter("paymentId", requestParams.paymentId + "");
             var co_delivery_charge = new SqlParameter("co_delivery_charge", requestParams.deliveryCharge);
+            var paymentMethod = new SqlParameter("paymentMethod", requestParams.paymentMethod == 0 ? (object)DBNull.Value : requestParams.paymentMethod);
+            var address = new SqlParameter("address", requestParams.address == 0 ? (object)DBNull.Value : requestParams.address);
 
-            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateCustomerOrder @details, @user ,@promo, @paymentId, @co_delivery_charge;",
-                details, user, promo, paymentId, co_delivery_charge).ToList().FirstOrDefault() ?? new DbResult();
+            var dbresult = db.Set<DbResult>().FromSqlRaw("EXEC dbo.createOrUpdateCustomerOrder @details, @user, @promo, @paymentId, @co_delivery_charge, @paymentMethod, @address;",
+                details, user, promo, paymentId, co_delivery_charge, paymentMethod, address).ToList().FirstOrDefault() ?? new DbResult();
             return dbresult;
         }
 
@@ -65,6 +67,21 @@ namespace Erp.Server.Repository
             var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCustomerOrders @id, @user, @completedYn, @startDate, @endDate, @status;", 
                 _id, _user, _completedYn, _startDate, _endDate, _status).ToList();
 
+            return customerorders;
+        }
+
+        public List<CustomerOrder> getCreatedShipments(RequestParams requestParms)
+        {
+            var _startDate = new SqlParameter("startDate", string.IsNullOrEmpty(requestParms.startDate) ? (object)DBNull.Value : requestParms.startDate);
+            var _endDate = new SqlParameter("endDate", string.IsNullOrEmpty(requestParms.endDate) ? (object)DBNull.Value : requestParms.endDate);
+            var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCreatedShipments @startDate, @endDate;", _startDate, _endDate).ToList();
+            return customerorders;
+        }
+
+        public List<CustomerOrder> getOrdersForShipment(RequestParams requestParms)
+        {
+            var _status = new SqlParameter("status", requestParms.status);
+            var customerorders = db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getOrdersForShipment @status;", _status).ToList();
             return customerorders;
         }
 

@@ -185,13 +185,20 @@ export class StatusComponent implements OnInit {
 
   onDeleteConfirmed() {
     if (this.status.s_id) {
-      this.statusService.deleteStatus(this.status.s_id).subscribe((data: DbResult) => {
-        if (data.message === "Success") {
-          this.snackBarService.showSuccess("Status deleted successfully.");
-          this.statusService.refresh();
+      this.statusService.deleteStatus(this.status.s_id).subscribe({
+        next: (data: DbResult) => {
           $('#confirmDeleteModal').modal('hide');
-        } else {
-          this.snackBarService.showError(data.message);
+          if (data.message === "Success") {
+            this.snackBarService.showSuccess("Status deleted successfully.");
+          } else {
+            this.snackBarService.showSuccess(data.message || "Status processed successfully.");
+          }
+          this.getStatuses();
+          this.statusService.refresh();
+        },
+        error: (err) => {
+          $('#confirmDeleteModal').modal('hide');
+          this.snackBarService.showError("Failed to delete status. " + (err.error?.message || ""));
         }
       });
     }

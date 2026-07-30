@@ -9,6 +9,8 @@ namespace Erp.Server.Services
         DbResult deleteCustomerOrder(int id);
         CustomerOrder getCustomerOrder(int id);
         List<CustomerOrder> getCustomerOrders(RequestParams requestParms);
+        List<CustomerOrder> getCreatedShipments(RequestParams requestParms);
+        List<CustomerOrder> getOrdersForShipment(RequestParams requestParms);
         List<CustomerOrder> getMyOrders(RequestParams requestParms);
         DbResult updateStatusForCustomerOrder(RequestParams requestParams);
     }

@@ -276,7 +276,7 @@ export class SingleProductComponent implements OnInit {
     this.productReview.pr_overall_rating = rating;
   }
 
-  addToCart() {
+  addToCart(redirect: boolean = false) {
     const hasSizes = this.getListFromJSON(this.product.p_sizes)?.length > 0;
     const hasColors = this.getListFromJSON(this.product.p_colors)?.length > 0;
 
@@ -306,11 +306,19 @@ export class SingleProductComponent implements OnInit {
     this.cart.c_cre_by = this.currentUser.u_id;
     this.icartService.createOrUpdateCart(this.cart).subscribe(
       (data: DbResult) => {
-        this.router.navigate(['my-cart']);
+        if (redirect) {
+          this.router.navigate(['my-cart']);
+        } else {
+          this.snackbarService.showSuccess("Item added to bag successfully!");
+        }
       },
       (error: any) => {
       }
     );
+  }
+
+  buyNow() {
+    this.addToCart(true);
   }
 
   loadUserFavourites() {

@@ -64,18 +64,19 @@ namespace Erp.Server.Models
         public string? co_cre_by_name { get; set; } = string.Empty;
 
         public string? co_payment_id { get; set; } = string.Empty;
+        public int? co_payment_method { get; set; }
+        public string? co_payment_method_name { get; set; } = string.Empty;
         public string? co_refund_id { get; set; } = string.Empty;
         public string? co_waybill { get; set; } = string.Empty;
         public DateTime co_cre_date { get; set; } = DateTime.Now;
 
+        public string? co_shipment_cre_by { get; set; } = string.Empty;
+        public DateTime? co_shipment_cre_on { get; set; }
+        public string? omh_cre_by_name { get; set; } = string.Empty;
+        public DateTime? omh_cre_date { get; set; }
+
         [NotMapped]
         public List<CustomerOrderDetail>? details { get; set; } = new List<CustomerOrderDetail>();
 
-        // Shipment creator from OrderMovementHistory (status 2 = Shipped)
-        [NotMapped]
-        public string? omh_cre_by_name { get; set; } = string.Empty;
-
-        [NotMapped]
-        public DateTime? omh_cre_date { get; set; }
     }
 }
