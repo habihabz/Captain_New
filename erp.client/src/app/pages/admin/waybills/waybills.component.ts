@@ -48,9 +48,9 @@ export class WaybillsComponent implements OnInit {
       headerName: "Waybill Number",
       field: "wb_number",
       flex: 1.5,
-      cellClass: 'font-monospace fw-bold text-primary',
+      cellClass: 'font-monospace fw-bold',
       cellRenderer: (p: any) => p.value
-        ? `<span class="badge bg-primary px-2 py-1" style="cursor: pointer;" title="Click to Track Shipment"><i class="fa fa-location-arrow me-1"></i>${p.value}</span>`
+        ? `<span style="font-family: monospace; font-size: 13px; color: #0f172a; cursor: pointer;" title="Click to Track Shipment"><i class="fa fa-location-arrow text-primary me-1" style="font-size: 11px;"></i>${p.value}</span>`
         : '<span class="text-muted">-</span>'
     },
     {
@@ -59,7 +59,9 @@ export class WaybillsComponent implements OnInit {
       width: 120,
       cellRenderer: (p: any) => {
         const isUsed = p.value === 'Used';
-        return `<span class="grid-badge ${isUsed ? 'bg-success' : 'bg-warning'} text-white shadow-xs">${p.value || ''}</span>`;
+        return isUsed
+          ? `<span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-pill fw-bold border border-success-subtle" style="font-size: 10px; letter-spacing: 0.5px;">USED</span>`
+          : `<span class="badge bg-warning-subtle text-warning px-2.5 py-1 rounded-pill fw-bold border border-warning-subtle" style="font-size: 10px; letter-spacing: 0.5px;">UNUSED</span>`;
       }
     },
     {
@@ -84,7 +86,7 @@ export class WaybillsComponent implements OnInit {
   ];
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private snackbar: SnackBarService,
     private icustomerOrder: ICustomerOrder
   ) { }
@@ -119,6 +121,12 @@ export class WaybillsComponent implements OnInit {
     });
   }
 
+  onDateRangeChange(event: { startDate: string, endDate: string }) {
+    this.dateFrom = event.startDate;
+    this.dateTo = event.endDate;
+    this.applyFilters();
+  }
+
   applyFilters() {
     const from = this.dateFrom ? new Date(this.dateFrom) : null;
     const to = this.dateTo ? new Date(this.dateTo + 'T23:59:59') : null;
@@ -132,11 +140,17 @@ export class WaybillsComponent implements OnInit {
       // Status
       const matchStatus = this.statusFilter === 'All' || wb.wb_status === this.statusFilter;
 
-      // Date — use wb_used_date for Used, wb_created_date for others
-      const dateField = wb.wb_status === 'Used' ? wb.wb_used_date : wb.wb_created_date;
-      const rowDate = dateField ? new Date(dateField) : null;
-      const matchDate = (!from && !to) ||
-        (rowDate ? ((!from || rowDate >= from) && (!to || rowDate <= to)) : false);
+      // Date Range — ONLY applies to Used waybills
+      let matchDate = true;
+      if (from || to) {
+        if (wb.wb_status === 'Used') {
+          const rowDate = wb.wb_used_date ? new Date(wb.wb_used_date) : null;
+          matchDate = rowDate ? ((!from || rowDate >= from) && (!to || rowDate <= to)) : false;
+        } else {
+          // Unused waybills are NOT filtered by date range
+          matchDate = true;
+        }
+      }
 
       return matchSearch && matchStatus && matchDate;
     });

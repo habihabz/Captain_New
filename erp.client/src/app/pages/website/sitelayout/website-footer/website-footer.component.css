@@ -1,0 +1,85 @@
+/* Premium Footer Styles */
+.footer_area {
+    background-color: #0a0a0a !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.f-title {
+    color: #fff;
+    margin-bottom: 25px !important;
+    position: relative;
+    display: inline-block;
+}
+
+.f-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 30px;
+    height: 2px;
+    background-color: #D6DE23;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: #a0a0a0;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.footer-links a:hover {
+    color: #D6DE23;
+    transform: translateX(5px);
+}
+
+.social__media {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.social-icon:hover {
+    background-color: #D6DE23;
+    color: #000;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(214, 222, 35, 0.3);
+}
+
+.footer-contact li {
+    color: #a0a0a0;
+}
+
+.footer-contact i {
+    font-size: 16px;
+    margin-top: 3px;
+}
+
+.footer-bottom-links a:hover {
+    color: #D6DE23 !important;
+}
+
+/* Override previous compact footer rules if any */
+.footer__bottom {
+    margin-top: 0 !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+}

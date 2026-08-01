@@ -20,6 +20,8 @@ import { IFavouriteService } from '../../../services/ifavourite.service';
 import { IuserService } from '../../../services/iuser.service';
 import { SnackBarService } from '../../../services/isnackbar.service';
 import { DbResult } from '../../../models/dbresult.model';
+import { IConstantValueService } from '../../../services/iconstant.values.service';
+import { ConstantValue } from '../../../models/constant.value.model';
 
 @Component({
   selector: 'app-shop',
@@ -61,6 +63,7 @@ export class ShopComponent implements OnInit {
   currentUser: User = new User();
   userFavourites: Favourite[] = [];
   isMobileFilterOpen: boolean = false;
+  isShopEnabled: boolean = true;
 
   constructor(
     private elRef: ElementRef,
@@ -73,7 +76,8 @@ export class ShopComponent implements OnInit {
     private iuser: IuserService,
     private snackbarService: SnackBarService,
     private titleService: Title,
-    private metaService: Meta
+    private metaService: Meta,
+    private constantService: IConstantValueService
   ) {
     this.currentUser = iuser.getCurrentUser();
     this.country = this.geolocationService.getCurrentCountry();
@@ -89,6 +93,22 @@ export class ShopComponent implements OnInit {
     this.getMasterDatasByType("SubDivision", (data) => { this.subdivisions = data; });
     this.getMasterDatasByType("ProductSize", (data) => { this.sizes = data; });
     this.loadUserFavourites();
+    this.checkShopStatus();
+  }
+
+  checkShopStatus() {
+    this.constantService.getConstantValueByName('SHOP_ENABLED').subscribe({
+      next: (res: ConstantValue) => {
+        if (res && res.cv_id) {
+          this.isShopEnabled = res.cv_value?.toUpperCase() === 'TRUE';
+        } else {
+          this.isShopEnabled = true;
+        }
+      },
+      error: () => {
+        this.isShopEnabled = true;
+      }
+    });
   }
 
   setSEO() {

@@ -52,6 +52,11 @@ export class OrderDetailsComponent {
     this.getOrderDetails();
 
   }
+  trackingWaybill: string = '';
+  trackingLoading: boolean = false;
+  trackingError: string = '';
+  trackingDetails: any = null;
+
   getOrderDetails(): void {
 
     this.icustomerOrder.getCustomerOrder(this.orderId).subscribe(
@@ -59,10 +64,133 @@ export class OrderDetailsComponent {
         this.customerOrder = data;
         this.resolveOrderItemImage(this.customerOrder);
         this.getOrderMovementHistory(this.orderId);
+
+        if (this.customerOrder.co_waybill) {
+          this.loadTrackingForOrder(this.customerOrder.co_waybill, this.customerOrder.co_id);
+        }
       },
       (error) => {
       }
     );
+  }
+
+  loadTrackingForOrder(waybill: string, refId: any = '') {
+    if (!waybill) return;
+    this.trackingWaybill = waybill;
+    this.trackingLoading = true;
+    this.trackingError = '';
+    this.trackingDetails = null;
+
+    this.icustomerOrder.trackDelhiveryShipment(waybill, String(refId || '')).subscribe({
+      next: (res) => {
+        this.trackingLoading = false;
+        this.parseTrackingResponse(res, waybill);
+      },
+      error: (err) => {
+        this.trackingLoading = false;
+        this.trackingError = err.error?.message || "Failed to fetch tracking details from Delhivery.";
+      }
+    });
+  }
+
+  parseTrackingResponse(res: any, waybill: string) {
+    if (!res || !res.success || !res.data) {
+      this.trackingError = res?.message || "No tracking data found for waybill: " + waybill;
+      return;
+    }
+
+    const data = res.data;
+    let shipmentData = null;
+
+    if (data.ShipmentData && Array.isArray(data.ShipmentData) && data.ShipmentData.length > 0) {
+      shipmentData = data.ShipmentData[0].Shipment;
+    } else if (data.packages && Array.isArray(data.packages) && data.packages.length > 0) {
+      shipmentData = data.packages[0];
+    } else if (typeof data === 'object') {
+      shipmentData = data;
+    }
+
+    if (!shipmentData) {
+      this.trackingError = "No tracking information found for waybill: " + waybill;
+      return;
+    }
+
+    const statusObj = shipmentData.Status || {};
+    const consigneeObj = shipmentData.Consignee || {};
+    const originObj = shipmentData.OriginRec || {};
+
+    const rawScans = shipmentData.Scans || shipmentData.scans || [];
+    const scansList = rawScans.map((s: any) => {
+      const detail = s.ScanDetail || s;
+      return {
+        Scan: detail.Scan || detail.scan || detail.instructions || detail.ScanType || 'Scanned',
+        ScanType: detail.ScanType || '',
+        ScanDateTime: detail.ScanDateTime || detail.scan_date_time || detail.date,
+        ScannedLocation: detail.ScannedLocation || detail.location || detail.scanned_location || '',
+        Instructions: detail.Instructions || detail.instructions || detail.remarks || ''
+      };
+    });
+
+    const statusType = String(statusObj.StatusType || statusObj.status_type || shipmentData.status_type || '').toUpperCase();
+    const rawStatus = String(statusObj.Status || statusObj.status || shipmentData.status || '');
+    
+    // Check if shipment is converted to Return Shipment (RT / RTO)
+    const isReturnShipment = statusType === 'RT' || rawStatus.toLowerCase().includes('rto') || rawStatus.toLowerCase().includes('return');
+    
+    let displayStatus = rawStatus || 'Manifested';
+    if (statusType === 'RT') {
+      displayStatus = `RT - Return (${rawStatus})`;
+    } else if (rawStatus.toUpperCase() === 'RTO') {
+      displayStatus = `RTO - Returned to Origin`;
+    }
+
+    this.trackingDetails = {
+      awb: shipmentData.AWB || shipmentData.waybill || waybill,
+      status: displayStatus,
+      rawStatus: rawStatus,
+      statusType: statusType,
+      isReturnShipment: isReturnShipment,
+      statusDate: statusObj.StatusDateTime || statusObj.status_date_time,
+      instructions: statusObj.Instructions || statusObj.instructions || statusObj.remarks || '',
+      expectedDate: shipmentData.ExpectedDeliveryDate || shipmentData.expected_delivery_date,
+      origin: originObj.City || shipmentData.Origin || shipmentData.origin || '',
+      destination: consigneeObj.City || shipmentData.Destination || shipmentData.destination || '',
+      consigneeName: consigneeObj.Name || shipmentData.consignee_name || '',
+      scans: scansList
+    };
+
+    // 1. Auto-sync ERP Order Status to Delivered (3) if Status is "Delivered"
+    const currentStatus = String(rawStatus || '').toLowerCase();
+    if (currentStatus.includes('deliver') && !isReturnShipment && this.customerOrder && this.customerOrder.co_status !== 3) {
+      this.customerOrder.co_status = 3;
+      const omh = new OrderMovementHistory();
+      omh.omh_id = 0;
+      omh.omh_order_no = this.customerOrder.co_id;
+      omh.omh_status = 3;
+      omh.omh_cre_by = this.currentUser?.u_id || 1;
+
+      this.iOrderMovementHistoryService.createOrderMovementHistory(omh).subscribe({
+        next: () => {
+          this.getOrderMovementHistory(this.customerOrder.co_id);
+        }
+      });
+    }
+
+    // 2. Auto-sync Return Journey if Return Shipment (RT / RTO) is detected from Delhivery
+    if (isReturnShipment && this.customerOrder && !this.isReturnActive) {
+      this.isReturnActive = true;
+      const omh = new OrderMovementHistory();
+      omh.omh_id = 0;
+      omh.omh_order_no = this.customerOrder.co_id;
+      omh.omh_status = 14; // Return / RTO Initiated
+      omh.omh_cre_by = this.currentUser?.u_id || 1;
+
+      this.iOrderMovementHistoryService.createOrderMovementHistory(omh).subscribe({
+        next: () => {
+          this.getOrderMovementHistory(this.customerOrder.co_id);
+        }
+      });
+    }
   }
 
   showReturnForm: boolean = false;
@@ -89,7 +217,12 @@ export class OrderDetailsComponent {
   }
 
   isOrderDelivered(): boolean {
-    return !!(this.customerOrder && this.customerOrder.co_status_name === 'Delivered');
+    if (!this.customerOrder) return false;
+    const stName = (this.customerOrder.co_status_name || '').toLowerCase();
+    const trackingStatus = (this.trackingDetails?.status || '').toLowerCase();
+    return this.customerOrder.co_status === 3 || 
+           stName.includes('deliver') || 
+           trackingStatus.includes('deliver');
   }
 
   getAttachementOfaProduct(p_attachements: string) {
@@ -135,33 +268,36 @@ export class OrderDetailsComponent {
     if (cleanPath.startsWith('http')) return cleanPath;
     return `${this.apiUrl}/${cleanPath}`;
   }
+
   downloadTaxInvoice() {
-
-    this.icustomerOrder.invoice(this.orderId)
-      .subscribe({
-
-        next: (data: Blob) => {
-
-          const blob = new Blob([data], { type: 'application/pdf' });
-
-          const url = window.URL.createObjectURL(blob);
-
+    this.icustomerOrder.invoice(this.orderId).subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+        if (!win) {
           const a = document.createElement('a');
           a.href = url;
           a.download = `Tax_Invoice_Order_${this.orderId}.pdf`;
-
           document.body.appendChild(a);
           a.click();
-
           document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        },
-
-        error: () => {
-          this.snackBarService.showError('Error downloading tax invoice.');
         }
+      },
+      error: () => {
+        this.snackBarService.showError('Error downloading tax invoice.');
+      }
+    });
+  }
 
-      });
+  isCashOnDelivery(): boolean {
+    if (!this.customerOrder) return false;
+    const pmName = (this.customerOrder.co_payment_method_name || '').toLowerCase();
+    return pmName.includes('cash') || this.customerOrder.co_payment_method === 39;
+  }
+
+  isPrepaid(): boolean {
+    return !this.isCashOnDelivery();
   }
 
   allMovementHistories: any[] = [];
@@ -169,18 +305,22 @@ export class OrderDetailsComponent {
   getOrderMovementHistory(co_id: number) {
     this.iOrderMovementHistoryService.getOrderMovementHistoriesByOrder(co_id).subscribe(
       (data: OrderMovementHistory[]) => {
-        this.allMovementHistories = data;
+        if (this.isCashOnDelivery()) {
+          this.allMovementHistories = data.filter(omh => omh.omh_workflow_id !== 3);
+        } else {
+          this.allMovementHistories = data;
+        }
         
-        // Split for conditional UI logic if needed elsewhere
         this.orderMovementHistories = data.filter(omh => omh.omh_workflow_id === 1);
-        const returnAndRefund = data.filter(omh => omh.omh_workflow_id === 2 || omh.omh_workflow_id === 3);
         this.isReturnActive = data.some(omh => omh.omh_workflow_id === 2);
-        this.isRefundActive = data.some(omh => omh.omh_workflow_id === 3) || this.isOrderCanceled();
+        this.isRefundActive = !this.isCashOnDelivery() && (data.some(omh => omh.omh_workflow_id === 3) || this.isOrderCanceled());
       }
     );
   }
 
   showWorkflowHeader(index: number): boolean {
+    if (!this.allMovementHistories[index]) return false;
+    if (this.isCashOnDelivery() && this.allMovementHistories[index].omh_workflow_id === 3) return false;
     if (index === 0) return true;
     return this.allMovementHistories[index].omh_workflow_id !== this.allMovementHistories[index - 1].omh_workflow_id;
   }
@@ -211,11 +351,11 @@ export class OrderDetailsComponent {
 
   cancelCustomerOrder() {
     // Determine if the order is already confirmed (ID 1) or processed beyond confirmation (IDs 2, 3)
-    // Orders in these stages require bank details for a Refund (Workflow 3)
+    // Orders in these stages require bank details for a Refund (Workflow 3) if Prepaid
     const refundRequiredStages = [1, 2, 3];
     const currentStatusId = this.customerOrder.co_status;
 
-    if (refundRequiredStages.includes(currentStatusId)) {
+    if (this.isPrepaid() && refundRequiredStages.includes(currentStatusId)) {
       this.showCancelRefundForm = true;
       this.bankName = '';
       this.accountNo = '';
@@ -276,8 +416,17 @@ export class OrderDetailsComponent {
       this.ireturnOrder.raiseReturnRequest(returnRequest).subscribe(
         (data: DbResult) => {
           if (data.message === "Success") {
-            this.getOrderDetails();
-            this.getOrderMovementHistory(this.orderId);
+            const omh = new OrderMovementHistory();
+            omh.omh_id = 0;
+            omh.omh_order_no = this.orderId;
+            omh.omh_status = 14; // Return / RTO Initiated
+            omh.omh_cre_by = this.currentUser?.u_id || 1;
+
+            this.iOrderMovementHistoryService.createOrderMovementHistory(omh).subscribe(() => {
+              this.getOrderDetails();
+              this.getOrderMovementHistory(this.orderId);
+            });
+
             this.showReturnForm = false;
             this.snackBarService.showSuccess('Return request submitted successfully.');
           } else {

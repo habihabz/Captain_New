@@ -27,12 +27,7 @@ export class DashboardComponent implements OnInit {
   currencySymbol: string = '₹'; // Default fallback
 
   recentOrders: any[] = [];
-  topProducts: any[] = [
-    { name: 'Classic Leather Watch', sales: 142, revenue: 14200, growth: 12 },
-    { name: 'Premium Silk Scarf', sales: 98, revenue: 4900, growth: 8 },
-    { name: 'Minimalist Card Holder', sales: 85, revenue: 2550, growth: -2 },
-    { name: 'Signature Fragrance', sales: 74, revenue: 7400, growth: 15 }
-  ];
+  topProducts: any[] = [];
 
   constructor(
     private orderService: ICustomerOrder,
@@ -103,8 +98,6 @@ export class DashboardComponent implements OnInit {
       .sort((a: any, b: any) => b.revenue - a.revenue)
       .slice(0, 4);
 
-    if (sortedProducts.length > 0) {
-      this.topProducts = sortedProducts;
-    }
+    this.topProducts = sortedProducts;
   }
 }

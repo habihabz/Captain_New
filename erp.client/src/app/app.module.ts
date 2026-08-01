@@ -67,6 +67,7 @@ import { WaybillsComponent } from './pages/admin/waybills/waybills.component';
 import { DelhiveryWarehouseComponent } from './pages/admin/delhivery-warehouse/delhivery-warehouse.component';
 import { DelhiveryPickupRequestComponent } from './pages/admin/delhivery-pickup-request/delhivery-pickup-request.component';
 import { DelhiveryShipmentComponent } from './pages/admin/delhivery-shipment/delhivery-shipment.component';
+import { SettingsComponent } from './pages/admin/settings/settings.component';
 
 // Define a function to get the token
 export function tokenGetter() {
@@ -124,7 +125,8 @@ const jwtConfig: JwtModuleOptions = {
     WaybillsComponent,
     DelhiveryWarehouseComponent,
     DelhiveryPickupRequestComponent,
-    DelhiveryShipmentComponent
+    DelhiveryShipmentComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,

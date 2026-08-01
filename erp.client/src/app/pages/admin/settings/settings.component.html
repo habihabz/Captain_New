@@ -1,0 +1,37 @@
+<div class="right_col d-flex flex-column" role="main" style="padding-top: 10px; height: 100vh; overflow: hidden;">
+  <div class="row mb-4 flex-shrink-0">
+    <div class="col-12 px-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 m-0">
+          <li class="breadcrumb-item text-muted small">Admin Console</li>
+          <li class="breadcrumb-item active text-dark fw-bold small" aria-current="page">Settings</li>
+        </ol>
+      </nav>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <h3 class="fw-bold text-dark m-0">Settings</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="x_panel border-0 shadow-sm rounded-4 mx-2 mb-3 flex-grow-1 d-flex flex-column overflow-hidden">
+    <div class="x_content p-4">
+      <div class="card border-0 shadow-sm rounded-4" style="max-width: 600px;">
+        <div class="card-body p-4">
+          <h5 class="card-title fw-bold mb-4">Website Settings</h5>
+          
+          <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+            <div>
+              <h6 class="mb-1 fw-bold">Enable Shop</h6>
+              <p class="text-muted small mb-0">When disabled, products are visible but purchasing is hidden.</p>
+            </div>
+            <div class="form-check form-switch" style="font-size: 1.5rem;">
+              <input class="form-check-input" type="checkbox" role="switch" id="shopEnabledSwitch" 
+                     [checked]="shopEnabled" (change)="toggleShop($event)" [disabled]="isLoading">
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

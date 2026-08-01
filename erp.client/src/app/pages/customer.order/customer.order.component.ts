@@ -112,22 +112,6 @@ export class CustomerOrderComponent {
           },
           {
             name: '',
-            tooltip: 'Change Status',
-            cssClass: 'btn btn-outline-success btn-xs rounded-pill ms-1',
-            icon: 'fa fa-refresh',
-            action: 'statusChange',
-            statusChange: (data: any) => this.onAction('statusChange', data)
-          },
-          {
-            name: '',
-            tooltip: 'Create Delhivery Shipment',
-            cssClass: 'btn btn-outline-info btn-xs rounded-pill ms-1',
-            icon: 'fa fa-truck',
-            action: 'createShipment',
-            createShipment: (data: any) => this.onAction('createShipment', data)
-          },
-          {
-            name: '',
             tooltip: 'Track Delhivery Shipment',
             cssClass: 'btn btn-outline-warning btn-xs rounded-pill ms-1',
             icon: 'fa fa-map-marker',

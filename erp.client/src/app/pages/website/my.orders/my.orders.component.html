@@ -22,24 +22,32 @@
           <!-- ORDER STATUS -->
           <div class="mb-4">
             <h6 class="fw-bold text-dark small text-uppercase mb-3" style="letter-spacing: 0.5px;">Order Status</h6>
-            <div class="form-check mb-2" *ngFor="let status of availableStatuses">
-              <input class="form-check-input border-gray" type="checkbox" [id]="status" 
-                     (change)="toggleStatus(status)" [checked]="selectedStatuses.has(status)">
-              <label class="form-check-label small text-muted" [for]="status" style="cursor: pointer;">
-                {{ status }}
-              </label>
+            <div class="row g-2">
+                <div class="col-6 col-sm-4 col-lg-12" *ngFor="let status of availableStatuses">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input border-gray" type="checkbox" [id]="status" 
+                           (change)="toggleStatus(status)" [checked]="selectedStatuses.has(status)">
+                    <label class="form-check-label small text-muted" [for]="status" style="cursor: pointer;">
+                      {{ status }}
+                    </label>
+                  </div>
+                </div>
             </div>
           </div>
 
           <!-- ORDER TIME -->
           <div class="mb-2">
             <h6 class="fw-bold text-dark small text-uppercase mb-3" style="letter-spacing: 0.5px;">Order Time</h6>
-            <div class="form-check mb-2" *ngFor="let year of availableYears">
-              <input class="form-check-input border-gray" type="checkbox" [id]="year" 
-                     (change)="toggleYear(year)" [checked]="selectedYears.has(year)">
-              <label class="form-check-label small text-muted" [for]="year" style="cursor: pointer;">
-                {{ year }}
-              </label>
+            <div class="row g-2">
+                <div class="col-6 col-sm-4 col-lg-12" *ngFor="let year of availableYears">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input border-gray" type="checkbox" [id]="year" 
+                           (change)="toggleYear(year)" [checked]="selectedYears.has(year)">
+                    <label class="form-check-label small text-muted" [for]="year" style="cursor: pointer;">
+                      {{ year }}
+                    </label>
+                  </div>
+                </div>
             </div>
           </div>
         </div>

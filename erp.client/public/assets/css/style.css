@@ -6259,7 +6259,7 @@ label {
 .sub-title {
     font-size: 18px;
     font-weight: 600;
-    color: #2bb9a9;
+    color: #D6DE23;
     text-transform: uppercase;
     font-family: "Barlow Condensed", Sans-serif;
 }
@@ -6306,7 +6306,7 @@ label {
 }
 
 .lightbluee {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 /***********************
@@ -6411,7 +6411,7 @@ label {
 }
 
 .gota_top li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -6506,7 +6506,7 @@ label {
 }
 
 .additional_dropdown li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -6663,7 +6663,7 @@ label {
 }
 
 .main-menu ul li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -6897,7 +6897,7 @@ label {
 }
 
 .main-menu.white-color ul li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -6937,7 +6937,7 @@ label {
 }
 
 .popup_offer p span {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 .gota_call p {
@@ -7098,7 +7098,7 @@ label {
 }
 
 .gota_vertical_menu .vertical-dropdown li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -7349,7 +7349,7 @@ label {
 }
 
 .gota_cart_3 a {
-    background: #2bb9a9;
+    background: #D6DE23;
     padding: 16px 60px;
     color: #ffffff;
     border-radius: 3px;
@@ -7668,7 +7668,7 @@ input:-ms-input-placeholder {
     top: 0;
     right: 0;
     bottom: 0;
-    background: #000;
+    background: #212529;
     height: 100%;
     width: 100%;
     z-index: 2;
@@ -8177,7 +8177,7 @@ input:-ms-input-placeholder {
     height: 12px;
     display: inline-block;
     border-radius: 0;
-    background: #000;
+    background: #212529;
     opacity: 0.2;
 }
 
@@ -13082,9 +13082,9 @@ print {
 
 .categories__tab .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
-    color: #2bb9a9;
+    color: #D6DE23;
     background-color: #fff;
-    border: 1px solid #2bb9a9 !important;
+    border: 1px solid #D6DE23 !important;
     border-radius: 0;
 }
 
@@ -13207,7 +13207,7 @@ print {
 }
 
 .product__name h4:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -13321,7 +13321,7 @@ print {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #000;
+    background: #212529;
     content: "";
     opacity: 0.7;
 }
@@ -13345,7 +13345,7 @@ print {
     text-transform: uppercase;
     transform: translateY(-43px);
     transition: all 0.3s;
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid #212529;
 }
 
 .product {
@@ -13397,7 +13397,7 @@ print {
     width: 100px;
     justify-content: space-around;
     background: #fff;
-    border: 1px solid #000;
+    border: 1px solid #212529;
     opacity: 0;
     justify-content: flex-end;
     visibility: hidden;
@@ -13416,7 +13416,7 @@ print {
 }
 
 .inner__action>div:hover {
-    background: #000;
+    background: #212529;
     color: #fff;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
@@ -13431,7 +13431,7 @@ print {
     left: 0;
     height: 100%;
     width: 1px;
-    background: #000;
+    background: #212529;
     content: "";
 }
 
@@ -13508,7 +13508,7 @@ print {
 }
 
 .list-actions a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 .border-top {
@@ -13631,7 +13631,7 @@ print {
 }
 
 .product__update .lightblueclr {
-    background: #2bb9a9;
+    background: #D6DE23;
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
@@ -13686,7 +13686,7 @@ print {
 .blog__content>span {
     display: inline-block;
     padding: 7px 8px;
-    background: #2bb9a9;
+    background: #D6DE23;
     color: #ffffff;
     font-size: 13px;
     font-weight: 500;
@@ -13739,7 +13739,7 @@ print {
     width: 100%;
     bottom: 0;
     transition: height 0.5s ease-out;
-    background: linear-gradient(to bottom, transparent 0%, #2bb9a9 100%);
+    background: linear-gradient(to bottom, transparent 0%, #D6DE23 100%);
 }
 
 .blog:hover::before {
@@ -13780,7 +13780,7 @@ print {
 }
 
 .blog-title:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -13808,7 +13808,7 @@ print {
     width: 100%;
     bottom: 0;
     transition: height 0.5s ease-out;
-    background: linear-gradient(to bottom, transparent 0%, #2bb9a9 100%);
+    background: linear-gradient(to bottom, transparent 0%, #D6DE23 100%);
 }
 
 .bpost__thumb:hover::before {
@@ -13834,7 +13834,7 @@ print {
 .bpost__content>span {
     display: inline-block;
     padding: 7px 8px;
-    background: #2bb9a9;
+    background: #D6DE23;
     color: #ffffff;
     font-size: 13px;
     font-weight: 500;
@@ -13849,7 +13849,7 @@ print {
 }
 
 .bpost__content p span {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 @media only screen and (min-width: 576px) and (max-width: 767px) {
@@ -13902,7 +13902,7 @@ print {
     right: 31%;
     top: 50%;
     transform: translateY(-50%);
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
@@ -14240,7 +14240,7 @@ print {
 
 .bigpost__content h4 {
     font-size: 16px;
-    color: #2bb9a9;
+    color: #D6DE23;
     font-weight: 400;
     font-family: "Futura Std Book";
 }
@@ -14296,7 +14296,7 @@ print {
 }
 
 .b-title:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -14309,7 +14309,7 @@ print {
 }
 
 .post-meta p span {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 @media (max-width: 767px) {
@@ -14353,7 +14353,7 @@ print {
 }
 
 .pagination ul li a:hover {
-    background: #2bb9a9;
+    background: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -14363,7 +14363,7 @@ print {
 
 .grid_blog__content h4 {
     font-size: 16px;
-    color: #2bb9a9;
+    color: #D6DE23;
     font-family: "Futura Std Book";
 }
 
@@ -15148,7 +15148,7 @@ print {
 }
 
 .company__info ul li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -15193,7 +15193,7 @@ print {
 }
 
 .social__media a:hover {
-    background: #2bb9a9;
+    background: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -15221,7 +15221,7 @@ print {
 
 .subscribe button {
     display: inline-block;
-    background: #2bb9a9;
+    background: #D6DE23;
     color: #ffffff;
     border: 0;
     position: absolute;
@@ -15289,7 +15289,7 @@ print {
 }
 
 .footer__bottom p span {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 .footer-menu ul li {
@@ -15326,7 +15326,7 @@ print {
 }
 
 .footer-menu ul li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -15610,7 +15610,7 @@ print {
 
 .btn-style-1 {
     font-size: 18px;
-    color: #2bb9a9;
+    color: #D6DE23;
     text-transform: uppercase;
     background: #ffffff;
     padding: 10px 30px;
@@ -15684,7 +15684,7 @@ print {
 
 .testimonial__content h4 span {
     font-weight: 600;
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 @media (max-width: 767px) {
@@ -15776,7 +15776,7 @@ print {
 }
 
 .sidebar-content ul li a:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -15805,7 +15805,7 @@ print {
     height: 50px;
     width: 50px;
     background: transparent;
-    color: #000;
+    color: #212529;
     line-height: 50px;
     text-align: center;
     font-size: 18px;
@@ -16000,7 +16000,7 @@ print {
 }
 
 .tags a:hover {
-    background: #2bb9a9;
+    background: #D6DE23;
     color: #ffffff;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
@@ -16320,12 +16320,12 @@ ul.color-list li:hover {
 
 .viewcontent__header h2 {
     font-size: 30px;
-    color: #000;
+    color: #212529;
     text-transform: capitalize;
 }
 
 .viewcontent__header h2:hover {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 @media (max-width: 767px) {
@@ -16414,7 +16414,7 @@ ul.color-list li:hover {
     left: 0;
     width: 0;
     height: 100%;
-    background: #000;
+    background: #212529;
     transition: 0.3s;
     content: "";
     z-index: -1;
@@ -16453,7 +16453,7 @@ ul.color-list li:hover {
     right: 5%;
     height: 50px;
     width: 50px;
-    background: #000;
+    background: #212529;
     color: #fff;
     line-height: 50px;
     text-align: center;
@@ -16646,7 +16646,7 @@ ul.color-list li:hover {
 }
 
 .testimonial__content p {
-    color: #000;
+    color: #212529;
     font-size: 16px;
     line-height: 2;
 }
@@ -16825,7 +16825,7 @@ ul.color-list li:hover {
 }
 
 .company__social {
-    background: #2bb9a9;
+    background: #D6DE23;
     padding: 35px 0;
     margin-top: -6px;
 }
@@ -16858,7 +16858,7 @@ ul.color-list li:hover {
 .additional-information ul li.title {
     font-size: 24px;
     font-weight: 700;
-    color: #000;
+    color: #212529;
     width: 100%;
 }
 
@@ -17005,7 +17005,7 @@ ul.color-list li:hover {
 
 .submit-btn input:hover {
     background: transparent;
-    border: 1px solid #2bb9a9;
+    border: 1px solid #D6DE23;
     color: #222222;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
@@ -17103,11 +17103,11 @@ ul.color-list li:hover {
 
 .contact-single__thumb i {
     font-size: 50px;
-    color: #2bb9a9;
+    color: #D6DE23;
     display: inline-block;
     height: 100px;
     width: 100px;
-    border: 2px solid #2bb9a9;
+    border: 2px solid #D6DE23;
     border-radius: 50%;
     text-align: center;
     line-height: 100px;
@@ -17200,7 +17200,7 @@ ul.color-list li:hover {
 .service-single a {
     display: inline-block;
     padding: 9px 46px;
-    background: #2bb9a9;
+    background: #D6DE23;
     text-transform: uppercase;
     font-weight: 600;
 }
@@ -17238,7 +17238,7 @@ ul.color-list li:hover {
     content: "";
     height: 2px;
     width: 50px;
-    background: #2bb9a9;
+    background: #D6DE23;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
@@ -17328,7 +17328,7 @@ ul.color-list li:hover {
 
 .accordion .c-item button {
     background: transparent;
-    color: #000;
+    color: #212529;
     font-size: 18px;
     font-weight: 600;
 }
@@ -17420,25 +17420,25 @@ button.accordion-button::after {
 .categories__tab .nav-tabs .nav-link {
     margin-bottom: -1px;
     background: 0 0;
-    border: 2px solid #2bb9a9;
+    border: 2px solid #D6DE23;
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
 }
 
 .categories__tab .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
-    color: #2bb9a9;
+    color: #D6DE23;
     background-color: #fff;
     border-radius: 0;
 }
 
 .categories__tab .nav-tabs li button.active {
-    border: 2px solid #2bb9a9 !important;
+    border: 2px solid #D6DE23 !important;
 }
 
 .search_tab .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
-    color: #2bb9a9;
+    color: #D6DE23;
     background-color: #fff;
     border-radius: 0;
 }
@@ -17495,7 +17495,7 @@ button.accordion-button::after {
     background: transparent;
     border: 0;
     font-size: 21px;
-    color: #000;
+    color: #212529;
     font-weight: 600;
 }
 
@@ -17583,7 +17583,7 @@ button.accordion-button::after {
 .cart_table th {
     border: 1px solid #ddd;
     text-align: center;
-    color: #000;
+    color: #212529;
     font-weight: 600;
     text-transform: uppercase;
     height: 70px;
@@ -17649,7 +17649,7 @@ button.accordion-button::after {
 .cart__acount h5 {
     text-transform: uppercase;
     margin-bottom: 20px;
-    color: #000;
+    color: #212529;
     font-size: 20px;
     font-weight: 600;
 }
@@ -17720,14 +17720,14 @@ button.accordion-button::after {
     font-family: "Futura Std Book";
     background-color: #f7f6f7;
     padding: 15px 0;
-    border-top: 2px solid #2bb9a9;
+    border-top: 2px solid #D6DE23;
     margin-bottom: 30px;
     padding-left: 15px;
 }
 
 .notification__message p i {
     padding-right: 15px;
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 .checkout__wrap label {
@@ -17851,7 +17851,7 @@ button.accordion-button::after {
     width: 100%;
     height: 50px;
     text-transform: uppercase;
-    background: #000;
+    background: #212529;
     color: #ffffff;
     font-weight: 600;
 }
@@ -17876,10 +17876,10 @@ button.accordion-button::after {
 }
 
 .checkout__accordion .accordion-button:not(.collapsed) {
-    color: #2bb9a9;
+    color: #D6DE23;
     background-color: transparent;
     box-shadow: none;
-    border: 1px solid #2bb9a9;
+    border: 1px solid #D6DE23;
 }
 
 .add_cart_product {
@@ -17927,7 +17927,7 @@ button.accordion-button::after {
 .end {
     margin-left: 108px;
     letter-spacing: 2px;
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 .cart-bottom__text a {
@@ -17950,7 +17950,7 @@ button.accordion-button::after {
 }
 
 .cart-bottom__text a:hover {
-    border: 2px solid #2bb9a9;
+    border: 2px solid #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -18031,7 +18031,7 @@ button.accordion-button::after {
 }
 
 .input_wrap button:hover {
-    background: #2bb9a9;
+    background: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -18117,7 +18117,7 @@ button.accordion-button::after {
 .sm-input-wrap button {
     width: 100%;
     text-transform: uppercase;
-    background: #000;
+    background: #212529;
     color: #fff;
     padding: 4px 0;
     border: 0;
@@ -18171,7 +18171,7 @@ button.accordion-button::after {
     width: 50px;
     text-align: center;
     line-height: 50px;
-    color: #000;
+    color: #212529;
     font-weight: 500;
 }
 
@@ -18185,7 +18185,7 @@ button.accordion-button::after {
 
 .s-price span {
     font-size: 28px;
-    color: #000;
+    color: #212529;
     font-weight: 600;
 }
 
@@ -18207,7 +18207,7 @@ button.accordion-button::after {
     display: inline;
     padding: 16px 50px;
     background: transparent;
-    color: #000;
+    color: #212529;
     border: 2px solid #ddd;
     text-align: center;
     text-transform: uppercase;
@@ -18220,7 +18220,7 @@ button.accordion-button::after {
 }
 
 .single_action span a::before {
-    background: #2bb9a9;
+    background: #D6DE23;
     color: #ffffff;
 }
 
@@ -18235,7 +18235,7 @@ button.accordion-button::after {
     line-height: 50px;
     text-align: center;
     border: 2px solid #ddd;
-    color: #000;
+    color: #212529;
     font-weight: 400;
 }
 
@@ -18302,7 +18302,7 @@ button.accordion-button::after {
 }
 
 .desc-3_content h4 {
-    color: #000;
+    color: #212529;
     font-weight: 500;
 }
 
@@ -18430,7 +18430,7 @@ button.accordion-button::after {
     font-size: 16px;
     padding: 10px 30px;
     border: 0;
-    background: #000;
+    background: #212529;
     color: #fff;
     text-transform: uppercase;
     -webkit-transition: all 0.3s ease-out 0s;
@@ -18441,7 +18441,7 @@ button.accordion-button::after {
 }
 
 .review__wrap button:hover {
-    background: #2bb9a9;
+    background: #D6DE23;
     -webkit-transition: all 0.3s ease-out 0s;
     -moz-transition: all 0.3s ease-out 0s;
     -ms-transition: all 0.3s ease-out 0s;
@@ -18450,7 +18450,7 @@ button.accordion-button::after {
 }
 
 .categories__tab.single_disc_tab .nav-tabs .nav-item .nav-link.active {
-    color: #2bb9a9;
+    color: #D6DE23;
 }
 
 /*# sourceMappingURL=style.css.map */

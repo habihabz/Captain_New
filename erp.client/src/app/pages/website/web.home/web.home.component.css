@@ -41,11 +41,12 @@
     height: 100%;
     background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     text-align: center;
     color: white;
     z-index: 2;
+    padding-bottom: 5vh;
     padding-top: 110px; /* Offset for the two fixed headers */
 }
 
@@ -278,9 +279,7 @@
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -2px;
-    background: linear-gradient(to right, #fff, #888);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #D6DE23 !important;
     margin-bottom: 2rem;
 }
 
@@ -341,4 +340,28 @@
     .showcase-title {
         font-size: 2.5rem;
     }
-}
+}
+
+/* About Section */
+.about-section {
+    background: url('/assets/img/about_mockup_bg.png') no-repeat center center;
+    background-size: cover;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+}
+
+.about-title {
+    color: #cda341;
+    font-size: 4.5rem;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.about-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}

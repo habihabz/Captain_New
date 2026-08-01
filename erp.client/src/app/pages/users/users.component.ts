@@ -38,6 +38,7 @@ export class UsersComponent implements OnInit {
       headerName: "Profile", 
       field: "u_image_url", 
       width: 80, 
+      pinned: 'left',
       cellClass: 'text-center',
       cellRenderer: (p: any) => {
         const url = p.value ? Env.serverHostAddress + p.value : 'images/img.jpg';
@@ -48,25 +49,32 @@ export class UsersComponent implements OnInit {
       headerName: "ID", 
       field: "u_id", 
       width: 70, 
+      pinned: 'left',
       cellClass: 'text-center fw-bold text-muted'
     },
     { 
       headerName: "Full Name", 
       field: "u_name", 
-      flex: 1.2,
-      cellClass: 'fw-bold text-dark'
+      width: 160,
+      pinned: 'left',
+      cellClass: 'fw-bold text-dark',
+      valueFormatter: p => p.value && p.value.length > 40 ? p.value.substring(0, 40) + '...' : p.value
     },
     { 
       headerName: "Username", 
       field: "u_username", 
-      flex: 1,
-      cellClass: 'text-primary'
+      width: 140,
+      pinned: 'left',
+      cellClass: 'text-primary',
+      valueFormatter: p => p.value && p.value.length > 40 ? p.value.substring(0, 40) + '...' : p.value
     },
     { 
       headerName: "Email", 
       field: "u_email", 
-      flex: 1.2,
-      cellClass: 'text-muted'
+      width: 220,
+      pinned: 'left',
+      cellClass: 'text-muted',
+      valueFormatter: p => p.value && p.value.length > 40 ? p.value.substring(0, 40) + '...' : p.value
     },
     { 
       headerName: "Phone", 
@@ -205,7 +213,7 @@ export class UsersComponent implements OnInit {
   }
 
   onGridReady(params: any) {
-    params.api.sizeColumnsToFit();
+    // params.api.sizeColumnsToFit(); removed to allow horizontal scrolling
   }
 
   deleteUser(id: number) {

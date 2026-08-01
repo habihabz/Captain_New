@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, HostListener } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IProductService } from '../../../services/iproduct.service';
@@ -20,6 +20,8 @@ import { User } from '../../../models/user.model';
 import { Favourite } from '../../../models/favourite.model';
 import { IFavouriteService } from '../../../services/ifavourite.service';
 import { ProdAttachement } from '../../../models/prod.attachments.model';
+import { IConstantValueService } from '../../../services/iconstant.values.service';
+import { ConstantValue } from '../../../models/constant.value.model';
 declare var $: any;
 
 @Component({
@@ -48,10 +50,25 @@ export class SingleProductComponent implements OnInit {
   favourite: Favourite = new Favourite();
   productAttachements: any[] = [];
   userFavourites: Favourite[] = [];
+  isShopEnabled: boolean = true;
 
   // IMAGE ZOOM VARIABLES
   isZoomed: boolean = false;
   transformOrigin: string = 'center center';
+  selectedImageIndex: number = 0;
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (!this.productAttachements || this.productAttachements.length <= 1) return;
+
+    if (event.key === 'ArrowRight') {
+      const newIndex = (this.selectedImageIndex + 1) % this.productAttachements.length;
+      this.selectImage(newIndex);
+    } else if (event.key === 'ArrowLeft') {
+      const newIndex = (this.selectedImageIndex - 1 + this.productAttachements.length) % this.productAttachements.length;
+      this.selectImage(newIndex);
+    }
+  }
 
   onMouseMove(event: MouseEvent) {
     const target = event.currentTarget as HTMLElement;
@@ -84,7 +101,8 @@ export class SingleProductComponent implements OnInit {
     private geolocationService: GeolocationService,
     private iuser: IuserService,
     private titleService: Title,
-    private metaService: Meta
+    private metaService: Meta,
+    private constantService: IConstantValueService
   ) {
 
     this.currentUser = iuser.getCurrentUser();
@@ -97,7 +115,24 @@ export class SingleProductComponent implements OnInit {
     this.getProductsMayLike(this.productId);
     this.getProductReviews(this.productId);
     this.loadUserFavourites();
+    this.checkShopStatus();
   }
+
+  checkShopStatus() {
+    this.constantService.getConstantValueByName('SHOP_ENABLED').subscribe({
+      next: (res: ConstantValue) => {
+        if (res && res.cv_id) {
+          this.isShopEnabled = res.cv_value?.toUpperCase() === 'TRUE';
+        } else {
+          this.isShopEnabled = true;
+        }
+      },
+      error: () => {
+        this.isShopEnabled = true;
+      }
+    });
+  }
+
   getProductByCountry(productId: number) {
     this.productAttachements= [];
     this.requestParms.id = productId;
@@ -173,7 +208,8 @@ export class SingleProductComponent implements OnInit {
   }
 
   selectImage(index: number) {
-    const selectedAttachment = this.getFilteredAttachments()[index];
+    this.selectedImageIndex = index;
+    const selectedAttachment = this.productAttachements[index] || this.getFilteredAttachments()[index];
     if (selectedAttachment) {
       this.selectedImagePath = this.apiUrl + '/' + selectedAttachment.pa_image_path;
     }

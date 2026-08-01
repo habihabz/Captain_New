@@ -1,13 +1,18 @@
 <!-- HERO SECTION -->
 <section class="hero-wrapper">
-    <img src="/assets/img/hero/captain_hero_bg.png" class="hero-bg" alt="Captain Hero">
+    <video autoplay loop muted playsinline class="hero-bg">
+        <source src="./assets/video/front_page_video.MOV" type="video/mp4">
+    </video>
     <div class="hero-overlay">
         <div class="hero-content">
-            <h1>Engineered for Greatness</h1>
-            <p>Elevate your performance with premium sports gear designed for the elite. Precision, Power, and Passion in every stitch.</p>
+            <h1 style="color: #D6DE23 !important;">Engineered for Greatness</h1>
+            <p>Elevate your performance with premium sports gear designed for the elite. Precision, Power, and Passion
+                in every stitch.</p>
             <div class="hero-btn-group">
-                <button class="btn btn-light btn-lg rounded-0 px-5 fw-bold text-uppercase" (click)="navigateTo('shop')">Shop Collection</button>
-                <button class="btn btn-outline-light btn-lg rounded-0 px-5 fw-bold text-uppercase" (click)="navigateTo('about-us')">Our Story</button>
+                <button class="btn btn-light btn-lg rounded-0 px-5 fw-bold text-uppercase"
+                    (click)="navigateTo('shop')">Shop Collection</button>
+                <button class="btn btn-outline-light btn-lg rounded-0 px-5 fw-bold text-uppercase"
+                    (click)="navigateTo('about-us')">Our Story</button>
             </div>
 
         </div>
@@ -27,25 +32,30 @@
             <mat-tab *ngFor="let category of categories" [label]="category.ct_name">
                 <div class="container-fluid mt-5">
                     <div class="row g-4">
-                        <div *ngFor="let product of getProductsByCategory(category.ct_id)" class="col-lg-3 col-md-6">
-                            <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
+                        <div *ngFor="let product of getProductsByCategory(category.ct_id)"
+                            class="col-lg-3 col-md-6 col-sm-6 col-6">
+                            <div class="product-card-premium h-100 d-flex flex-column cursor-pointer"
+                                (click)="navigateToProduct(product.p_id)">
                                 <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center"
-                                     [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
-                                    <ng-container *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
-                                        <img [src]="apiUrl + '/' + p_attachement.pa_image_path"
-                                             alt="{{product.p_name}}" 
-                                             class="img-fluid" 
-                                             [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+                                    [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
+                                    <ng-container
+                                        *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
+                                        <img [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}"
+                                            class="img-fluid"
+                                            [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
                                     </ng-container>
-                                    
+
                                     <!-- Favorite Button -->
                                     <div class="product-actions position-absolute top-0 end-0 m-3">
-                                        <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
-                                            <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                                        <button class="btn-favorite"
+                                            (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                                            <i class="fa"
+                                                [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
                                         </button>
                                     </div>
 
-                                    <div class="product-badge position-absolute top-0 start-0 m-3" *ngIf="product.p_price > 5000">
+                                    <div class="product-badge position-absolute top-0 start-0 m-3"
+                                        *ngIf="product.p_price > 5000">
                                         <span class="badge bg-dark text-white rounded-0 px-3 py-2">PREMIUM</span>
                                     </div>
                                 </div>
@@ -53,17 +63,23 @@
                                 <div class="product-details text-center p-3">
                                     <span class="product-category">{{ product.p_sub_category_name }}</span>
                                     <a class="product-name">{{product.p_name}}</a>
-                                    
+
                                     <!-- Rating Display -->
                                     <div class="product-rating mb-3">
                                         <div class="stars">
-                                            <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 1}"></i>
-                                            <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 2}"></i>
-                                            <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 3}"></i>
-                                            <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 4}"></i>
-                                            <i class="fa fa-star text-warning" [ngClass]="{'opacity-25': product.p_overall_rating < 5}"></i>
+                                            <i class="fa fa-star text-warning"
+                                                [ngClass]="{'opacity-25': product.p_overall_rating < 1}"></i>
+                                            <i class="fa fa-star text-warning"
+                                                [ngClass]="{'opacity-25': product.p_overall_rating < 2}"></i>
+                                            <i class="fa fa-star text-warning"
+                                                [ngClass]="{'opacity-25': product.p_overall_rating < 3}"></i>
+                                            <i class="fa fa-star text-warning"
+                                                [ngClass]="{'opacity-25': product.p_overall_rating < 4}"></i>
+                                            <i class="fa fa-star text-warning"
+                                                [ngClass]="{'opacity-25': product.p_overall_rating < 5}"></i>
                                         </div>
-                                        <span class="ms-1 small text-muted">({{ product.p_overall_rating | number:'1.1-1' }})</span>
+                                        <span class="ms-1 small text-muted">({{ product.p_overall_rating |
+                                            number:'1.1-1' }})</span>
                                     </div>
 
 
@@ -84,51 +100,49 @@
 </div>
 
 <!-- SHOWCASE AREA -->
-<div class="show-case-premium">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-5 mb-lg-0 py-5">
+<div class="show-case-premium position-relative overflow-hidden d-flex align-items-center justify-content-center"
+    style="background-color: #111; min-height: 80vh;">
+    <video autoplay loop muted playsinline class="position-absolute w-100 h-100"
+        style="object-fit: cover; top: 0; left: 0; z-index: 0;">
+        <source src="./assets/video/front_page_video2.MOV" type="video/mp4">
+    </video>
+    <div class="position-absolute w-100 h-100 bg-dark opacity-50" style="top: 0; left: 0; z-index: 1; opacity: 0.5;">
+    </div>
+    <div class="container position-relative w-100" style="z-index: 3;">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
                 <h5 class="text-uppercase fw-bold mb-4 text-white-50" style="letter-spacing: 5px;">Limited Edition</h5>
-                <h2 class="showcase-title">The Velocity<br>Series</h2>
-                <p class="mb-5">
-                    Unleash your potential with the all-new Velocity sneakers. Lightweight construction meets unmatched durability for the modern athlete.
+                <h2 class="showcase-title" style="color: #D6DE23 !important; text-align: center;">THE VELOCITY<br>SERIES
+                </h2>
+                <p class="mb-5 text-white" style="text-align: center;">
+                    Unleash your potential with the all-new Velocity sneakers. Lightweight construction meets unmatched
+                    durability for the modern athlete.
                 </p>
-                <div class="d-flex align-items-center gap-4">
-                    <button class="btn btn-light btn-lg px-5 rounded-pill fw-bold text-uppercase py-3" (click)="navigateTo('shop')">Explore Now</button>
-                    <a (click)="navigateTo('shop')" class="text-white text-decoration-none fw-bold cursor-pointer small text-uppercase letter-spacing-1">
-                        View Details <i class="fa fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center position-relative py-5">
-                <div class="position-relative">
-                    <div class="glass-badge position-absolute top-0 end-0 py-2 px-4 rounded-pill z-3">NEW RELEASE</div>
-                    <img class="img-fluid floating-shoe" src="./assets/img/product/product4.png" 
-                         style="max-height: 450px; filter: drop-shadow(0px 30px 50px rgba(0,0,0,0.5));" alt="Sneakers">
-                    
-                    <!-- Decorative Circle behind shoe -->
-                    <div class="position-absolute top-50 start-50 translate-middle rounded-circle border border-white opacity-10" 
-                         style="width: 400px; height: 400px; z-index: 0;"></div>
+                <div class="d-flex align-items-center justify-content-center gap-4">
+                    <button class="btn btn-light btn-lg px-5 rounded-pill fw-bold text-uppercase py-3"
+                        (click)="navigateTo('shop')">Explore Now</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+
 <!-- BLOG AREA -->
 <div class="blog-area py-5 bg-light">
     <div class="container">
         <div class="section-wrapper text-center mb-5">
-            <h2 class="section-title">The Captain Blog</h2>
-            <p class="text-muted">Stay ahead of the game with the latest trends and tips.</p>
+            <h2 class="section-title text-uppercase" style="font-family: 'Teko', sans-serif !important; font-size: 3.5rem; letter-spacing: 2px; font-weight: 600;">LAUNCHPAD</h2>
+            <p class="text-muted">What’s Next Starts Here</p>
         </div>
-        
+
         <div class="row">
             <div class="col-lg-8">
                 <div class="card border-0 rounded-0 shadow-sm overflow-hidden mb-4 h-100">
-                    <div class="row g-0">
-                        <div class="col-md-6">
-                            <img [src]="attachmentUrl + latestBlog.b_image_url" class="img-fluid h-100" style="object-fit: cover;" alt="blog">
+                    <div class="row g-0 h-100">
+                        <div class="col-md-6 h-100">
+                            <img [src]="attachmentUrl + latestBlog.b_image_url" class="w-100 h-100"
+                                style="object-fit: cover;" alt="blog">
                         </div>
                         <div class="col-md-6">
                             <div class="card-body p-4 d-flex flex-column justify-content-center h-100">
@@ -141,7 +155,8 @@
                                 <p class="text-muted small mb-4">
                                     {{ latestBlog.b_cre_date | date:'MMMM dd, yyyy' }}
                                 </p>
-                                <a (click)="navigateToBlog(latestBlog.b_id)" class="fw-bold text-uppercase text-dark small cursor-pointer">
+                                <a (click)="navigateToBlog(latestBlog.b_id)"
+                                    class="fw-bold text-uppercase text-dark small cursor-pointer">
                                     Read Article <i class="fa fa-arrow-right ms-2"></i>
                                 </a>
                             </div>
@@ -149,11 +164,13 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-lg-4">
                 <div class="d-flex flex-column gap-4">
-                    <div class="d-flex gap-3 align-items-center bg-white p-3 shadow-sm" *ngFor="let blog of blogs.slice(1,4)">
-                        <img [src]="attachmentUrl + blog.b_image_url" class="rounded-0" width="100" height="80" style="object-fit: cover;" alt="blog">
+                    <div class="d-flex gap-3 align-items-center bg-white p-3 shadow-sm"
+                        *ngFor="let blog of blogs.slice(1,4)">
+                        <img [src]="attachmentUrl + blog.b_image_url" class="rounded-0" width="100" height="80"
+                            style="object-fit: cover;" alt="blog">
                         <div>
                             <h6 class="fw-bold mb-1">
                                 <a (click)="navigateToBlog(blog.b_id)" class="text-dark text-decoration-none">
@@ -167,4 +184,4 @@
             </div>
         </div>
     </div>
-</div>
+</div>

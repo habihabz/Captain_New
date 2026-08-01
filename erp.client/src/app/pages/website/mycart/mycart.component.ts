@@ -440,6 +440,33 @@ export class MycartComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.http.get<any>(`${this.apiUrl}/api/Delhivery/unused-waybill-count`).subscribe({
+      next: (res) => {
+        if (res && res.success && res.count > 0) {
+          this.executeOrder(paymentId, paymentMethodId);
+        } else {
+          this.snackbarService.showSuccess("Fetching waybills, please wait...");
+          this.http.post<any>(`${this.apiUrl}/api/Delhivery/fetchWaybills`, 1000).subscribe({
+            next: (fetchRes) => {
+               if (fetchRes && fetchRes.success) {
+                  this.executeOrder(paymentId, paymentMethodId);
+               } else {
+                  this.snackbarService.showError("Failed to fetch waybills. Order cannot be placed.");
+               }
+            },
+            error: (err) => {
+               this.snackbarService.showError("Error fetching waybills.");
+            }
+          });
+        }
+      },
+      error: (err) => {
+        this.snackbarService.showError("Error checking waybill availability.");
+      }
+    });
+  }
+
+  private executeOrder(paymentId: string, paymentMethodId: number) {
     const pMethod = paymentMethodId > 0 ? paymentMethodId : (this.selectedPaymentMethod || (paymentId ? 38 : 39));
 
     const cartOnly = this.carts.map((c: any) => ({
@@ -452,7 +479,7 @@ export class MycartComponent implements OnInit, OnDestroy {
       c_price: Math.round(c.c_price * 100) / 100
     }));
 
-    this.requestParms.address = this.selectedAddress.ad_id;
+    this.requestParms.address = this.selectedAddress!.ad_id;
     this.requestParms.details = JSON.stringify(cartOnly);
     this.requestParms.user = this.currentUser.u_id;
     this.requestParms.others = this.appliedPromo ? this.appliedPromo.pc_code : '';
@@ -767,6 +794,23 @@ export class MycartComponent implements OnInit, OnDestroy {
 
     this.showPaymentError = false;
 
+    this.http.get<any>(`${this.apiUrl}/api/Delhivery/unused-waybill-count`).subscribe(res => {
+      if (res && res.count > 0) {
+          this.proceedToPay();
+      } else {
+          this.snackbarService.showSuccess("Fetching waybills, please wait...");
+          this.http.post<any>(`${this.apiUrl}/api/Delhivery/fetchWaybills`, 1000).subscribe(fetchRes => {
+              this.proceedToPay();
+          }, err => {
+              this.snackbarService.showError("Failed to fetch waybills. Order cannot be placed.");
+          });
+      }
+    }, err => {
+         this.snackbarService.showError("Failed to check waybill availability.");
+    });
+  }
+
+  async proceedToPay() {
     if (this.selectedPaymentMethod === 39) {
       // Cash on Delivery (COD)
       this.placeOrder('', 39);

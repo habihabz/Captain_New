@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="/assets/css/slick.css">
 <link rel="stylesheet" href="/assets/css/style.css">
 <link rel="stylesheet" href="/assets/css/responsive.css">
-<header class="header-area" >
+<header class="header-area d-none d-lg-block" >
     <div class="container-fluid top-fixed-nav d-flex justify-content-between align-items-center">
 
         <!-- LEFT SIDE -->
@@ -29,7 +29,7 @@
                 <a class="nav-link dropdown-toggle" href="#" id="countryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 13px;">
                     {{ this.country.md_name || 'India' }}
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="countryDropdown" style="min-width: auto; padding: 0; background-color: #000; border: 1px solid #333;">
+                <ul class="dropdown-menu" aria-labelledby="countryDropdown" style="min-width: auto; padding: 0; background-color: #212529; border: 1px solid #333;">
                     <li *ngFor="let c of countries">
                         <a class="dropdown-item text-white" style="font-size: 13px; cursor:pointer;" (click)="changeCountry(c)">{{c.md_name}}</a>
                     </li>
@@ -38,19 +38,17 @@
         </ul>
 
         <!-- RIGHT SIDE -->
-        <ul class="navbar-nav d-flex flex-row ms-auto gap-3 gap-md-4 mb-0 flex-nowrap" style="overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px;">
+        <ul class="navbar-nav d-none d-lg-flex flex-row ms-auto gap-3 gap-md-4 mb-0 flex-nowrap" style="overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px;">
             <ng-container *ngIf="isLoggedIn; else guestLinks">
                 <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" routerLink="/myorders"><i class="fa fa-shopping-bag me-1"></i> Orders</a></li>
                 <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" (click)="navigateTo('favourites')"><i class="fa fa-heart me-1 text-danger"></i> Favourites</a></li>
                 <li class="nav-item"><a class="nav-link text-white" style="font-size: 13px; cursor: pointer;" (click)="navigateTo('my-cart')"><i class="fa fa-shopping-cart me-1"></i> Cart</a></li>
                 
-                <!-- Hidden on tiny mobile screens to save space -->
-                <li class="nav-item d-none d-sm-block text-white">
+                <li class="nav-item text-white">
                     <a class="nav-link text-light opacity-75" style="font-size: 13px; cursor: pointer;" routerLink="/profile"><i class="fa fa-user-circle me-1"></i> Hi, {{ currentUser.u_name }}</a>
                 </li>
 
-                <!-- Hidden on small screens to save space -->
-                <li class="nav-item d-none d-md-block text-white" *ngIf="currentUser.u_is_admin == 'Y'">
+                <li class="nav-item text-white" *ngIf="currentUser.u_is_admin == 'Y'">
                     <a class="nav-link text-warning fw-bold" style="font-size: 13px; cursor: pointer;" href="#/dashboard"><i class="fa fa-cogs me-1"></i> Console</a>
                 </li>
 
@@ -70,11 +68,25 @@
 <header class="header-area">
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top glass-nav">
         <div class="container-fluid">
-            <img src="assets/img/logo/logo_black.png" alt="Logo" style="height: 60px; margin: 10px;">
-            <!-- Toggle -->
-            <button class="navbar-toggler" type="button" (click)="toggleMenu()">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <img src="assets/img/logo/logo_black.png" alt="Logo" class="mobile-logo-large" style="height: 100px; margin: 5px 10px;">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Mobile Search Icon -->
+                <a class="text-white d-lg-none" (click)="navigateTo('shop')" style="cursor: pointer; font-size: 16px;">
+                    <i class="fa fa-search"></i>
+                </a>
+                
+                <!-- Mobile Cart Icon -->
+                <ng-container *ngIf="isLoggedIn">
+                    <a class="text-white d-lg-none" (click)="navigateTo('my-cart')" style="cursor: pointer; font-size: 16px;">
+                        <i class="fa fa-shopping-cart"></i>
+                    </a>
+                </ng-container>
+
+                <!-- Toggle -->
+                <button class="navbar-toggler" type="button" (click)="toggleMenu()" style="border: none !important; box-shadow: none !important; outline: none !important; padding: 0;">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
             <!-- Desktop Menu -->
             <div class="collapse navbar-collapse" [class.show]="menuVisible">
@@ -84,6 +96,22 @@
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('blog')">Blogs</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('contact-us')">Contact Us</a></li>
                     <li class="nav-item"><a class="nav-link" (click)="navigateTo('about-us')">About Us</a></li>
+                    
+                    <!-- Mobile ONLY Links (Moved from top bar) -->
+                    <ng-container *ngIf="isLoggedIn; else guestLinksMobile">
+                        <li class="nav-item d-lg-none mt-3 pt-3 border-top border-secondary"><a class="nav-link" (click)="navigateTo('myorders')">Orders</a></li>
+                        <li class="nav-item d-lg-none"><a class="nav-link" (click)="navigateTo('favourites')">Favourites</a></li>
+                        <li class="nav-item d-lg-none"><a class="nav-link" (click)="navigateTo('profile')">Profile ({{ currentUser.u_name }})</a></li>
+                        <li class="nav-item d-lg-none" *ngIf="currentUser.u_is_admin == 'Y'">
+                            <a class="nav-link text-warning" (click)="navigateTo('dashboard')">Console</a>
+                        </li>
+                        <li class="nav-item d-lg-none"><a class="nav-link" (click)="logout()">Logout</a></li>
+                    </ng-container>
+
+                    <ng-template #guestLinksMobile>
+                        <li class="nav-item d-lg-none mt-3 pt-3 border-top border-secondary"><a class="nav-link" (click)="navigateTo('user-registration')">Sign Up</a></li>
+                        <li class="nav-item d-lg-none"><a class="nav-link" (click)="navigateTo('login')">Login</a></li>
+                    </ng-template>
                 </ul>
 
             </div>

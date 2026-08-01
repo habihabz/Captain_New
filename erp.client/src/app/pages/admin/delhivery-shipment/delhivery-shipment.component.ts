@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { SnackBarService } from '../../../services/isnackbar.service';
 import { IuserService } from '../../../services/iuser.service';
 import { ICustomerOrder } from '../../../services/icustomer.order.service';
+import { IOrderMovementHistoryService } from '../../../services/iorder.movement.history.service';
+import { OrderMovementHistory } from '../../../models/order.movement.history.model';
 import { RequestParms } from '../../../models/requestParms';
 import { ActionRendererComponent } from '../../../directives/action.renderer';
 
@@ -108,27 +110,9 @@ export class DelhiveryShipmentComponent implements OnInit, OnDestroy {
         : '<span class="text-muted">-</span>'
     },
     {
-      headerName: "Shipped By",
-      field: "co_shipment_cre_by",
-      width: 160,
-      hide: true,
-      cellClass: 'fw-bold text-dark',
-      cellRenderer: (p: any) => (p.value && p.value.trim())
-        ? `<span>${p.value}</span>`
-        : '<span class="text-muted">-</span>'
-    },
-    {
-      headerName: "Shipped On",
-      field: "co_shipment_cre_on",
-      width: 170,
-      hide: true,
-      cellRenderer: (p: any) => p.value
-        ? `<span class="text-muted small">${new Date(p.value).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`
-        : '<span class="text-muted">-</span>'
-    },
-    {
       headerName: 'Actions',
-      width: 150,
+      width: 140,
+      minWidth: 130,
       pinned: 'right',
       cellClass: 'text-center',
       cellRenderer: 'actionRenderer',
@@ -138,9 +122,13 @@ export class DelhiveryShipmentComponent implements OnInit, OnDestroy {
     }
   ];
 
+  customerOrder: CustomerOrder = new CustomerOrder();
+  orderMovementHistories: OrderMovementHistory[] = [];
+
   constructor(
     private iuserService: IuserService,
     private icustomerOrder: ICustomerOrder,
+    private iOrderMovementHistoryService: IOrderMovementHistoryService,
     private snackBarService: SnackBarService,
     private router: Router,
     private cd: ChangeDetectorRef
@@ -239,29 +227,26 @@ export class DelhiveryShipmentComponent implements OnInit, OnDestroy {
       waybillCol.hide = this.currentTab === 'pending';
     }
 
-    // Show/hide Shipped By column based on tab
-    const creByCol = this.colDefs.find(c => c.field === 'co_shipment_cre_by');
-    if (creByCol) {
-      creByCol.hide = this.currentTab === 'pending';
-    }
-
-    // Show/hide Shipped On column based on tab
-    const creDateCol = this.colDefs.find(c => c.field === 'co_shipment_cre_on');
-    if (creDateCol) {
-      creDateCol.hide = this.currentTab === 'pending';
-    }
-
     // Configure actions based on tab
     const actionsCol = this.colDefs.find(c => c.headerName === 'Actions');
     if (actionsCol) {
       actionsCol.hide = false;
+      actionsCol.width = 140;
       if (actionsCol.cellRendererParams) {
         if (this.currentTab === 'pending') {
           actionsCol.cellRendererParams.actions = [
             {
-              name: ' CREATE',
-              tooltip: 'Create Delhivery Shipment',
+              name: '',
+              tooltip: 'View Order Details',
               cssClass: 'btn btn-outline-primary btn-xs rounded-pill me-1',
+              icon: 'fa fa-eye',
+              action: 'onDetails',
+              onDetails: (data: any) => this.onDetails(data)
+            },
+            {
+              name: '',
+              tooltip: 'Create Delhivery Shipment',
+              cssClass: 'btn btn-outline-info btn-xs rounded-pill me-1',
               icon: 'fa fa-truck',
               action: 'onCreateShipment',
               onCreateShipment: (data: any) => this.openCreateShipmentModal(data)
@@ -270,12 +255,28 @@ export class DelhiveryShipmentComponent implements OnInit, OnDestroy {
         } else {
           actionsCol.cellRendererParams.actions = [
             {
-              name: ' TRACK',
+              name: '',
+              tooltip: 'View Order Details',
+              cssClass: 'btn btn-outline-primary btn-xs rounded-pill me-1',
+              icon: 'fa fa-eye',
+              action: 'onDetails',
+              onDetails: (data: any) => this.onDetails(data)
+            },
+            {
+              name: '',
               tooltip: 'Track Delhivery Shipment',
               cssClass: 'btn btn-outline-warning btn-xs rounded-pill me-1',
               icon: 'fa fa-map-marker',
               action: 'onTrackShipment',
               onTrackShipment: (data: any) => this.openTrackingModal(data.co_waybill, data.co_id)
+            },
+            {
+              name: '',
+              tooltip: 'Cancel Delhivery Shipment',
+              cssClass: 'btn btn-outline-danger btn-xs rounded-pill me-1',
+              icon: 'fa fa-ban',
+              action: 'onCancelShipment',
+              onCancelShipment: (data: any) => this.onCancelShipment(data)
             }
           ];
         }
@@ -516,5 +517,96 @@ export class DelhiveryShipmentComponent implements OnInit, OnDestroy {
   printShippingLabel(waybill: string, pdfSize: string = '4R') {
     if (!waybill) return;
     this.icustomerOrder.printShippingLabelInNewTab(waybill, pdfSize);
+  }
+
+  onDetails(data: any) {
+    this.getOrderMovementHistory(data.co_id);
+    this.icustomerOrder.getCustomerOrder(data.co_id).subscribe({
+      next: (order: CustomerOrder) => {
+        this.customerOrder = order;
+        this.resolveOrderItemImage(this.customerOrder);
+        
+        if (this.customerOrder.co_waybill) {
+          this.loadTrackingForOrder(this.customerOrder.co_waybill, this.customerOrder.co_id);
+        } else {
+          this.trackingDetails = null;
+          this.trackingError = '';
+          this.trackingLoading = false;
+        }
+
+        $("#customerOrderDetailModal").modal("show");
+      }
+    });
+  }
+
+  getOrderMovementHistory(orderId: number) {
+    this.iOrderMovementHistoryService.getOrderMovementHistoriesByOrder(orderId).subscribe({
+      next: (res: OrderMovementHistory[]) => {
+        this.orderMovementHistories = res;
+      },
+      error: () => {}
+    });
+  }
+
+  loadTrackingForOrder(waybill: string, refId: any = '') {
+    if (!waybill) return;
+    this.trackingWaybill = waybill;
+    this.trackingLoading = true;
+    this.trackingError = '';
+    this.trackingDetails = null;
+
+    this.icustomerOrder.trackDelhiveryShipment(waybill, String(refId || '')).subscribe({
+      next: (res) => {
+        this.trackingLoading = false;
+        this.parseTrackingResponse(res, waybill);
+      },
+      error: (err) => {
+        this.trackingLoading = false;
+        this.trackingError = err.error?.message || "Failed to fetch tracking details from Delhivery.";
+      }
+    });
+  }
+
+  resolveOrderItemImage(order: any) {
+    if (!order) return;
+    try {
+      const attachments = typeof order.p_attachements === 'string' ? JSON.parse(order.p_attachements) : order.p_attachements;
+      if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+        order.resolvedImageUrl = attachments[0].pa_image_path;
+      }
+    } catch (e) {}
+  }
+
+  isOrderCanceled(): boolean {
+    return this.customerOrder.co_is_canceled === 'Y' || 
+           (this.customerOrder.co_status_name || '').toLowerCase().includes('cancel');
+  }
+
+  onCancelShipment(data: any) {
+    if (!data || !data.co_waybill) return;
+    const isCod = (data.co_payment_method_name || '').toLowerCase().includes('cash') || data.co_payment_method === 39;
+    const paymentNotice = !isCod ? '\n(Note: As this order is Prepaid, refund payback will be initiated automatically).' : '';
+    
+    if (confirm(`Are you sure you want to cancel the Delhivery shipment for Order #${data.co_id} (Waybill: ${data.co_waybill})?${paymentNotice}`)) {
+      const payload = {
+        waybill: data.co_waybill,
+        order_id: data.co_id,
+        cre_by: this.currentUser.u_id
+      };
+
+      this.icustomerOrder.cancelDelhiveryShipment(payload).subscribe({
+        next: (res) => {
+          if (res && res.success) {
+            this.snackBarService.showSuccess(res.message || "Shipment cancelled successfully.");
+            this.loadOrders();
+          } else {
+            this.snackBarService.showError(res.message || "Failed to cancel shipment.");
+          }
+        },
+        error: (err) => {
+          this.snackBarService.showError(err.error?.message || "Failed to cancel shipment.");
+        }
+      });
+    }
   }
 }

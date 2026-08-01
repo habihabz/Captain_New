@@ -72,8 +72,6 @@ namespace Erp.Server.Models
 
         public string? co_shipment_cre_by { get; set; } = string.Empty;
         public DateTime? co_shipment_cre_on { get; set; }
-        public string? omh_cre_by_name { get; set; } = string.Empty;
-        public DateTime? omh_cre_date { get; set; }
 
         [NotMapped]
         public List<CustomerOrderDetail>? details { get; set; } = new List<CustomerOrderDetail>();

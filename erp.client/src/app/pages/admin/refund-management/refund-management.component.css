@@ -1,87 +1,29 @@
 .right_col {
-    background: #f1f5f9;
+    background: #f8fafc;
     padding: 10px 25px !important;
 }
 
-.nav-tab {
-    background: transparent;
-    border-radius: 12px 12px 0 0 !important;
+.nav-tab-btn {
     font-size: 13px;
     color: #64748b;
-    outline: none !important;
-    padding: 12px 24px !important;
     border-bottom: 3px solid transparent !important;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
 }
 
-.active-tab {
+.nav-tab-btn:hover {
+    color: #0f172a;
+    background-color: rgba(241, 245, 249, 0.6);
+}
+
+.active-tab-btn {
+    color: #16a34a !important;
+    border-bottom: 3px solid #16a34a !important;
     background: #ffffff;
-    color: #198754;
-    border-bottom: 3px solid #198754 !important;
 }
 
-.nav-tab:hover {
-    background: rgba(255,255,255,0.5);
-    color: #1e293b;
-}
-
-.nav-tab i {
-    margin-right: 12px !important;
-    font-size: 14px;
-}
-
-.nav-tab .badge {
-    margin-left: 12px !important;
-}
-
-/* Ensure gap between icon and text for all buttons and badges */
-.btn i, .info-badge i {
-    margin-right: 10px !important;
-}
-
-.breadcrumb {
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-
-.x_panel {
-    background: #ffffff;
-    padding: 25px !important;
-    position: relative;
-}
-
-.x_title {
-    border-bottom: 1px solid #edf2f7;
-    margin-bottom: 0;
-}
-
-.page-header-text h2 {
-    letter-spacing: -0.2px;
-    margin: 0;
-    line-height: 1.2;
-}
-
-.page-header-text span {
-    line-height: 1.4;
-    display: block;
-}
-
-.alert-custom {
-    transition: all 0.3s ease;
-    min-height: 70px;
-}
-
-.alert-custom .icon-holder {
-    width: 24px;
-    display: flex;
-    justify-content: center;
-}
-
-.alert-custom p {
-    line-height: 1.5;
-}
-
-.alert-custom:hover {
-    transform: translateX(5px);
+.transition-all {
+    transition: all 0.2s ease-in-out;
 }
 
 .grid-card {
@@ -91,11 +33,11 @@
 .ag-theme-quartz {
     --ag-header-background-color: #f8fafc;
     --ag-header-foreground-color: #475569;
-    --ag-header-height: 48px;
+    --ag-header-height: 46px;
     --ag-row-hover-color: #f1f5f9;
     --ag-border-color: #e2e8f0;
     --ag-font-size: 13px;
-    --ag-font-family: 'Inter', sans-serif;
+    --ag-font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* Custom button style for Issue Refund */
@@ -106,114 +48,26 @@
     font-size: 11px;
     border: none;
     padding: 6px 14px;
-    border-radius: 6px; /* Modern square-ish rounded look instead of pill */
-    box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
-    transition: all 0.3s ease;
+    border-radius: 6px;
+    box-shadow: 0 3px 6px rgba(5, 150, 105, 0.2);
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px; /* Fixed gap between icon and text */
+    gap: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 ::ng-deep .btn-issue-refund:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(5, 150, 105, 0.3);
-    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(5, 150, 105, 0.3);
+    filter: brightness(1.08);
 }
 
 ::ng-deep .btn-issue-refund i {
-    font-size: 13px;
-    margin: 0 !important; /* Reset any global margins for this flex child */
-}
-
-.empty-state-icon i {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 0.25; }
-    50% { transform: scale(1.05); opacity: 0.35; }
-    100% { transform: scale(1); opacity: 0.25; }
-}
-
-/* NEW FILTER BAR STYLES */
-.filter-bar-container {
-    transition: all 0.3s ease;
-}
-
-.filter-bar-container:focus-within {
-    background: #fff !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-}
-
-.date-input-wrapper input[type="date"] {
-    color: #475569;
     font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    min-width: 125px;
-}
-
-/* Remove default date picker icons/styling for cleaner look */
-.date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
-    background: transparent;
-    bottom: 0;
-    color: transparent;
-    cursor: pointer;
-    height: auto;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: auto;
-}
-
-.date-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.date-input-wrapper::before {
-    content: '\f073';
-    font-family: 'FontAwesome';
-    color: #94a3b8;
-    font-size: 12px;
-    pointer-events: none;
-    margin-right: 2px;
-}
-
-.filter-btn {
-    background: #5e72e4;
-    border: none;
-    box-shadow: 0 4px 6px rgba(94, 114, 228, 0.2);
-    font-size: 10px;
-    letter-spacing: 0.5px;
-}
-
-.filter-btn:hover {
-    background: #4a5ed3;
-    transform: translateY(-1px);
-}
-
-.reset-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.reset-btn:hover {
-    background: #f8fafc;
-}
-
-.filter-divider {
-    height: 20px !important;
-    align-self: center;
-    border-left: 1px solid #e2e8f0;
+    margin: 0 !important;
 }

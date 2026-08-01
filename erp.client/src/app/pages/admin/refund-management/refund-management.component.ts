@@ -24,12 +24,12 @@ export class RefundManagementComponent implements OnInit {
 
   // Pending Columns
   pendingColDefs: ColDef[] = [
-    { headerName: "Order ID", field: "co_id", width: 100, cellClass: 'fw-bold' },
+    { headerName: "Order ID", field: "co_id", width: 110, cellClass: 'fw-bold text-dark' },
     { headerName: "Customer", field: "co_customer_name", flex: 1.2 },
     { 
       headerName: "Amount", 
       field: "co_net_amount", 
-      width: 120,
+      width: 130,
       cellClass: 'fw-bold text-success',
       valueFormatter: p => "₹ " + Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })
     },
@@ -37,18 +37,19 @@ export class RefundManagementComponent implements OnInit {
       headerName: "Source ID", 
       field: "co_payment_id", 
       flex: 1.5,
-      cellClass: 'text-muted small'
+      cellClass: 'text-muted small font-monospace'
     },
     { 
       headerName: "Issue", 
       field: "co_is_canceled", 
-      width: 150,
-      valueFormatter: p => p.value === 'Y' ? 'CANCELLATION' : 'RETURNED',
-      cellStyle: p => ({ color: p.value === 'Y' ? '#dc3545' : '#0d6efd', fontWeight: 'bold', fontSize: '11px' })
+      width: 140,
+      cellRenderer: (p: any) => p.value === 'Y' 
+        ? `<span class="badge bg-danger-subtle text-danger px-2.5 py-1 rounded-pill fw-bold border border-danger-subtle" style="font-size: 10px; letter-spacing: 0.5px;">CANCELLATION</span>` 
+        : `<span class="badge bg-primary-subtle text-primary px-2.5 py-1 rounded-pill fw-bold border border-primary-subtle" style="font-size: 10px; letter-spacing: 0.5px;">RETURNED</span>`
     },
     {
       headerName: 'Actions',
-      width: 130,
+      width: 160,
       pinned: 'right',
       cellRenderer: (params: any) => {
         return `<button class="btn-issue-refund">
@@ -61,21 +62,21 @@ export class RefundManagementComponent implements OnInit {
 
   // History Columns
   historyColDefs: ColDef[] = [
-    { headerName: "Order ID", field: "co_id", width: 100 },
+    { headerName: "Order ID", field: "co_id", width: 110, cellClass: 'fw-bold text-dark' },
     { headerName: "Customer", field: "co_customer_name", flex: 1.2 },
     { 
         headerName: "Refunded Amount", 
         field: "co_net_amount", 
-        width: 140,
+        width: 150,
         cellClass: 'fw-bold text-success',
         valueFormatter: p => "₹ " + Number(p.value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })
     },
-    { headerName: "Razorpay ID", field: "co_payment_id", flex: 1.5, cellClass: 'text-muted' },
+    { headerName: "Razorpay ID", field: "co_payment_id", flex: 1.5, cellClass: 'text-muted font-monospace' },
     { 
         headerName: "Status", 
         field: "co_status_name", 
         width: 140,
-        cellRenderer: () => `<span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill border border-success-subtle">COMPLETED</span>`
+        cellRenderer: () => `<span class="badge bg-success-subtle text-success px-3 py-1.5 rounded-pill fw-bold border border-success-subtle" style="font-size: 10px; letter-spacing: 0.5px;">COMPLETED</span>`
     }
   ];
 

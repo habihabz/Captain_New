@@ -22,8 +22,8 @@
                         <h2 class="fw-bold mb-1 text-dark" style="letter-spacing: -1px;">{{ customerOrder.p_name }}</h2>
                         <div class="d-flex align-items-center gap-3 mb-3">
                             <h3 class="fw-bold text-success mb-0">₹ {{ customerOrder.co_net_amount | number:'1.2-2' }}</h3>
-                            <span class="badge bg-soft-success text-success px-2 py-1" style="font-size: 10px;">
-                                {{ customerOrder.co_status_name || (allMovementHistories.length > 0 ? allMovementHistories[allMovementHistories.length - 1].omh_status_name : 'Return Initiated') }}
+                            <span class="badge" [ngClass]="isOrderCanceled() ? 'bg-soft-danger text-danger' : 'bg-soft-success text-success'" style="font-size: 10px;">
+                                {{ (isOrderCanceled() && isCashOnDelivery()) ? 'Cancelled' : (customerOrder.co_status_name || (allMovementHistories.length > 0 ? allMovementHistories[allMovementHistories.length - 1].omh_status_name : 'Return Initiated')) }}
                             </span>
                         </div>
                         
@@ -44,9 +44,9 @@
                 </div>
             </div>
 
-            <!-- CANCELLATION/RETURN ALERT BAR (Top View) -->
-            <div class="card border-0 rounded-4 p-4 d-flex align-items-center flex-row shadow-sm mb-4" 
-                 style="background-color: rgba(220, 53, 69, 0.06); color: #dc3545; border-left: 6px solid #dc3545; gap: 20px;" 
+            <!-- CANCELLED / RETURNED WARNING BANNER -->
+            <div class="card border-0 rounded-4 shadow-sm text-white p-4 mb-4 d-flex flex-row align-items-center gap-3"
+                 [ngClass]="isOrderCanceled() ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'"
                  *ngIf="isOrderCanceled() || isOrderReturned()">
                 <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 45px; height: 45px;">
                     <i class="fa" [ngClass]="isOrderCanceled() ? 'fa-times' : 'fa-undo'" style="font-size: 20px;"></i>
@@ -54,7 +54,7 @@
                 <div>
                     <h5 class="fw-bold mb-0" style="letter-spacing: -0.5px;">{{ isOrderCanceled() ? 'Order Cancelled' : 'Order Returned' }}</h5>
                     <div class="small fw-medium opacity-75">
-                        {{ isOrderCanceled() ? 'This order has been officially cancelled. Refund status can be tracked below.' : 'This item has been sent back. Our team is inspecting the return.' }}
+                        {{ isOrderCanceled() ? (isCashOnDelivery() ? 'This order has been officially cancelled.' : 'This order has been officially cancelled. Refund status can be tracked below.') : 'This item has been sent back. Our team is inspecting the return.' }}
                     </div>
                 </div>
             </div>
@@ -99,6 +99,158 @@
                     </div>
                 </div>
             </div>
+
+            <!-- DELHIVERY SHIPMENT LIVE TRACKING -->
+            <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mt-4" *ngIf="customerOrder.co_waybill">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                    <div class="d-flex align-items-center" style="gap: 12px;">
+                        <div style="width: 36px; height: 36px; background: rgba(59, 130, 246, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa fa-truck text-primary" style="font-size: 1.1rem;"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0" style="font-size: 14px;">Delhivery Live Shipment Tracking</h6>
+                            <div class="small text-muted font-monospace">Waybill: <strong class="text-primary">{{ customerOrder.co_waybill }}</strong></div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center" style="gap: 8px;">
+                        <button type="button" class="btn btn-outline-primary btn-xs rounded-pill px-3 py-1 fw-bold" 
+                                (click)="loadTrackingForOrder(customerOrder.co_waybill, customerOrder.co_id)" [disabled]="trackingLoading">
+                            <i class="fa fa-refresh me-1" [ngClass]="{'fa-spin': trackingLoading}"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div *ngIf="trackingLoading" class="text-center py-4">
+                    <i class="fa fa-circle-o-notch fa-spin fa-2x text-primary mb-2"></i>
+                    <div class="fw-bold text-dark small">Fetching Live Tracking from Delhivery...</div>
+                </div>
+
+                <!-- Error State -->
+                <div *ngIf="!trackingLoading && trackingError" class="alert border-0 shadow-sm rounded-3 p-3 mb-0" style="background-color: #fef2f2; border-left: 4px solid #ef4444 !important;">
+                    <div class="d-flex align-items-center" style="gap: 12px;">
+                        <i class="fa fa-exclamation-triangle fa-lg text-danger"></i>
+                        <div class="small text-secondary">{{ trackingError }}</div>
+                    </div>
+                </div>
+
+                <!-- Tracking Details Content -->
+                <div *ngIf="!trackingLoading && !trackingError && trackingDetails">
+                    
+                    <!-- Status Banner -->
+                    <div class="p-3 rounded-4 mb-4 bg-light border border-white">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <div class="text-uppercase text-muted fw-bold mb-1" style="font-size: 9px; letter-spacing: 1px;">CURRENT STATUS</div>
+                                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                    <span class="fw-bold rounded-pill" 
+                                          style="font-size: 11px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 4px; background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a;">
+                                        <i class="fa" [ngClass]="{
+                                          'fa-check-circle': trackingDetails.status === 'Delivered',
+                                          'fa-truck': trackingDetails.status === 'In Transit' || trackingDetails.status === 'Dispatched',
+                                          'fa-box': trackingDetails.status === 'Manifested'
+                                        }"></i>
+                                        {{ trackingDetails.status }}
+                                    </span>
+                                    <span *ngIf="trackingDetails.statusDate" class="text-muted small">
+                                        as of {{ trackingDetails.statusDate | date:'medium' }}
+                                    </span>
+                                </div>
+                                <div *ngIf="trackingDetails.instructions" class="text-dark small mt-2 fw-semibold d-flex align-items-center" style="gap: 4px;">
+                                    <i class="fa fa-info-circle text-info"></i>
+                                    <span>{{ trackingDetails.instructions }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-md-end mt-2 mt-md-0 border-start ps-md-3">
+                                <div class="text-uppercase text-muted fw-bold mb-1" style="font-size: 9px; letter-spacing: 1px;">EXPECTED DELIVERY</div>
+                                <div class="fw-bold text-dark small">
+                                    <i class="fa fa-calendar text-primary me-1"></i>
+                                    <span>{{ trackingDetails.expectedDate ? (trackingDetails.expectedDate | date:'mediumDate') : 'Pending Update' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Route Progress Card -->
+                    <div class="p-3 rounded-4 mb-4 bg-white border border-light">
+                        <div class="row align-items-center">
+                            <div class="col-4 d-flex align-items-center" style="gap: 10px;">
+                                <div class="rounded-3" style="background: #f1f5f9; width: 36px; height: 36px; min-width: 36px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-building text-secondary" style="font-size: 1rem;"></i>
+                                </div>
+                                <div>
+                                    <div class="text-uppercase text-muted fw-bold" style="font-size: 9px;">ORIGIN</div>
+                                    <div class="fw-bold text-dark small" style="line-height: 1.2;">{{ trackingDetails.origin || 'Origin Hub' }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-4 text-center px-1">
+                                <div class="position-relative d-flex align-items-center justify-content-center" style="height: 24px;">
+                                    <div style="height: 3px; width: 100%; background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%); border-radius: 2px;"></div>
+                                    <div class="position-absolute bg-white rounded-circle shadow-sm border d-flex align-items-center justify-content-center" 
+                                         style="width: 24px; height: 24px; border-color: #3b82f6 !important; left: 50%; transform: translateX(-50%);">
+                                        <i class="fa fa-truck text-primary" style="color: #3b82f6 !important; font-size: 10px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4 d-flex align-items-center justify-content-end text-end" style="gap: 10px;">
+                                <div>
+                                    <div class="text-uppercase text-muted fw-bold" style="font-size: 9px;">DESTINATION</div>
+                                    <div class="fw-bold text-dark small" style="line-height: 1.2;">{{ trackingDetails.destination || 'Destination Hub' }}</div>
+                                </div>
+                                <div class="rounded-3" style="background: #fef2f2; width: 36px; height: 36px; min-width: 36px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-map-marker text-danger" style="font-size: 1.1rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scan History Timeline -->
+                    <div class="timeline-container px-1">
+                        <div class="fw-bold text-dark mb-3 small d-flex align-items-center" style="gap: 6px;">
+                            <i class="fa fa-history text-primary"></i> Scan Activity History
+                        </div>
+                        <div *ngIf="!trackingDetails.scans || trackingDetails.scans.length === 0" class="text-muted text-center py-2 small">
+                            No scan activities recorded yet.
+                        </div>
+                        <div *ngFor="let scan of trackingDetails.scans; let first = first; let last = last" 
+                             class="position-relative ps-4" [style.padding-bottom]="last ? '0px' : '16px'" style="border-left: 2px solid #e2e8f0; margin-left: 10px;">
+                            <div class="position-absolute rounded-circle d-flex align-items-center justify-content-center"
+                                 [style.background]="first ? '#3b82f6' : '#cbd5e1'"
+                                 style="width: 20px; height: 20px; left: -11px; top: 0px; font-size: 9px; color: #ffffff; box-shadow: 0 0 0 3px #ffffff;">
+                                <i class="fa" [ngClass]="first ? 'fa-check' : 'fa-circle'"></i>
+                            </div>
+                            <div class="rounded-3" [style.background]="first ? '#f0f9ff' : '#f8fafc'" [style.border]="first ? '1px solid #bae6fd' : '1px solid #f1f5f9'" style="padding: 10px 14px;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-dark small">{{ scan.Scan || scan.ScanType || 'Scan Activity' }}</span>
+                                    <span class="badge bg-white text-muted border font-11 px-2 py-1" style="font-weight: 500;">{{ scan.ScanDateTime | date:'medium' }}</span>
+                                </div>
+                                <div class="d-flex align-items-center flex-wrap text-secondary small" style="gap: 12px;">
+                                    <span *ngIf="scan.ScannedLocation"><i class="fa fa-map-marker text-danger me-1"></i>{{ scan.ScannedLocation }}</span>
+                                    <span *ngIf="scan.Instructions" class="text-muted"><i class="fa fa-info-circle text-info me-1"></i>{{ scan.Instructions }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- PENDING SHIPMENT PROCESSING CARD -->
+            <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mt-4" *ngIf="!customerOrder.co_waybill && !isOrderCanceled() && !isOrderReturned()">
+                <div class="d-flex align-items-center" style="gap: 16px;">
+                    <div style="width: 45px; height: 45px; min-width: 45px; background: rgba(13, 110, 253, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa fa-truck text-primary" style="font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 14px;">Shipment Processing</h6>
+                        <p class="text-muted small mb-0" style="line-height: 1.4;">
+                            Your order is confirmed and being prepared for shipment. Delhivery tracking details and waybill number will be assigned here once dispatched.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- RIGHT COLUMN -->
@@ -126,6 +278,18 @@
                         <p class="mb-0 text-dark small lh-base">
                             {{ customerOrder.co_c_address_details }}
                         </p>
+                    </div>
+                    <div class="mt-3 p-3 bg-soft-primary rounded-4 border border-primary border-opacity-25 d-flex align-items-center justify-content-between" *ngIf="customerOrder.co_waybill">
+                        <div>
+                            <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 9px; letter-spacing: 1px;">Delhivery Waybill</div>
+                            <div class="fw-bold text-primary font-monospace" style="font-size: 13px;">{{ customerOrder.co_waybill }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-3 bg-light rounded-4 border border-light d-flex align-items-center justify-content-between" *ngIf="!customerOrder.co_waybill && !isOrderCanceled() && !isOrderReturned()">
+                        <div>
+                            <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 9px; letter-spacing: 1px;">Delhivery Waybill</div>
+                            <div class="small text-muted fst-italic">Pending Dispatch</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -268,7 +432,7 @@
             </div>
 
             <!-- FOOTER INFO -->
-            <div class="mt-4 px-2 text-center">
+            <div class="mt-4 px-2 text-center" *ngIf="!isOrderCanceled()">
                 <p class="text-muted" style="font-size: 10px;">
                    <i class="fa fa-info-circle me-1"></i> Return policy active for 7 days after delivery.
                 </p>

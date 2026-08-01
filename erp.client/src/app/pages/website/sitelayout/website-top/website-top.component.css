@@ -92,8 +92,10 @@
         border-radius: 10px;
     }
     .glass-nav {
-        margin-top: 50px;
+        margin-top: 0px;
         padding: 5px 0 !important;
+        background-color: #000 !important;
+        backdrop-filter: none;
     }
     .glass-nav img {
         height: 32px !important; /* Smaller logo for mobile */
@@ -102,6 +104,15 @@
         padding: 4px 8px !important;
         font-size: 0.85rem !important; /* Compact menu button */
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    /* Mobile nav adjustments */
+    .glass-nav .nav-link {
+        padding: 12px 18px !important;
+    }
+    
+    .glass-nav .nav-link::after {
+        display: none !important; /* Disable hover underline effect on mobile menu */
     }
 }
 

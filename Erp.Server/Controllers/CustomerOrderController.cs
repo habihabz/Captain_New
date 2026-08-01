@@ -328,14 +328,38 @@ namespace Erp.Server.Controllers
         public async Task<DbResult> cancelCustomerOrder([FromBody] RequestParams requestParams)
         {
             DbResult dbResult = new DbResult();
+
+            // Fetch order prior to cancellation to get waybill and payment details
+            var order = requestParams.id > 0 ? icustomerOrder.getCustomerOrder(requestParams.id) : null;
+
             dbResult = icustomerOrder.cancelCustomerOrder(requestParams);
             
             try
             {
                 if (requestParams.id > 0 && (dbResult.message == "Success" || dbResult.message.Contains("successfully", StringComparison.OrdinalIgnoreCase)))
                 {
-                    var order = icustomerOrder.getCustomerOrder(requestParams.id);
-                    
+                    // 1. Cancel Delhivery shipment if waybill exists
+                    if (order != null && !string.IsNullOrWhiteSpace(order.co_waybill))
+                    {
+                        try
+                        {
+                            var baseUrl = _configuration["DelhiverySettings:BaseUrl"] ?? "https://staging-express.delhivery.com";
+                            var token = _configuration["DelhiverySettings:Token"];
+                            using var client = new HttpClient();
+                            await DelhiveryController.CancelDelhiveryShipmentApi(client, baseUrl, token, order.co_waybill, logger);
+                        }
+                        catch (Exception exDel)
+                        {
+                            logger.LogError(exDel, $"Failed to cancel Delhivery shipment for order #{order.co_id}");
+                        }
+                    }
+
+                    // 2. Check if order was Prepaid & not delivered -> Notify about automatic payback
+                    bool isPrepaid = order != null && 
+                                     !string.IsNullOrEmpty(order.co_payment_method_name) && 
+                                     !order.co_payment_method_name.ToLower().Contains("cash") && 
+                                     order.co_payment_method != 39;
+
                     var userProfile = iuser.getUser(requestParams.user);
                     string targetEmail = userProfile?.u_email ?? "";
                     string targetPhone = userProfile?.u_phone ?? "";
@@ -345,11 +369,19 @@ namespace Erp.Server.Controllers
                         string frontendUrl = _configuration["FrontendUrl"]?.TrimEnd('/') ?? "http://localhost:4200";
                         string orderLink = $"{frontendUrl}/#/order-details/{order?.co_id}";
                         string subject = "Order Cancelled Successfully";
+
+                        string refundHtml = isPrepaid 
+                            ? $" As your order was <b>Prepaid</b> (₹{order?.co_net_amount}), your refund has been automatically initiated and will be credited back to your original payment account."
+                            : "";
+
+                        string refundWaText = isPrepaid 
+                            ? $" As your order was Prepaid (₹{order?.co_net_amount}), your refund has been automatically initiated to your original payment account."
+                            : "";
                         
                         if (!string.IsNullOrEmpty(targetEmail))
                         {
                             string emailBody = $"Dear {userProfile?.u_name ?? order?.co_customer_name},<br><br>" +
-                                $"Your order #{order?.co_id} has been successfully <b>Cancelled</b>.<br><br>" +
+                                $"Your order #{order?.co_id} has been successfully <b>Cancelled</b>.{refundHtml}<br><br>" +
                                 $"<a href='{orderLink}'>Click here to view your order details</a><br><br>" +
                                 $"<small>Please do not reply to this email, as this inbox is not monitored.</small>";
                             await inotificationService.SendEmailAsync(targetEmail, subject, emailBody);
@@ -358,7 +390,7 @@ namespace Erp.Server.Controllers
                         if (!string.IsNullOrEmpty(targetPhone))
                         {
                             string whatsappBody = $"Dear {userProfile?.u_name ?? order?.co_customer_name},\n" +
-                                $"Your order #{order?.co_id} has been successfully Cancelled.\n\n" +
+                                $"Your order #{order?.co_id} has been successfully Cancelled.{refundWaText}\n\n" +
                                 $"View your order details here: {orderLink}\n\n" +
                                 $"_(Please do not reply to this message)_";
                             await inotificationService.SendWhatsAppAsync(targetPhone, whatsappBody);
@@ -368,7 +400,7 @@ namespace Erp.Server.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error sending cancellation notification.");
+                logger.LogError(ex, "Error in post-cancellation operations.");
             }
 
             return dbResult;

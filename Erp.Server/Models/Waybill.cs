@@ -22,5 +22,10 @@ namespace Erp.Server.Models
         public DateTime? wb_used_date { get; set; }
 
         public DateTime wb_created_date { get; set; } = DateTime.Now;
+
+        [MaxLength(1)]
+        public string wb_is_pickup_scheduled { get; set; } = "N";
+
+        public int? wb_pickup_id { get; set; }
     }
 }

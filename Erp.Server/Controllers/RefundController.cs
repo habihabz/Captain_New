@@ -22,10 +22,11 @@ namespace Erp.Server.Controllers
 
         [HttpPost("getRefundableOrders")]
         [Authorize]
-        public IActionResult GetRefundableOrders(RequestParams requestParams)
+        public IActionResult GetRefundableOrders([FromBody] RequestParams requestParams)
         {
             try
             {
+                if (requestParams == null) requestParams = new RequestParams();
                 var refundableOrders = _refund.GetRefundableOrders(requestParams);
                 return Ok(refundableOrders);
             }
@@ -37,10 +38,11 @@ namespace Erp.Server.Controllers
 
         [HttpPost("getCompletedRefunds")]
         [Authorize]
-        public IActionResult GetCompletedRefunds(RequestParams requestParams)
+        public IActionResult GetCompletedRefunds([FromBody] RequestParams requestParams)
         {
             try
             {
+                if (requestParams == null) requestParams = new RequestParams();
                 var completedOrders = _refund.GetCompletedRefunds(requestParams);
                 return Ok(completedOrders);
             }

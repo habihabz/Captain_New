@@ -19,18 +19,18 @@ namespace Erp.Server.Repository
 
         public List<CustomerOrder> GetRefundableOrders(RequestParams requestParams)
         {
-            var id = new SqlParameter("id", requestParams.id == null ? (object)DBNull.Value : requestParams.id);
-            var startDate = new SqlParameter("startDate", string.IsNullOrEmpty(requestParams.startDate) ? (object)DBNull.Value : requestParams.startDate);
-            var endDate = new SqlParameter("endDate", string.IsNullOrEmpty(requestParams.endDate) ? (object)DBNull.Value : requestParams.endDate);
+            var id = new SqlParameter("id", (requestParams == null || requestParams.id <= 0) ? (object)DBNull.Value : requestParams.id);
+            var startDate = new SqlParameter("startDate", (requestParams == null || string.IsNullOrEmpty(requestParams.startDate)) ? (object)DBNull.Value : requestParams.startDate);
+            var endDate = new SqlParameter("endDate", (requestParams == null || string.IsNullOrEmpty(requestParams.endDate)) ? (object)DBNull.Value : requestParams.endDate);
 
             return db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getRefundableOrders @id, @startDate, @endDate", id, startDate, endDate).ToList();
         }
 
         public List<CustomerOrder> GetCompletedRefunds(RequestParams requestParams)
         {
-            var id = new SqlParameter("id", requestParams.id == null ? (object)DBNull.Value : requestParams.id);
-            var startDate = new SqlParameter("startDate", string.IsNullOrEmpty(requestParams.startDate) ? (object)DBNull.Value : requestParams.startDate);
-            var endDate = new SqlParameter("endDate", string.IsNullOrEmpty(requestParams.endDate) ? (object)DBNull.Value : requestParams.endDate);
+            var id = new SqlParameter("id", (requestParams == null || requestParams.id <= 0) ? (object)DBNull.Value : requestParams.id);
+            var startDate = new SqlParameter("startDate", (requestParams == null || string.IsNullOrEmpty(requestParams.startDate)) ? (object)DBNull.Value : requestParams.startDate);
+            var endDate = new SqlParameter("endDate", (requestParams == null || string.IsNullOrEmpty(requestParams.endDate)) ? (object)DBNull.Value : requestParams.endDate);
 
             return db.Set<CustomerOrder>().FromSqlRaw("EXEC dbo.getCompletedRefunds @id, @startDate, @endDate", id, startDate, endDate).ToList();
         }

@@ -25,3 +25,13 @@ img {
 img:hover {
     transform: scale(1.02);
 }
+
+/* Font applied to all content in about us */
+p, .fs-5 {
+    font-family: 'Inter', sans-serif !important;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif !important;
+}

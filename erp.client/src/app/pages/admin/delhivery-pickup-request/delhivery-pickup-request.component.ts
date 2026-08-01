@@ -27,6 +27,8 @@ export class DelhiveryPickupRequestComponent implements OnInit {
     cre_by: 0
   };
 
+  tomorrowDateStr: string = '';
+
   loading: boolean = false;
   submitting: boolean = false;
   domLayout: DomLayoutType = 'autoHeight';
@@ -85,25 +87,43 @@ export class DelhiveryPickupRequestComponent implements OnInit {
     this.loadHistory();
   }
 
+  unscheduledCount: number = 0;
+
   openCreateModal() {
     if (this.warehouses.length === 0) {
       this.snackbar.showError("No registered warehouses available to create a pickup request.");
       return;
     }
     
-    // Reset form defaults
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
+    // Reset form defaults to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const dd = String(tomorrow.getDate()).padStart(2, '0');
+    this.tomorrowDateStr = `${yyyy}-${mm}-${dd}`;
 
     this.pickupData = {
       pickup_location: this.warehouses[0].dw_name,
-      pickup_date: `${yyyy}-${mm}-${dd}`,
+      pickup_date: this.tomorrowDateStr,
       pickup_time: "11:00:00",
       expected_package_count: 1,
       cre_by: this.currentUser.u_id
     };
+
+    // Auto-fetch count of unscheduled used waybills
+    this.http.get<any>(`${this.apiUrl}/api/Delhivery/unscheduled-waybill-count`).subscribe({
+      next: (res) => {
+        const count = res && typeof res.count === 'number' ? res.count : 0;
+        this.unscheduledCount = count;
+        if (count > 0) {
+          this.pickupData.expected_package_count = count;
+        }
+      },
+      error: () => {
+        this.unscheduledCount = 0;
+      }
+    });
 
     $('#pickupRequestModal').modal('show');
   }
@@ -161,6 +181,20 @@ export class DelhiveryPickupRequestComponent implements OnInit {
           let msg = "Failed to create pickup request.";
           if (err.error && typeof err.error === 'object') {
             msg = err.error.message || err.error.error || msg;
+            
+            if (err.error.data) {
+              try {
+                const parsedData = JSON.parse(err.error.data);
+                const firstKey = Object.keys(parsedData)[0];
+                if (firstKey && Array.isArray(parsedData[firstKey]) && parsedData[firstKey].length > 0) {
+                  msg = parsedData[firstKey][0];
+                } else if (firstKey && typeof parsedData[firstKey] === 'string') {
+                  msg = parsedData[firstKey];
+                }
+              } catch (e) {
+                // Ignore parse errors and fallback
+              }
+            }
           } else if (err.error && typeof err.error === 'string') {
             msg = err.error;
           }

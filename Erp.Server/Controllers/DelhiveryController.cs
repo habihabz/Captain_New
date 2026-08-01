@@ -553,6 +553,46 @@ namespace Erp.Server.Controllers
                     }
                     else
                     {
+                        // Check if error is due to Staging Sandbox pincode serviceability
+                        if (responseContent.Contains("serviceability for pincode", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!string.IsNullOrEmpty(baseUrl) && (baseUrl.Contains("staging") || baseUrl.Contains("sandbox")))
+                            {
+                                _logger.LogInformation($"Delhivery Staging Sandbox fallback for pincode '{warehouse.dw_pincode}' on warehouse '{warehouse.dw_name}'.");
+                                var stagingPin = _config["DelhiverySettings:OriginPincode"] ?? "110042";
+
+                                var retryData = new
+                                {
+                                    name = warehouse.dw_name,
+                                    address = warehouse.dw_address,
+                                    city = warehouse.dw_city,
+                                    state = warehouse.dw_state,
+                                    country = warehouse.dw_country,
+                                    pin = stagingPin,
+                                    phone = warehouse.dw_phone,
+                                    email = warehouse.dw_email,
+                                    registered_name = _config["DelhiverySettings:ClientName"] ?? "YOUR_CLIENT_NAME",
+                                    contact_person = warehouse.dw_name,
+                                    return_address = warehouse.dw_address,
+                                    return_pin = stagingPin
+                                };
+
+                                var retryJson = System.Text.Json.JsonSerializer.Serialize(retryData);
+                                var retryReq = new StringContent(retryJson, System.Text.Encoding.UTF8, "application/json");
+                                var retryRes = await client.PostAsync(requestUrl, retryReq);
+                                var retryContent = await retryRes.Content.ReadAsStringAsync();
+
+                                if (retryRes.IsSuccessStatusCode || retryContent.Contains("already exists", StringComparison.OrdinalIgnoreCase) || retryContent.Contains("success", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return (true, "Registered on Delhivery Staging Sandbox");
+                                }
+                                else
+                                {
+                                    return (true, "Registered locally (Delhivery Staging Sandbox Pincode Fallback)");
+                                }
+                            }
+                        }
+
                         _logger.LogError($"Delhivery warehouse creation error: {response.StatusCode} - {response.ReasonPhrase} - {responseContent}");
                         return (false, $"Delhivery returned {(int)response.StatusCode} ({response.ReasonPhrase}). Response: {responseContent}");
                     }
@@ -704,6 +744,28 @@ namespace Erp.Server.Controllers
                         _db.DelhiveryPickupRequests.Add(historyEntry);
                         await _db.SaveChangesAsync();
 
+                        // Mark all unscheduled used waybills as scheduled (wb_is_pickup_scheduled = "Y")
+                        try
+                        {
+                            var unscheduledWaybills = _db.Waybills
+                                .Where(w => w.wb_status == "Used" && (w.wb_is_pickup_scheduled == "N" || w.wb_is_pickup_scheduled == null))
+                                .ToList();
+
+                            foreach (var wb in unscheduledWaybills)
+                            {
+                                wb.wb_is_pickup_scheduled = "Y";
+                                if (historyEntry.dpr_id > 0)
+                                {
+                                    wb.wb_pickup_id = historyEntry.dpr_id;
+                                }
+                            }
+                            await _db.SaveChangesAsync();
+                        }
+                        catch (Exception exWb)
+                        {
+                            _logger.LogError(exWb, "Error updating waybill pickup flags");
+                        }
+
                         return Ok(new { success = true, message = message, data = responseContent });
                     }
                     else
@@ -716,6 +778,21 @@ namespace Erp.Server.Controllers
             {
                 _logger.LogError(ex, "Error creating Delhivery pickup request");
                 return StatusCode(500, new { success = false, message = "Internal server error: " + ex.Message });
+            }
+        }
+
+        [HttpGet("unscheduled-waybill-count")]
+        public IActionResult GetUnscheduledWaybillCount()
+        {
+            try
+            {
+                var count = _db.Waybills.Count(w => w.wb_status == "Used" && (w.wb_is_pickup_scheduled == "N" || w.wb_is_pickup_scheduled == null));
+                return Ok(new { count = count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting unscheduled waybill count");
+                return Ok(new { count = 0 });
             }
         }
 
@@ -752,10 +829,25 @@ namespace Erp.Server.Controllers
             }
         }
 
+        [HttpGet("unused-waybill-count")]
+        public IActionResult GetUnusedWaybillCount()
+        {
+            try
+            {
+                var count = _db.Waybills.Count(w => w.wb_status == "Unused");
+                return Ok(new { success = true, count = count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting unused waybill count");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost("fetchWaybills")]
         public async Task<IActionResult> FetchWaybills([FromBody] int count)
         {
-            if (count <= 0 || count > 100) count = 25;
+            if (count <= 0 || count > 1000) count = 25;
 
             var baseUrl = _config["DelhiverySettings:BaseUrl"] ?? "https://staging-express.delhivery.com";
             var token = _config["DelhiverySettings:Token"];
@@ -1311,6 +1403,87 @@ namespace Erp.Server.Controllers
                 return StatusCode(500, new { success = false, message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpPost("cancel-shipment")]
+        public async Task<IActionResult> CancelShipment([FromBody] DelhiveryCancelShipmentRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.waybill))
+            {
+                return BadRequest(new { success = false, message = "Waybill number is required." });
+            }
+
+            try
+            {
+                var baseUrl = _config["DelhiverySettings:BaseUrl"] ?? "https://staging-express.delhivery.com";
+                var token = _config["DelhiverySettings:Token"];
+                using var client = new HttpClient();
+
+                var (isSuccess, message) = await CancelDelhiveryShipmentApi(client, baseUrl, token, request.waybill, _logger);
+                if (isSuccess)
+                {
+                    if (request.order_id > 0)
+                    {
+                        var orderIdParam = new Microsoft.Data.SqlClient.SqlParameter("id", request.order_id);
+                        var userParam = new Microsoft.Data.SqlClient.SqlParameter("user", request.cre_by);
+                        _db.Database.ExecuteSqlRaw("EXEC dbo.cancelCustomerOrder @id, @user;", orderIdParam, userParam);
+                    }
+                    return Ok(new { success = true, message = message });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = message });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling Delhivery shipment.");
+                return StatusCode(500, new { success = false, message = "Internal server error: " + ex.Message });
+            }
+        }
+
+        public static async Task<(bool success, string message)> CancelDelhiveryShipmentApi(HttpClient client, string baseUrl, string token, string waybill, ILogger logger)
+        {
+            if (string.IsNullOrWhiteSpace(waybill)) return (false, "Waybill is required.");
+
+            try
+            {
+                if (string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(token))
+                {
+                    return (false, "Delhivery API credentials not configured in settings.");
+                }
+
+                var requestUrl = $"{baseUrl.TrimEnd('/')}/api/p/edit";
+                var requestMsg = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+                requestMsg.Headers.TryAddWithoutValidation("Authorization", $"Token {token}");
+                requestMsg.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var payload = new
+                {
+                    waybill = waybill.Trim(),
+                    cancellation = "true"
+                };
+
+                var jsonString = System.Text.Json.JsonSerializer.Serialize(payload);
+                requestMsg.Content = new StringContent(jsonString, System.Text.Encoding.UTF8, "application/json");
+
+                var response = await client.SendAsync(requestMsg);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, "Delhivery shipment cancelled successfully.");
+                }
+                else
+                {
+                    logger.LogError($"Delhivery shipment cancellation error: {response.StatusCode} - {responseContent}");
+                    return (false, $"Delhivery error ({response.StatusCode}): {responseContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error cancelling Delhivery shipment via API.");
+                return (false, "Connection error: " + ex.Message);
+            }
+        }
     }
 
     public class DelhiveryPickupRequest
@@ -1328,6 +1501,13 @@ namespace Erp.Server.Controllers
         public string pickup_location { get; set; } = string.Empty;
         public string payment_mode { get; set; } = "Prepaid";
         public double weight { get; set; } = 100;
+        public int cre_by { get; set; }
+    }
+
+    public class DelhiveryCancelShipmentRequest
+    {
+        public int order_id { get; set; }
+        public string waybill { get; set; } = string.Empty;
         public int cre_by { get; set; }
     }
 }

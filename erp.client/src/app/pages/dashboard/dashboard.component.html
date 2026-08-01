@@ -150,6 +150,10 @@
           <h2 class="fw-bold text-dark m-0">Top Products</h2>
         </div>
         <div class="x_content p-0 mt-3">
+          <div *ngIf="topProducts.length === 0" class="text-center text-muted py-5">
+              <i class="fa fa-box-open fa-3x mb-3 text-light"></i>
+              <p>No products sold yet.</p>
+          </div>
           <div *ngFor="let product of topProducts" class="d-flex align-items-center mb-4 p-2 rounded-3 hover-bg-light transition-all cursor-pointer">
             <div class="product-icon bg-soft-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
                 <i class="fa fa-tag text-primary"></i>
@@ -158,8 +162,8 @@
                 <h6 class="mb-0 fw-bold text-dark small">{{product.name}}</h6>
                 <div class="d-flex align-items-center text-muted small mt-1">
                     <span class="fw-600 me-2">{{product.sales}} Sales</span>
-                    <span [ngClass]="product.growth > 0 ? 'text-success' : 'text-danger'">
-                        <i class="fa" [ngClass]="product.growth > 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i> {{product.growth}}%
+                    <span [ngClass]="product.growth > 0 ? 'text-success' : (product.growth === 0 ? 'text-muted' : 'text-danger')">
+                        <i class="fa" [ngClass]="product.growth > 0 ? 'fa-arrow-up' : (product.growth === 0 ? 'fa-minus' : 'fa-arrow-down')"></i> {{product.growth}}%
                     </span>
                 </div>
             </div>

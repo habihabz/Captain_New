@@ -21,6 +21,7 @@ export class WebsiteFooterComponent implements OnInit{
   subcategories: MasterData[] = [];
   requestParms: RequestParms = new RequestParms();
   subscription: Subscription = new Subscription();
+  showContact: boolean = false;
   
   constructor(
     private elRef: ElementRef,
@@ -58,5 +59,17 @@ export class WebsiteFooterComponent implements OnInit{
         callback([]);  // Pass an empty array if there's an error
       }
     );
+  }
+
+  toggleContactInfo() {
+    this.showContact = !this.showContact;
+    if (this.showContact) {
+      setTimeout(() => {
+        const contactDiv = document.getElementById('contactDetailsContent');
+        if (contactDiv) {
+          contactDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 150);
+    }
   }
 }

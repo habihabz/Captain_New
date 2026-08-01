@@ -85,6 +85,10 @@ export class ICustomerOrder {
     return this.http.get<any>(`${environment.serverHostAddress}/api/Delhivery/trackShipment/${waybill}?refId=${refId}`);
   }
 
+  cancelDelhiveryShipment(payload: any): Observable<any> {
+    return this.http.post<any>(`${environment.serverHostAddress}/api/Delhivery/cancel-shipment`, payload);
+  }
+
   printShippingLabelInNewTab(waybill: string, pdfSize: string = '4R') {
     if (!waybill) return;
     const url = `${environment.serverHostAddress}/api/Delhivery/generateShippingLabel/${waybill}?pdf_size=${pdfSize}`;

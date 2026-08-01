@@ -144,7 +144,7 @@
                 </div>
               </div>
 
-              <div class="product-price">
+              <div class="product-price" *ngIf="isShopEnabled">
                 <span class="small">₹</span>{{ product.p_price | number }}
               </div>
             </div>

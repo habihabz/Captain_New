@@ -74,7 +74,7 @@
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label for="pickup_date">Pickup Date <span class="text-danger">*</span></label>
-                <input type="date" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3" id="pickup_date" name="pickup_date" [(ngModel)]="pickupData.pickup_date" required>
+                <input type="date" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3" id="pickup_date" name="pickup_date" [(ngModel)]="pickupData.pickup_date" required [min]="tomorrowDateStr" [max]="tomorrowDateStr">
               </div>
             </div>
             <div class="col-md-6">
@@ -86,8 +86,13 @@
           </div>
 
           <div class="form-group mb-3">
-            <label for="expected_package_count">Expected Package Count <span class="text-danger">*</span></label>
-            <input type="number" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3" id="expected_package_count" name="expected_package_count" [(ngModel)]="pickupData.expected_package_count" required min="1">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="expected_package_count" class="mb-0">Expected Package Count <span class="text-danger">*</span></label>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1" style="font-size: 10px;" *ngIf="unscheduledCount > 0">
+                <i class="fa fa-calculator me-1"></i> Auto-calculated: {{ unscheduledCount }} unscheduled waybill(s)
+              </span>
+            </div>
+            <input type="number" class="form-control border-0 bg-light rounded-3 shadow-xs py-2 px-3 fw-bold" id="expected_package_count" name="expected_package_count" [(ngModel)]="pickupData.expected_package_count" required min="1">
           </div>
 
           <div class="modal-footer px-0 pb-0 pt-3">
