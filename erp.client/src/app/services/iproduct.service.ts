@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DbResult } from '../models/dbresult.model';
 import { environment } from '../../environments/environment';
 import { Product } from '../models/product.model';
@@ -18,19 +19,55 @@ export class IProductService {
   constructor(private http: HttpClient) { }
 
   getProducts(): Observable<Product[]> {
-    return this.http.post<Product[]>(this.apiUrl + "/getProducts", {});
+    return this.http.post<Product[]>(this.apiUrl + "/getProducts", {}).pipe(
+      map(products => products.map(p => {
+        if (p.p_attachements) {
+          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
+        } else {
+          p.parsed_attachments = [];
+        }
+        return p;
+      }))
+    );
   }
 
   getProductsByCountry(id: number): Observable<Product[]> {
-    return this.http.post<Product[]>(this.apiUrl + "/getProductsByCountry", id);
+    return this.http.post<Product[]>(this.apiUrl + "/getProductsByCountry", id).pipe(
+      map(products => products.map(p => {
+        if (p.p_attachements) {
+          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
+        } else {
+          p.parsed_attachments = [];
+        }
+        return p;
+      }))
+    );
   }
 
   getProduct(id: number): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl + "/getProduct", id);
+    return this.http.post<Product>(this.apiUrl + "/getProduct", id).pipe(
+      map(p => {
+        if (p.p_attachements) {
+          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
+        } else {
+          p.parsed_attachments = [];
+        }
+        return p;
+      })
+    );
   }
 
   getProductByCountry(requestParms: RequestParms): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl + "/getProductByCountry", requestParms);
+    return this.http.post<Product>(this.apiUrl + "/getProductByCountry", requestParms).pipe(
+      map(p => {
+        if (p.p_attachements) {
+          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
+        } else {
+          p.parsed_attachments = [];
+        }
+        return p;
+      })
+    );
   }
 
   deleteProduct(id: number): Observable<DbResult> {
@@ -42,7 +79,16 @@ export class IProductService {
   }
 
   getProductsByFilters(productSearchParms: ProductSearchParms): Observable<Product[]> {
-    return this.http.post<Product[]>(this.apiUrl + "/getProductsByFilters", productSearchParms);
+    return this.http.post<Product[]>(this.apiUrl + "/getProductsByFilters", productSearchParms).pipe(
+      map(products => products.map(p => {
+        if (p.p_attachements) {
+          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
+        } else {
+          p.parsed_attachments = [];
+        }
+        return p;
+      }))
+    );
   }
 
   getProductAttachementsByColor(requestParms: RequestParms): Observable<ProdAttachement[]> {

@@ -2482,6 +2482,201 @@ body.nav-sm .sidebar-footer {
     margin-bottom: 0;
     background: transparent;
     padding: 0;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #2d3748 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 44px !important;
+    /* Matches container height for vertical centering */
+    padding-left: 15px !important;
+    display: block !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 44px !important;
+    right: 12px !important;
+}
+
+/* Dropdown Menu Styling */
+.select2-dropdown {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    margin-top: 5px !important;
+    background: #fff !important;
+}
+
+.select2-results__option {
+    padding: 12px 16px !important;
+    font-size: 13.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    /* Space for the emojis/icons */
+    transition: all 0.2s ease !important;
+}
+
+.select2-primary .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: rgba(26, 187, 156, 0.1) !important;
+    color: #d6de23 !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #f7fafc !important;
+    color: #d6de23 !important;
+    font-weight: 700 !important;
+}
+
+/* Custom Search in Select2 */
+.select2-search--dropdown .select2-search__field {
+    border-radius: 10px !important;
+    border: 1px solid #edf2f7 !important;
+    padding: 8px 12px !important;
+}
+
+/* --- 📂 CUSTOM TABS SYSTEM --- */
+.custom-tabs .nav-link {
+    color: #4a5568 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    font-size: 11px !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase;
+    transition: all 0.3s ease !important;
+    opacity: 0.5;
+    padding: 12px 25px !important;
+}
+
+.custom-tabs .nav-link.active {
+    color: #d6de23 !important;
+    background: white !important;
+    border: 1px solid #edf2f7 !important;
+    border-bottom-color: white !important;
+    z-index: 5;
+    opacity: 1;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.custom-tabs .nav-link:hover:not(.active) {
+    opacity: 0.9;
+    color: #d6de23 !important;
+    background: rgba(26, 187, 156, 0.05) !important;
+}
+
+.animate-pulse {
+    animation: pulse-teal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-teal {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .4;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-card-glass {
+        padding: 30px 20px !important;
+        margin: 15px !important;
+    }
+}
+
+/* --- 🎨 PREMIUM COLOR TOKENS --- */
+.text-teal {
+    color: #d6de23 !important;
+}
+
+.bg-teal {
+    background-color: #d6de23 !important;
+}
+
+.bg-teal-soft {
+    background-color: rgba(26, 187, 156, 0.1) !important;
+}
+
+.border-teal {
+    border-color: #d6de23 !important;
+}
+
+/* --- 🔔 SNACKBAR STYLING --- */
+.success-snackbar.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    background-color: #198754 !important;
+}
+
+.success-snackbar .mdc-snackbar__label,
+.success-snackbar .mat-mdc-button {
+    color: white !important;
+}
+
+.danger-snackbar.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    background-color: #dc3545 !important;
+}
+
+.danger-snackbar .mdc-snackbar__label,
+.danger-snackbar .mat-mdc-button {
+    color: white !important;
+}
+
+/* --- 🚀 ENSURE SNACKBAR IS ON TOP --- */
+.cdk-overlay-container {
+    z-index: 99999 !important;
+}
+
+/* Remove AG Grid Cell Focus Borders */
+.ag-theme-quartz,
+.ag-theme-acmecorp {
+    --ag-cell-focus-border-color: transparent !important;
+    --ag-cell-focus-box-shadow: none !important;
+}
+
+/* --- 🌐 GLOBAL ICON SPACING SYSTEM --- */
+.nav-link i,
+.dropdown-item i,
+.breadcrumb-item i,
+.nav-tab i,
+.info-badge i {
+    margin-right: 10px !important;
+    vertical-align: middle;
+}
+
+/* Ensure icons are not squashed */
+.fa,
+.fas,
+.far {
+    display: inline-block;
+    min-width: 14px;
+    text-align: center;
+}
+
+/* --- ?? GLOBAL BREADCRUMB SYSTEM --- */
+.global-breadcrumb-wrapper {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 6px 0;
+    margin-top: 50px;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+}
+
+.global-breadcrumb-wrapper .breadcrumb {
+    margin-bottom: 0;
+    background: transparent;
+    padding: 0;
 }
 
 .global-breadcrumb-wrapper .breadcrumb-item {
@@ -2511,7 +2706,7 @@ body.nav-sm .sidebar-footer {
 
 @media (max-width: 991px) {
     .global-breadcrumb-wrapper {
-        margin-top: 10px !important;
+        margin-top: 0px !important;
         padding: 4px 0 !important;
     }
 }
@@ -2534,8 +2729,6 @@ body.nav-sm .sidebar-footer {
     }
 }
 
-
-/* Custom Teko Font for Titles */
 h1, h2, h3, h4, h5, h6, .title, .f-title, .section-title, .site_title {
     font-family: 'Poppins', sans-serif !important;
 }
@@ -2553,9 +2746,8 @@ h1, h2, h3, h4, h5, h6, .title, .f-title, .section-title, .site_title {
     
 }
 .breadcrumb-item a, .breadcrumb-item.active, .breadcrumb-item + .breadcrumb-item::before {
-    color: #D6DE23 !important;
+    color: #000000 !important;
 }
-
 
 /* Section Title Font Override */
 .section-title, .section-subtitle {

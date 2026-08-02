@@ -16,7 +16,7 @@
     backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
-    padding: 10px 0;
+    padding: 0;
 }
 
 .glass-nav:hover {
@@ -98,7 +98,7 @@
         backdrop-filter: none;
     }
     .glass-nav img {
-        height: 32px !important; /* Smaller logo for mobile */
+        height: 42px !important; /* Increased logo size for mobile */
     }
     .navbar-toggler {
         padding: 4px 8px !important;

@@ -28,12 +28,31 @@
             <!-- ✅ Show image if available -->
             <div *ngIf="productAttachements.length > 0; else noImagesMain" class="main-image-container text-center"
                 (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()"
-                style="overflow: hidden; position: relative; cursor: crosshair;">
+                (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
+                style="overflow: hidden; position: relative; cursor: crosshair; touch-action: pan-y;">
 
                 <img [src]="selectedImagePath" class="img-fluid zoom-img" [class.zoomed]="isZoomed"
                     [style.transformOrigin]="transformOrigin"
                     style="max-height: 450px; object-fit: contain; transition: transform 0.15s ease-out;"
                     alt="Primary product image">
+                    
+                <button *ngIf="productAttachements.length > 1" 
+                        class="btn btn-light position-absolute top-50 start-0 translate-middle-y ms-2 rounded-circle shadow-sm" 
+                        style="width: 40px; height: 40px; z-index: 10; opacity: 0.8; display: flex; align-items: center; justify-content: center; cursor: pointer;" 
+                        (click)="prevImage($event)"
+                        (mousemove)="$event.stopPropagation()"
+                        (mouseenter)="onMouseLeave(); $event.stopPropagation()">
+                    <i class="fa fa-chevron-left" style="color: black;"></i>
+                </button>
+                
+                <button *ngIf="productAttachements.length > 1" 
+                        class="btn btn-light position-absolute top-50 end-0 translate-middle-y me-2 rounded-circle shadow-sm" 
+                        style="width: 40px; height: 40px; z-index: 10; opacity: 0.8; display: flex; align-items: center; justify-content: center; cursor: pointer;" 
+                        (click)="nextImage($event)"
+                        (mousemove)="$event.stopPropagation()"
+                        (mouseenter)="onMouseLeave(); $event.stopPropagation()">
+                    <i class="fa fa-chevron-right" style="color: black;"></i>
+                </button>
             </div>
 
         </div>
@@ -150,9 +169,9 @@
                     <div class="product-card-premium h-100 d-flex flex-column cursor-pointer"
                         (click)="navigateToProduct(product.p_id)">
                         <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center"
-                            [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
+                            [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
                             <ng-container
-                                *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
+                                *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
                                 <img [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}"
                                     class="img-fluid" [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
                             </ng-container>

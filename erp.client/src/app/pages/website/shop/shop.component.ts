@@ -22,6 +22,8 @@ import { SnackBarService } from '../../../services/isnackbar.service';
 import { DbResult } from '../../../models/dbresult.model';
 import { IConstantValueService } from '../../../services/iconstant.values.service';
 import { ConstantValue } from '../../../models/constant.value.model';
+import { HostListener } from '@angular/core';
+import { ShopStateService } from '../../../services/shop-state.service';
 
 @Component({
   selector: 'app-shop',
@@ -33,6 +35,11 @@ export class ShopComponent implements OnInit {
   product: Product = new Product();
   products: Product[] = [];
   filteredProducts: Product[] = [];
+  searchFilteredProducts: Product[] = [];
+  displayedProducts: Product[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 20;
+  searchTerm: string = '';
   
   // Flat filters for selections
   categories: Category[] = [];
@@ -77,7 +84,8 @@ export class ShopComponent implements OnInit {
     private snackbarService: SnackBarService,
     private titleService: Title,
     private metaService: Meta,
-    private constantService: IConstantValueService
+    private constantService: IConstantValueService,
+    private shopStateService: ShopStateService
   ) {
     this.currentUser = iuser.getCurrentUser();
     this.country = this.geolocationService.getCurrentCountry();
@@ -87,13 +95,31 @@ export class ShopComponent implements OnInit {
   ngOnInit(): void {
     this.setSEO();
     this.loadCategories();
-    this.getProductsByCountry();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
     this.getMasterDatasByType("Division", (data) => { this.divisions = data; });
     this.getMasterDatasByType("SubDivision", (data) => { this.subdivisions = data; });
     this.getMasterDatasByType("ProductSize", (data) => { this.sizes = data; });
     this.loadUserFavourites();
     this.checkShopStatus();
+
+    const savedState = this.shopStateService.getState();
+    if (savedState) {
+      this.products = savedState.products;
+      this.displayedProducts = savedState.displayedProducts;
+      this.currentPage = savedState.currentPage;
+      this.selectedCategoryIds = savedState.selectedCategoryIds;
+      this.selectedSubCategoryIds = savedState.selectedSubCategoryIds;
+      this.selectedDivisionIds = savedState.selectedDivisionIds;
+      this.selectedSubDivisionIds = savedState.selectedSubDivisionIds;
+      this.selectedSizeIds = savedState.selectedSizeIds;
+      this.sortBy = savedState.sortBy;
+      
+      this.buildHierarchy();
+      setTimeout(() => window.scrollTo(0, savedState.scrollY), 0);
+      this.shopStateService.clearState();
+    } else {
+      this.getProductsByCountry();
+    }
   }
 
   checkShopStatus() {
@@ -121,6 +147,7 @@ export class ShopComponent implements OnInit {
     this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
       (data: Product[]) => {
         this.products = data;
+        this.applySearchFilter();
         this.buildHierarchy();
       },
       (error: any) => {
@@ -162,9 +189,19 @@ export class ShopComponent implements OnInit {
     return JSON.parse(p_attachements);
   }
   navigateToProduct(productId: number) {
-
+    this.shopStateService.saveState(
+      this.products,
+      this.displayedProducts,
+      this.currentPage,
+      window.scrollY,
+      this.selectedCategoryIds,
+      this.selectedSubCategoryIds,
+      this.selectedDivisionIds,
+      this.selectedSubDivisionIds,
+      this.selectedSizeIds,
+      this.sortBy
+    );
     this.router.navigate(['/single-product', productId]);
-
   }
 
   onCategoryChange(event: Event, categoryId: number): void {
@@ -240,10 +277,9 @@ export class ShopComponent implements OnInit {
     this.iproductService.getProductsByFilters(this.productSearchParms).subscribe(
       (data: Product[]) => {
         this.products = data;
-        // Optimization: only build hierarchy if no filters are applied, 
-        // OR build it but preserve open states. 
-        // For simplicity, we re-build it.
-        this.buildHierarchy();
+        this.applySearchFilter();
+        // Optimization: We DO NOT rebuild hierarchy here.
+        // Rebuilding here causes unselected categories to disappear from the sidebar.
       },
       (error: any) => {
       }
@@ -346,6 +382,31 @@ export class ShopComponent implements OnInit {
         (error: any) => {
         }
       );
+    }
+  }
+
+  applySearchFilter() {
+    this.currentPage = 1;
+    if (this.searchTerm && this.searchTerm.trim() !== '') {
+      const term = this.searchTerm.toLowerCase().trim();
+      this.searchFilteredProducts = this.products.filter(p => 
+        (p.p_name && p.p_name.toLowerCase().includes(term)) ||
+        (p.p_category_name && p.p_category_name.toLowerCase().includes(term)) ||
+        (p.p_sub_category_name && p.p_sub_category_name.toLowerCase().includes(term)) ||
+        (p.p_division_name && p.p_division_name.toLowerCase().includes(term)) ||
+        (p.p_sub_division_name && p.p_sub_division_name.toLowerCase().includes(term))
+      );
+    } else {
+      this.searchFilteredProducts = [...this.products];
+    }
+    this.displayedProducts = this.searchFilteredProducts.slice(0, this.itemsPerPage);
+  }
+
+  loadMore() {
+    if (this.displayedProducts.length < this.searchFilteredProducts.length) {
+      this.currentPage++;
+      const nextProducts = this.searchFilteredProducts.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+      this.displayedProducts = [...this.displayedProducts, ...nextProducts];
     }
   }
 }

@@ -13,20 +13,39 @@
   <!-- Hidden H1 for SEO -->
   <h1 class="sr-only" style="display:none;">Shop Our Sports Collection</h1>
 
-  <div class="shop-header-actions d-flex justify-content-between align-items-center mb-4">
-    <button class="btn btn-dark d-lg-none rounded-pill px-4 d-flex align-items-center gap-2" (click)="isMobileFilterOpen = true">
-      <i class="fa fa-filter"></i> Filters
-    </button>
+  <div class="shop-header-actions row align-items-center mb-4 gy-3">
+    <div class="col-auto d-lg-none order-1">
+      <button class="btn btn-dark rounded-pill px-4 d-flex align-items-center gap-2" (click)="isMobileFilterOpen = true">
+        <i class="fa fa-filter"></i> Filters
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="col-12 col-lg order-3 order-lg-2">
+      <div class="search-bar">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-4 text-muted">
+            <i class="fa fa-search"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 rounded-end-pill shadow-none py-2" 
+                 placeholder="Search by product, category, or subcategory..." 
+                 [(ngModel)]="searchTerm" 
+                 (input)="applySearchFilter()">
+        </div>
+      </div>
+    </div>
     
-    <div class="filter-rating ms-auto" style="min-width: 200px;">
-      <select id="ratingFilter" [(ngModel)]="sortBy" (change)="getProductsByFilters()" class="form-select border-0 shadow-sm rounded-pill px-4 py-2">
-        <option value="0">Default Sorting</option>
-        <option value="1">Featured</option>
-        <option value="2">Popularity</option>
-        <option value="3">Newest</option>
-        <option value="4">Price: High to Low</option>
-        <option value="5">Price: Low to High</option>
-      </select>
+    <div class="col-auto order-2 order-lg-3 ms-auto">
+      <div class="filter-rating" style="min-width: 170px;">
+        <select id="ratingFilter" [(ngModel)]="sortBy" (change)="getProductsByFilters()" class="form-select border-0 shadow-sm rounded-pill px-4 py-2">
+          <option value="0">Default Sorting</option>
+          <option value="1">Featured</option>
+          <option value="2">Popularity</option>
+          <option value="3">Newest</option>
+          <option value="4">Price: High to Low</option>
+          <option value="5">Price: Low to High</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -115,11 +134,11 @@
     <!-- Products Area -->
     <div class="products-area">
       <div class="row g-2 g-md-4">
-        <div *ngFor="let product of this.products" class="col-lg-3 col-md-4 col-grid-mobile">
+        <div *ngFor="let product of this.displayedProducts" class="col-lg-3 col-md-4 col-grid-mobile">
           <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
-            <div class="product-image-container flex-grow-1" [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
-              <ng-container *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
-                <img [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
+            <div class="product-image-container flex-grow-1" [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
+              <ng-container *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
+                <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
                      [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
               </ng-container>
 
@@ -151,9 +170,14 @@
           </div>
         </div>
       </div>
+
+      <!-- Load More Button -->
+      <div *ngIf="displayedProducts.length < searchFilteredProducts.length" class="text-center py-4">
+        <button class="btn btn-outline-dark rounded-pill px-4" (click)="loadMore()">Load More</button>
+      </div>
       
       <!-- Empty State -->
-      <div *ngIf="products.length === 0" class="text-center py-5">
+      <div *ngIf="searchFilteredProducts.length === 0" class="text-center py-5">
         <i class="fa fa-search fa-3x text-muted opacity-25 mb-3"></i>
         <h4 class="text-muted">No products found matching your criteria</h4>
         <button class="btn btn-outline-primary mt-3 rounded-pill" (click)="selectedSizeIds=[]; selectedCategoryIds=[]; getProductsByFilters()">Clear Filters</button>

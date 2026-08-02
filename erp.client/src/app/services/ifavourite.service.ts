@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DbResult } from '../models/dbresult.model';
 import { environment } from '../../environments/environment';
 import { Favourite } from '../models/favourite.model';
@@ -17,7 +18,16 @@ export class IFavouriteService {
   constructor(private http: HttpClient) { }
 
   getFavourites(requestParms: RequestParms): Observable<Favourite[]> {
-    return this.http.post<Favourite[]>(this.apiUrl + "/getFavourites", requestParms);
+    return this.http.post<Favourite[]>(this.apiUrl + "/getFavourites", requestParms).pipe(
+      map(favourites => favourites.map(f => {
+        if (f.p_attachements) {
+          try { f.parsed_attachments = JSON.parse(f.p_attachements); } catch (e) { f.parsed_attachments = []; }
+        } else {
+          f.parsed_attachments = [];
+        }
+        return f;
+      }))
+    );
   }
 
   createOrUpdateFavourite(fav: Favourite): Observable<DbResult> {

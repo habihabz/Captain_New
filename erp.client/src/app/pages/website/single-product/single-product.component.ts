@@ -9,6 +9,7 @@ import { IProductReviewService } from '../../../services/iproduct.review.service
 import { DbResult } from '../../../models/dbresult.model';
 import { SnackBarService } from '../../../services/isnackbar.service';
 import { RequestParms } from '../../../models/requestParms';
+import { ProductSearchParms } from '../../../models/product.search.parms.model';
 import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
 import { MasterData } from '../../../models/master.data.model';
 import { ICartService } from '../../../services/icart.service';
@@ -57,6 +58,10 @@ export class SingleProductComponent implements OnInit {
   transformOrigin: string = 'center center';
   selectedImageIndex: number = 0;
 
+  // SWIPE VARIABLES
+  touchStartX = 0;
+  touchEndX = 0;
+
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if (!this.productAttachements || this.productAttachements.length <= 1) return;
@@ -89,6 +94,44 @@ export class SingleProductComponent implements OnInit {
     this.transformOrigin = 'center center';
   }
 
+  nextImage(event?: Event) {
+    if (event) event.stopPropagation();
+    if (!this.productAttachements || this.productAttachements.length <= 1) return;
+    const newIndex = (this.selectedImageIndex + 1) % this.productAttachements.length;
+    this.selectImage(newIndex);
+  }
+
+  prevImage(event?: Event) {
+    if (event) event.stopPropagation();
+    if (!this.productAttachements || this.productAttachements.length <= 1) return;
+    const newIndex = (this.selectedImageIndex - 1 + this.productAttachements.length) % this.productAttachements.length;
+    this.selectImage(newIndex);
+  }
+
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.handleSwipe();
+  }
+
+  handleSwipe() {
+    const swipeThreshold = 50;
+    const difference = this.touchStartX - this.touchEndX;
+
+    if (Math.abs(difference) > swipeThreshold) {
+      if (difference > 0) {
+        // Swiped left -> Next
+        this.nextImage();
+      } else {
+        // Swiped right -> Prev
+        this.prevImage();
+      }
+    }
+  }
+
   constructor(
     private router: Router,
     private elRef: ElementRef,
@@ -112,7 +155,6 @@ export class SingleProductComponent implements OnInit {
     this.productId = +this.route.snapshot.paramMap.get('id')!;
 
     this.getProductByCountry(this.productId);
-    this.getProductsMayLike(this.productId);
     this.getProductReviews(this.productId);
     this.loadUserFavourites();
     this.checkShopStatus();
@@ -141,6 +183,9 @@ export class SingleProductComponent implements OnInit {
       (data: Product) => {
         this.product = data;
         
+        // Fetch related products using the category of the loaded product to optimize performance
+        this.getProductsMayLike(this.product.p_id, this.product.p_category);
+
         // Dynamic SEO
         this.titleService.setTitle(`${this.product.p_name} - Captain Premium Gear`);
         this.metaService.updateTag({ name: 'description', content: this.product.p_short_name || `Buy ${this.product.p_name} at Captain. High-quality sports equipment.` });
@@ -246,8 +291,14 @@ export class SingleProductComponent implements OnInit {
     );
   }
 
-  getProductsMayLike(productId: number) {
-    this.iproductService.getProductsByCountry(this.country.md_id).subscribe(
+  getProductsMayLike(productId: number, categoryId?: number) {
+    let params = new ProductSearchParms();
+    params.country = this.country.md_id;
+    if (categoryId) {
+      params.categories = categoryId.toString();
+    }
+    
+    this.iproductService.getProductsByFilters(params).subscribe(
       (data: Product[]) => {
         this.productsMayLike = data.filter(x => x.p_id != productId).slice(0, 4);
       },
@@ -258,7 +309,6 @@ export class SingleProductComponent implements OnInit {
   navigateToProduct(productId: number): void {
     this.router.navigate(['/single-product', productId]);
     this.getProductByCountry(productId);
-    this.getProductsMayLike(productId);
     this.getProductReviews(productId);
 
   }

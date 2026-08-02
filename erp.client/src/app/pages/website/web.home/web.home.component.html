@@ -1,6 +1,6 @@
 <!-- HERO SECTION -->
 <section class="hero-wrapper">
-    <video autoplay loop muted playsinline class="hero-bg">
+    <video autoplay loop [muted]="true" playsinline class="hero-bg">
         <source src="./assets/video/front_page_video.MOV" type="video/mp4">
     </video>
     <div class="hero-overlay">
@@ -37,9 +37,9 @@
                             <div class="product-card-premium h-100 d-flex flex-column cursor-pointer"
                                 (click)="navigateToProduct(product.p_id)">
                                 <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center"
-                                    [class.has-hover]="getAttachementOfaProduct(product.p_attachements).length > 1">
+                                    [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
                                     <ng-container
-                                        *ngFor="let p_attachement of getAttachementOfaProduct(product.p_attachements).slice(0, 2); let i = index">
+                                        *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
                                         <img [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}"
                                             class="img-fluid"
                                             [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
@@ -102,7 +102,7 @@
 <!-- SHOWCASE AREA -->
 <div class="show-case-premium position-relative overflow-hidden d-flex align-items-center justify-content-center"
     style="background-color: #111; min-height: 80vh;">
-    <video autoplay loop muted playsinline class="position-absolute w-100 h-100"
+    <video autoplay loop [muted]="true" playsinline class="position-absolute w-100 h-100"
         style="object-fit: cover; top: 0; left: 0; z-index: 0;">
         <source src="./assets/video/front_page_video2.MOV" type="video/mp4">
     </video>
@@ -132,7 +132,7 @@
 <div class="blog-area py-5 bg-light">
     <div class="container">
         <div class="section-wrapper text-center mb-5">
-            <h2 class="section-title text-uppercase" style="font-family: 'Teko', sans-serif !important; font-size: 3.5rem; letter-spacing: 2px; font-weight: 600;">LAUNCHPAD</h2>
+            <h2 class="section-title text-uppercase" style="font-size: 3.5rem; font-weight: 600;">LAUNCHPAD</h2>
             <p class="text-muted">What’s Next Starts Here</p>
         </div>
 

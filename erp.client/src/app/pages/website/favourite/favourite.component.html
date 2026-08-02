@@ -45,7 +45,7 @@
                             </button>
 
                             <a class="cursor-pointer" (click)="navigateToProduct(fav.p_id)">
-                                <img *ngFor="let att of getAttachementOfaProduct(fav.p_attachements)?.slice(0, 1);"
+                                <img *ngFor="let att of fav.parsed_attachments?.slice(0, 1);"
                                      [src]="apiUrl + '/' + att.pa_image_path" 
                                      alt="product_image" 
                                      style="height: 120px; width: 100%; object-fit: contain; margin: 0 auto;">

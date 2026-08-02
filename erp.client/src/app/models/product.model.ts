@@ -23,6 +23,7 @@ export class Product {
   p_attachements:string;
   p_packaging_type?: number;
   p_packaging_type_name?: string;
+  parsed_attachments?: any[];
   
   constructor() {
     this.p_id = 0;
