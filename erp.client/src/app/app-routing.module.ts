@@ -50,6 +50,7 @@ import { DelhiveryWarehouseComponent } from './pages/admin/delhivery-warehouse/d
 import { DelhiveryPickupRequestComponent } from './pages/admin/delhivery-pickup-request/delhivery-pickup-request.component';
 import { DelhiveryShipmentComponent } from './pages/admin/delhivery-shipment/delhivery-shipment.component';
 import { SettingsComponent } from './pages/admin/settings/settings.component';
+import { TermsAndConditionsComponent } from './pages/website/terms-and-conditions/terms-and-conditions.component';
 
 const routes: Routes = [
   // Redirect empty path to login
@@ -99,6 +100,7 @@ const routes: Routes = [
       { path: 'payment-success', component: PaymentSuccessComponent },
       { path: 'payment-failure', component: PaymentFailureComponent },
       { path: 'profile', component: UserProfileComponent },
+      { path: 'terms-and-conditions', component: TermsAndConditionsComponent },
     ]
   },
   {

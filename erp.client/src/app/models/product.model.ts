@@ -24,6 +24,7 @@ export class Product {
   p_packaging_type?: number;
   p_packaging_type_name?: string;
   parsed_attachments?: any[];
+  parsed_colors?: any[];
   
   constructor() {
     this.p_id = 0;

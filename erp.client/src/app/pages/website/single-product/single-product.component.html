@@ -92,11 +92,6 @@
                             </a>
                         </ng-container>
                     </div>
-                    &nbsp;
-                    <a class="btn btn-default" href="#reviewContainer">
-                        <i class="fa fa-pencil"></i>
-                        {{ product.p_overall_rating ? ' Write a Review' : ' Add the First Review' }}
-                    </a>
                 </div>
                 <br />
                 <div *ngIf="getListFromJSON(product.p_colors)?.length > 0">
@@ -166,52 +161,32 @@
         <div class="col-12">
             <div class="row g-4 mt-2">
                 <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="product-card-premium h-100 d-flex flex-column cursor-pointer"
-                        (click)="navigateToProduct(product.p_id)">
-                        <div class="product-image-container flex-grow-1 d-flex align-items-center justify-content-center"
-                            [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
-                            <ng-container
-                                *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
-                                <img [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}"
-                                    class="img-fluid" [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+                    <div class="product-card-premium h-100" (click)="navigateToProduct(product.p_id)">
+                        <div class="product-image-container" [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
+                            <ng-container *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
+                                <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
+                                     class="img-fluid" [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
                             </ng-container>
 
                             <!-- Favorite Button -->
-                            <div class="product-actions position-absolute top-0 end-0 m-3">
-                                <button class="btn-favorite"
-                                    (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
-                                    <i class="fa"
-                                        [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                            <div class="position-absolute top-0 end-0 m-3 z-index-2">
+                                <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                                    <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
                                 </button>
                             </div>
 
-                            <div class="product-badge position-absolute top-0 start-0 m-3"
-                                *ngIf="product.p_price > 5000">
+                            <div class="position-absolute top-0 start-0 m-3 z-index-2" *ngIf="product.p_price > 5000">
                                 <span class="badge bg-dark text-white rounded-0 px-2 py-1 small">PREMIUM</span>
                             </div>
                         </div>
 
-                        <div class="product-details text-center p-3">
-                            <span class="product-category">{{ product.p_sub_category_name }}</span>
+                        <div class="product-details">
                             <a class="product-name small fw-bold">{{product.p_name}}</a>
+                            <span class="product-category">{{ product.p_short_name || product.p_category_name || product.p_sub_category_name }}</span>
 
-                            <!-- Rating Display -->
-                            <div class="product-rating mb-2">
-                                <div class="stars">
-                                    <i class="fa fa-star text-warning small"
-                                        [ngClass]="{'opacity-25': product.p_overall_rating < 1}"></i>
-                                    <i class="fa fa-star text-warning small"
-                                        [ngClass]="{'opacity-25': product.p_overall_rating < 2}"></i>
-                                    <i class="fa fa-star text-warning small"
-                                        [ngClass]="{'opacity-25': product.p_overall_rating < 3}"></i>
-                                    <i class="fa fa-star text-warning small"
-                                        [ngClass]="{'opacity-25': product.p_overall_rating < 4}"></i>
-                                    <i class="fa fa-star text-warning small"
-                                        [ngClass]="{'opacity-25': product.p_overall_rating < 5}"></i>
-                                </div>
-                            </div>
 
-                            <div class="product-price small fw-bold">
+
+                            <div class="product-price small fw-bold" *ngIf="isShopEnabled">
                                 <span>&#x20B9;</span> {{ product.p_price | number }}
                             </div>
                         </div>

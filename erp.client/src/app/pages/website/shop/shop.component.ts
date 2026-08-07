@@ -125,7 +125,7 @@ export class ShopComponent implements OnInit {
   checkShopStatus() {
     this.constantService.getConstantValueByName('SHOP_ENABLED').subscribe({
       next: (res: ConstantValue) => {
-        if (res && res.cv_id) {
+        if (res && res.cv_name === 'SHOP_ENABLED') {
           this.isShopEnabled = res.cv_value?.toUpperCase() === 'TRUE';
         } else {
           this.isShopEnabled = true;

@@ -37,9 +37,16 @@ export class IConstantValueService {
     return this.http.post<DbResult>(`${this.apiUrl}/createOrUpdateConstantValue`, data);
   }
   getConstantValueByName(name: string): Observable<ConstantValue> {
-    const params = new RequestParms();
-    params.name = name;
-    return this.http.post<ConstantValue>(`${this.apiUrl}/getConstantValueByName`, params);
+    return new Observable<ConstantValue>(observer => {
+      this.getConstantValues().subscribe({
+        next: (constants) => {
+          const found = constants.find(c => c.cv_name === name);
+          observer.next(found || new ConstantValue());
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 
   get refreshConstants$() {

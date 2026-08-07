@@ -96,11 +96,25 @@ export class MycartComponent implements OnInit, OnDestroy {
 
   }
   ngOnInit(): void {
+    this.checkShopStatus();
     this.getConstantValues();
     this.getCarts();
+
   }
 
-
+  checkShopStatus() {
+    this.iConstantValueService.getConstantValueByName('SHOP_ENABLED').subscribe({
+      next: (res: ConstantValue) => {
+        if (res && res.cv_id) {
+          const isEnabled = res.cv_value?.toUpperCase() === 'TRUE';
+          if (!isEnabled) {
+            this.snackbarService.showError('Purchasing is currently disabled.');
+            this.router.navigate(['/web-home']);
+          }
+        }
+      }
+    });
+  }
 
   getConstantValues(): void {
     this.iConstantValueService.getConstantValues().subscribe(

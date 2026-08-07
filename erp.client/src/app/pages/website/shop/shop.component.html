@@ -135,33 +135,29 @@
     <div class="products-area">
       <div class="row g-2 g-md-4">
         <div *ngFor="let product of this.displayedProducts" class="col-lg-3 col-md-4 col-grid-mobile">
-          <div class="product-card-premium h-100 d-flex flex-column cursor-pointer" (click)="navigateToProduct(product.p_id)">
-            <div class="product-image-container flex-grow-1" [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
+          <div class="product-card-premium h-100" (click)="navigateToProduct(product.p_id)">
+            <div class="product-image-container" [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
               <ng-container *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
                 <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
                      [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
               </ng-container>
 
-              <div class="product-actions position-absolute top-0 end-0 m-2">
+              <div class="position-absolute top-0 end-0 m-3 z-index-2">
                 <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
                   <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
                 </button>
               </div>
 
-              <div class="product-badge position-absolute top-0 start-0 m-2" *ngIf="product.p_price > 5000">
+              <div class="position-absolute top-0 start-0 m-2 z-index-2" *ngIf="product.p_price > 5000">
                 <span class="badge bg-dark text-white rounded-pill px-2 py-1" style="font-size: 8px;">PREMIUM</span>
               </div>
             </div>
 
-            <div class="product-details text-center p-2 p-md-3">
-              <span class="product-category" style="font-size: 9px;">{{ product.p_sub_category_name }}</span>
+            <div class="product-details">
               <a class="product-name">{{product.p_name}}</a>
+              <span class="product-category">{{ product.p_short_name || product.p_category_name || product.p_sub_category_name }}</span>
 
-              <div class="product-rating mb-2" style="font-size: 10px;">
-                <div class="stars">
-                  <i class="fa fa-star text-warning" *ngFor="let s of [1,2,3,4,5]" [ngClass]="{'opacity-25': product.p_overall_rating < s}"></i>
-                </div>
-              </div>
+
 
               <div class="product-price" *ngIf="isShopEnabled">
                 <span class="small">₹</span>{{ product.p_price | number }}

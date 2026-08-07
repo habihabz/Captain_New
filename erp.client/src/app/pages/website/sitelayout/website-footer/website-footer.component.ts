@@ -22,6 +22,7 @@ export class WebsiteFooterComponent implements OnInit{
   requestParms: RequestParms = new RequestParms();
   subscription: Subscription = new Subscription();
   showContact: boolean = false;
+  currentYear: number = new Date().getFullYear();
   
   constructor(
     private elRef: ElementRef,

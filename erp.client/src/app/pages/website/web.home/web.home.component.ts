@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Product } from '../../../models/product.model';
 import { Router } from '@angular/router';
@@ -22,6 +22,8 @@ import { User } from '../../../models/user.model';
 import { DbResult } from '../../../models/dbresult.model';
 import { SnackBarService } from '../../../services/isnackbar.service';
 import { IuserService } from '../../../services/iuser.service';
+import { IConstantValueService } from '../../../services/iconstant.values.service';
+import { ConstantValue } from '../../../models/constant.value.model';
 
 @Component({
   selector: 'app-web.home',
@@ -29,6 +31,14 @@ import { IuserService } from '../../../services/iuser.service';
   styleUrl: './web.home.component.css'
 })
 export class WebHomeComponent implements OnInit {
+  @ViewChild('tabContainer') tabContainer!: ElementRef;
+  
+  scrollTabs(direction: number) {
+    if (this.tabContainer) {
+      this.tabContainer.nativeElement.scrollBy({ left: direction * 200, behavior: 'smooth' });
+    }
+  }
+
   apiUrl = `${environment.serverHostAddress}`;
   attachmentUrl = `${environment.serverHostAddress}`;
   country: MasterData = new MasterData();
@@ -37,6 +47,7 @@ export class WebHomeComponent implements OnInit {
   tempProducts: Product[] = [];
   categories: Category[] = [];
   subcategories: MasterData[] = [];
+  isShopEnabled: boolean = true;
   requestParms: RequestParms = new RequestParms();
   subscription: Subscription = new Subscription();
   attachments: ProdAttachement[] = [];
@@ -61,8 +72,8 @@ export class WebHomeComponent implements OnInit {
     private iblogService: IBlogService,
     private iuser: IuserService,
     private titleService: Title,
-    private metaService: Meta
-
+    private metaService: Meta,
+    private constantService: IConstantValueService
   ) {
     this.currentUser = iuser.getCurrentUser();
     this.country = this.geolocationService.getCurrentCountry();
@@ -78,6 +89,7 @@ export class WebHomeComponent implements OnInit {
     this.loadUserCountry();
     this.loadCategories();
     this.getSliders();
+    this.checkShopStatus();
     this.getProductsByCountry();
     this.getBlogsForHomePage();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
@@ -89,6 +101,21 @@ export class WebHomeComponent implements OnInit {
     this.metaService.updateTag({ name: 'description', content: 'Discover premium sports equipment, football gear, and high-performance badminton accessories at Captain. Lead to Win with our expert-crafted products.' });
     this.metaService.updateTag({ property: 'og:title', content: 'Captain - Premium Sports Gear & Apparel' });
     this.metaService.updateTag({ property: 'og:description', content: 'Elevate your game with high-performance sports gear from Captain.' });
+  }
+
+  checkShopStatus() {
+    this.constantService.getConstantValueByName('SHOP_ENABLED').subscribe({
+      next: (res: ConstantValue) => {
+        if (res && res.cv_name === 'SHOP_ENABLED') {
+          this.isShopEnabled = res.cv_value?.toUpperCase() === 'TRUE';
+        } else {
+          this.isShopEnabled = true;
+        }
+      },
+      error: () => {
+        this.isShopEnabled = true;
+      }
+    });
   }
 
   getSliders() {
@@ -112,15 +139,24 @@ export class WebHomeComponent implements OnInit {
       }
     );
   }
+  selectedCategoryId: number = 0;
+
   loadCategories(): void {
     this.icategoryService.getCategories().subscribe(
       (data: Category[]) => {
         this.categories = data;
+        if (this.categories && this.categories.length > 0) {
+          this.selectedCategoryId = this.categories[0].ct_id;
+        }
       },
       (error: any) => {
 
       }
     );
+  }
+
+  selectCategory(id: number) {
+    this.selectedCategoryId = id;
   }
 
   getMasterDatasByType(masterType: string, callback: (data: MasterData[]) => void): void {

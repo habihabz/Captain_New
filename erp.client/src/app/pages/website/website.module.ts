@@ -35,6 +35,7 @@ import { PaymentFailureComponent } from './payment.failure/payment.failure.compo
 import { PaymentSuccessComponent } from './payment.success/payment.success.component';
 import { PaymentComponent } from './payment/payment.component';
 import { SitemapComponent } from './sitemap/sitemap.component';
+import { TermsAndConditionsComponent } from './terms-and-conditions/terms-and-conditions.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,8 @@ import { SitemapComponent } from './sitemap/sitemap.component';
     PaymentFailureComponent,
     PaymentSuccessComponent,
     PaymentComponent,
-    SitemapComponent
+    SitemapComponent,
+    TermsAndConditionsComponent
   ],
   imports: [
     CommonModule,

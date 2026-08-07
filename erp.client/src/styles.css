@@ -2767,3 +2767,118 @@ h1, h2, h3, h4, h5, h6, .title, .f-title, .section-title, .site_title {
 .product-price, .product-price span {
     color: #000000 !important;
 }
+
+/* ---- NIKE STYLE PRODUCT CARD ---- */
+.product-card-premium {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card-premium:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.product-image-container {
+    background: #f6f6f6 !important;
+    position: relative;
+    overflow: hidden;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.product-image-container img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    mix-blend-mode: multiply;
+}
+
+.product-secondary {
+    opacity: 0;
+}
+
+.product-card-premium:hover .has-hover .product-primary {
+    opacity: 0;
+}
+
+.product-card-premium:hover .has-hover .product-secondary {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.btn-favorite {
+    background: #fff !important;
+    border: none !important;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+.btn-favorite:hover {
+    transform: scale(1.1);
+}
+
+.product-details {
+    text-align: left;
+    padding: 0 4px;
+}
+
+.product-name {
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 2px;
+    display: block;
+    text-decoration: none;
+    min-height: auto !important;
+}
+
+.product-category {
+    font-size: 0.95rem;
+    color: #707070;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111;
+    margin-top: 8px;
+}
+
+.product-colors {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #e5e5e5;
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+}

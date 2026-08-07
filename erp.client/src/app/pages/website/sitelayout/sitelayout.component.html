@@ -1,8 +1,7 @@
-<div class="body" style="overflow-x: hidden;">
-    <div class="web_main_container" [ngClass]="{'website-content-padding': !isHomePage()}">
+<div class="body d-flex flex-column min-vh-100" style="overflow-x: hidden;">
+    <div class="web_main_container flex-grow-1" [ngClass]="{'website-content-padding': !isHomePage()}">
         <app-website-top></app-website-top>
         <router-outlet></router-outlet>
     </div>
-
+    <app-website-footer class="mt-auto"></app-website-footer>
 </div>
-<app-website-footer></app-website-footer>

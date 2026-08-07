@@ -11,7 +11,8 @@ import { User } from '../../../../models/user.model';
 import { IuserService } from '../../../../services/iuser.service';
 import { ILoginService } from '../../../../services/ilogin.service';
 import { IMasterDataService } from '../../../../services/imaster.data.service';
-
+import { IConstantValueService } from '../../../../services/iconstant.values.service';
+import { ConstantValue } from '../../../../models/constant.value.model';
 @Component({
   selector: 'app-website-top',
   templateUrl: './website-top.component.html',
@@ -24,6 +25,7 @@ export class WebsiteTopComponent {
   currentCountry: string = '';
   menuVisible = false;
   countries: MasterData[] = [];
+  isShopEnabled: boolean = true;
   @ViewChild('sidenav') sidenav!: MatSidenav;
   constructor(
     private elRef: ElementRef,
@@ -31,7 +33,8 @@ export class WebsiteTopComponent {
     private geolocationService: GeolocationService,
     private iuser: IuserService,
     private loginService: ILoginService,
-    private masterDataService: IMasterDataService
+    private masterDataService: IMasterDataService,
+    private constantService: IConstantValueService
   ) {
     this.country = this.geolocationService.getCurrentCountry();
     this.currentUser = iuser.getCurrentUser();
@@ -40,6 +43,22 @@ export class WebsiteTopComponent {
   ngOnInit(): void {
     this.fetchCurrentCountry();
     this.fetchCountries();
+    this.checkShopStatus();
+  }
+
+  checkShopStatus() {
+    this.constantService.getConstantValueByName('SHOP_ENABLED').subscribe({
+      next: (res: ConstantValue) => {
+        if (res && res.cv_name === 'SHOP_ENABLED') {
+          this.isShopEnabled = res.cv_value?.toUpperCase() === 'TRUE';
+        } else {
+          this.isShopEnabled = true;
+        }
+      },
+      error: () => {
+        this.isShopEnabled = true;
+      }
+    });
   }
 
   fetchCountries() {

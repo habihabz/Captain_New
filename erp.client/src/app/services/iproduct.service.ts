@@ -20,53 +20,25 @@ export class IProductService {
 
   getProducts(): Observable<Product[]> {
     return this.http.post<Product[]>(this.apiUrl + "/getProducts", {}).pipe(
-      map(products => products.map(p => {
-        if (p.p_attachements) {
-          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
-        } else {
-          p.parsed_attachments = [];
-        }
-        return p;
-      }))
+      map(products => products.map(p => this.parseProductData(p)))
     );
   }
 
   getProductsByCountry(id: number): Observable<Product[]> {
     return this.http.post<Product[]>(this.apiUrl + "/getProductsByCountry", id).pipe(
-      map(products => products.map(p => {
-        if (p.p_attachements) {
-          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
-        } else {
-          p.parsed_attachments = [];
-        }
-        return p;
-      }))
+      map(products => products.map(p => this.parseProductData(p)))
     );
   }
 
   getProduct(id: number): Observable<Product> {
     return this.http.post<Product>(this.apiUrl + "/getProduct", id).pipe(
-      map(p => {
-        if (p.p_attachements) {
-          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
-        } else {
-          p.parsed_attachments = [];
-        }
-        return p;
-      })
+      map(p => this.parseProductData(p))
     );
   }
 
   getProductByCountry(requestParms: RequestParms): Observable<Product> {
     return this.http.post<Product>(this.apiUrl + "/getProductByCountry", requestParms).pipe(
-      map(p => {
-        if (p.p_attachements) {
-          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
-        } else {
-          p.parsed_attachments = [];
-        }
-        return p;
-      })
+      map(p => this.parseProductData(p))
     );
   }
 
@@ -80,14 +52,7 @@ export class IProductService {
 
   getProductsByFilters(productSearchParms: ProductSearchParms): Observable<Product[]> {
     return this.http.post<Product[]>(this.apiUrl + "/getProductsByFilters", productSearchParms).pipe(
-      map(products => products.map(p => {
-        if (p.p_attachements) {
-          try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
-        } else {
-          p.parsed_attachments = [];
-        }
-        return p;
-      }))
+      map(products => products.map(p => this.parseProductData(p)))
     );
   }
 
@@ -108,5 +73,19 @@ export class IProductService {
   }
   refreshProducts(): void {
     this.refreshProductsSubject.next();
+  }
+
+  private parseProductData(p: Product): Product {
+    if (p.p_attachements) {
+      try { p.parsed_attachments = JSON.parse(p.p_attachements); } catch (e) { p.parsed_attachments = []; }
+    } else {
+      p.parsed_attachments = [];
+    }
+    if (p.p_colors) {
+      try { p.parsed_colors = JSON.parse(p.p_colors); } catch (e) { p.parsed_colors = []; }
+    } else {
+      p.parsed_colors = [];
+    }
+    return p;
   }
 }

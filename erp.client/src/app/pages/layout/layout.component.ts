@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { User } from '../../models/user.model';
 import { ScriptLoaderService } from '../../services/script.loader.service';
-
+import { LoadingService } from '../../services/loading.service';
 
 @Component({
   selector: 'app-layout',
@@ -11,7 +11,7 @@ import { ScriptLoaderService } from '../../services/script.loader.service';
 })
 export class LayoutComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
-  constructor(private scriptLoaderService: ScriptLoaderService) {
+  constructor(private scriptLoaderService: ScriptLoaderService, public loadingService: LoadingService) {
     
   }
   ngOnInit(): void {
