@@ -70,7 +70,7 @@ export class ShopComponent implements OnInit {
   currentUser: User = new User();
   userFavourites: Favourite[] = [];
   isMobileFilterOpen: boolean = false;
-  isShopEnabled: boolean = true;
+  isShopEnabled: boolean = false;
 
   constructor(
     private elRef: ElementRef,

@@ -14,10 +14,13 @@
     <div class="row">
         <div class="col-12 col-sm-12 col-md-1 order-2 order-md-1 mt-3 mt-md-0">
             <!-- Thumbnails -->
-            <div class="d-flex flex-md-column flex-row thumbnail-wrapper" style="overflow-x: auto; gap: 10px;" *ngIf="productAttachements.length > 0">
-                <div *ngFor="let attachment of productAttachements; let i = index" class="thumbnail-item" style="flex: 0 0 auto;">
+            <div class="d-flex flex-md-column flex-row thumbnail-wrapper" style="overflow-x: auto; gap: 10px;"
+                *ngIf="productAttachements.length > 0">
+                <div *ngFor="let attachment of productAttachements; let i = index" class="thumbnail-item"
+                    style="flex: 0 0 auto;">
                     <img [src]="apiUrl + '/' + attachment.pa_image_path" class="img-thumbnail cursor-pointer thumb-img"
-                        (click)="selectImage(i)" style="width: 70px; height: 70px; object-fit: contain;" alt="Product Thumbnail Image">
+                        (click)="selectImage(i)" style="width: 70px; height: 70px; object-fit: contain;"
+                        alt="Product Thumbnail Image">
                 </div>
             </div>
         </div>
@@ -27,30 +30,28 @@
 
             <!-- ✅ Show image if available -->
             <div *ngIf="productAttachements.length > 0; else noImagesMain" class="main-image-container text-center"
-                (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()"
-                (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
+                (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()" (touchstart)="onTouchStart($event)"
+                (touchend)="onTouchEnd($event)"
                 style="overflow: hidden; position: relative; cursor: crosshair; touch-action: pan-y;">
 
                 <img [src]="selectedImagePath" class="img-fluid zoom-img" [class.zoomed]="isZoomed"
                     [style.transformOrigin]="transformOrigin"
                     style="max-height: 450px; object-fit: contain; transition: transform 0.15s ease-out;"
                     alt="Primary product image">
-                    
-                <button *ngIf="productAttachements.length > 1" 
-                        class="btn btn-light position-absolute top-50 start-0 translate-middle-y ms-2 rounded-circle shadow-sm" 
-                        style="width: 40px; height: 40px; z-index: 10; opacity: 0.8; display: flex; align-items: center; justify-content: center; cursor: pointer;" 
-                        (click)="prevImage($event)"
-                        (mousemove)="$event.stopPropagation()"
-                        (mouseenter)="onMouseLeave(); $event.stopPropagation()">
+
+                <button *ngIf="productAttachements.length > 1"
+                    class="btn btn-light position-absolute top-50 start-0 translate-middle-y ms-2 rounded-circle shadow-sm"
+                    style="width: 40px; height: 40px; z-index: 10; opacity: 0.8; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                    (click)="prevImage($event)" (mousemove)="$event.stopPropagation()"
+                    (mouseenter)="onMouseLeave(); $event.stopPropagation()">
                     <i class="fa fa-chevron-left" style="color: black;"></i>
                 </button>
-                
-                <button *ngIf="productAttachements.length > 1" 
-                        class="btn btn-light position-absolute top-50 end-0 translate-middle-y me-2 rounded-circle shadow-sm" 
-                        style="width: 40px; height: 40px; z-index: 10; opacity: 0.8; display: flex; align-items: center; justify-content: center; cursor: pointer;" 
-                        (click)="nextImage($event)"
-                        (mousemove)="$event.stopPropagation()"
-                        (mouseenter)="onMouseLeave(); $event.stopPropagation()">
+
+                <button *ngIf="productAttachements.length > 1"
+                    class="btn btn-light position-absolute top-50 end-0 translate-middle-y me-2 rounded-circle shadow-sm"
+                    style="width: 40px; height: 40px; z-index: 10; opacity: 0.8; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                    (click)="nextImage($event)" (mousemove)="$event.stopPropagation()"
+                    (mouseenter)="onMouseLeave(); $event.stopPropagation()">
                     <i class="fa fa-chevron-right" style="color: black;"></i>
                 </button>
             </div>
@@ -71,7 +72,7 @@
                 <h1 class="main-product-title">{{this.product.p_name}}</h1>
                 <h5 class="text-muted">{{this.product.p_short_name}}</h5>
                 <br />
-                <div *ngIf="isShopEnabled">
+                <div *ngIf="isShopEnabled && this.product.p_price > 0">
                     <div class="d-flex justify-content-between mt-3">
                         <h4 class="text-success fw-bold mb-0">MRP : <span>&#x20B9;</span>{{this.product.p_price}}</h4>
                     </div>
@@ -124,11 +125,13 @@
                 </div>
 
                 <div *ngIf="isShopEnabled" class="d-inline-block">
-                    <button class="btn btn-success px-md-4 py-md-2 px-2 py-1" style="font-size: 14px;" (click)="addToCart(false)"><i
+                    <button class="btn btn-success px-md-4 py-md-2 px-2 py-1" style="font-size: 14px;"
+                        [disabled]="this.product.p_price <= 0" (click)="addToCart(false)"><i
                             class="fa fa-shopping-bag me-1"></i> Add to Bag</button>
                     <button class="btn btn-dark px-md-4 py-md-2 px-2 py-1 ms-2 shadow-sm"
                         style="font-size: 14px; background-color: #111; color: #fff; border: none; font-weight: 600;"
-                        (click)="buyNow()"><i class="fa fa-bolt me-1 text-warning"></i> Buy Now</button>
+                        [disabled]="this.product.p_price <= 0" (click)="buyNow()"><i
+                            class="fa fa-bolt me-1 text-warning"></i> Buy Now</button>
                 </div>
                 <button class="btn btn-white border px-md-4 py-md-2 px-2 py-1 ms-2 shadow-sm" style="font-size: 14px;"
                     (click)="addToFavourites(product.p_id)">
@@ -141,13 +144,20 @@
                 <br />
             </div>
         </div>
-        <div class="col-12 order-4 mt-5">
-            <h3 class="mb-0 fw-bold">
-                Description
-            </h3>
-            <p class="text-muted mt-4" style="font-size: 14px; line-height: 1.6;">
-                {{ product.p_description }}
-            </p>
+
+
+    </div>
+    <div class="container">
+
+        <div class="row">
+            <div class="col-12 order-4 mt-5">
+                <h3 class="mb-0 fw-bold">
+                    Description
+                </h3>
+                <p class="text-muted mt-4" style="font-size: 14px; line-height: 1.6;">
+                    {{ product.p_description }}
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -162,16 +172,21 @@
             <div class="row g-4 mt-2">
                 <div *ngFor="let product of this.productsMayLike" class="col-lg-3 col-md-6 col-sm-12">
                     <div class="product-card-premium h-100" (click)="navigateToProduct(product.p_id)">
-                        <div class="product-image-container" [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
-                            <ng-container *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
-                                <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
-                                     class="img-fluid" [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+                        <div class="product-image-container"
+                            [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
+                            <ng-container
+                                *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
+                                <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path"
+                                    alt="{{product.p_name}}" class="img-fluid"
+                                    [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
                             </ng-container>
 
                             <!-- Favorite Button -->
                             <div class="position-absolute top-0 end-0 m-3 z-index-2">
-                                <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
-                                    <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                                <button class="btn-favorite"
+                                    (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                                    <i class="fa"
+                                        [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
                                 </button>
                             </div>
 
@@ -182,11 +197,12 @@
 
                         <div class="product-details">
                             <a class="product-name small fw-bold">{{product.p_name}}</a>
-                            <span class="product-category">{{ product.p_short_name || product.p_category_name || product.p_sub_category_name }}</span>
+                            <span class="product-category">{{ product.p_short_name || product.p_category_name ||
+                                product.p_sub_category_name }}</span>
 
 
 
-                            <div class="product-price small fw-bold" *ngIf="isShopEnabled">
+                            <div class="product-price small fw-bold" *ngIf="isShopEnabled && product.p_price > 0">
                                 <span>&#x20B9;</span> {{ product.p_price | number }}
                             </div>
                         </div>

@@ -5,14 +5,12 @@
     </video>
     <div class="hero-overlay">
         <div class="hero-content">
-            <h1 style="color: #D6DE23 !important;">Engineered for Greatness</h1>
-            <p>Elevate your performance with premium sports gear designed for the elite. Precision, Power, and Passion
-                in every stitch.</p>
-            <div class="hero-btn-group">
-                <button class="btn btn-light btn-lg rounded-0 px-5 fw-bold text-uppercase"
-                    (click)="navigateTo('shop')">Shop Collection</button>
-                <button class="btn btn-outline-light btn-lg rounded-0 px-5 fw-bold text-uppercase"
-                    (click)="navigateTo('about-us')">Our Story</button>
+            <h1 style="color: #D6DE23 !important;">TAKE THE LEAD</h1>
+            <h4 style="color: #fff !important;">Confidence in every punch</h4>
+            <div class="hero-btn-group" *ngIf="isShopEnabled">
+                <button class="btn btn-light  rounded-0 px-5 fw-bold text-uppercase"
+                    (click)="navigateTo('shop')">Shop</button>
+
             </div>
 
         </div>
@@ -30,57 +28,66 @@
 
         <!-- Scrollable Tabs -->
         <div class="position-relative mb-5 d-flex align-items-center justify-content-center">
-            <button class="btn btn-link text-dark p-0 border-0 fs-4 d-none d-md-flex align-items-center justify-content-center tab-scroll-arrow left-arrow" 
-                    (click)="scrollTabs(-1)" style="width: 40px; height: 40px; z-index: 10;">
+            <button
+                class="btn btn-link text-dark p-0 border-0 fs-4 d-none d-md-flex align-items-center justify-content-center tab-scroll-arrow left-arrow"
+                (click)="scrollTabs(-1)" style="width: 40px; height: 40px; z-index: 10;">
                 <i class="fa fa-angle-left"></i>
             </button>
 
-            <ul #tabContainer class="nav nav-tabs flex-nowrap overflow-auto border-0 custom-scroll-tabs mx-2" style="max-width: 90%;">
+            <ul #tabContainer class="nav nav-tabs flex-nowrap overflow-auto border-0 custom-scroll-tabs mx-2"
+                style="max-width: 90%;">
                 <li class="nav-item" *ngFor="let category of categories">
-                    <button class="nav-link border-0 fw-bold text-uppercase pb-3 px-4" 
-                            [class.active]="selectedCategoryId == category.ct_id"
-                            (click)="selectCategory(category.ct_id)">
+                    <button class="nav-link border-0 fw-bold text-uppercase pb-3 px-4"
+                        [class.active]="selectedCategoryId == category.ct_id" (click)="selectCategory(category.ct_id)">
                         {{ category.ct_name }}
                     </button>
                 </li>
             </ul>
 
-            <button class="btn btn-link text-dark p-0 border-0 fs-4 d-none d-md-flex align-items-center justify-content-center tab-scroll-arrow right-arrow" 
-                    (click)="scrollTabs(1)" style="width: 40px; height: 40px; z-index: 10;">
+            <button
+                class="btn btn-link text-dark p-0 border-0 fs-4 d-none d-md-flex align-items-center justify-content-center tab-scroll-arrow right-arrow"
+                (click)="scrollTabs(1)" style="width: 40px; height: 40px; z-index: 10;">
                 <i class="fa fa-angle-right"></i>
             </button>
         </div>
 
         <!-- Tab Content -->
-        <div class="container-fluid">
+        <div class="container-fluid" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
             <div class="row g-4">
                 <div *ngFor="let product of getProductsByCategory(selectedCategoryId)"
-                     class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    class="col-lg-3 col-md-4 col-grid-mobile">
                     <div class="product-card-premium h-100" (click)="navigateToProduct(product.p_id)">
-                        <div class="product-image-container" [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
-                            <ng-container *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
-                                <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path" alt="{{product.p_name}}" 
-                                     class="img-fluid"
-                                     [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
+                        <div class="product-image-container"
+                            [class.has-hover]="(product.parsed_attachments?.length || 0) > 1">
+                            <ng-container
+                                *ngFor="let p_attachement of product.parsed_attachments?.slice(0, 2); let i = index">
+                                <img loading="lazy" [src]="apiUrl + '/' + p_attachement.pa_image_path"
+                                    alt="{{product.p_name}}"
+                                    [ngClass]="i === 0 ? 'product-primary' : 'product-secondary'">
                             </ng-container>
 
                             <!-- Favorite Button -->
                             <div class="position-absolute top-0 end-0 m-3 z-index-2">
-                                <button class="btn-favorite" (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
-                                    <i class="fa" [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
+                                <button class="btn-favorite"
+                                    (click)="$event.stopPropagation(); addToFavourites(product.p_id)">
+                                    <i class="fa"
+                                        [ngClass]="isFavourite(product.p_id) ? 'fa-heart text-danger' : 'fa-heart-o'"></i>
                                 </button>
                             </div>
 
-                            <div class="position-absolute top-0 start-0 m-3 z-index-2" *ngIf="isShopEnabled && product.p_price > 5000">
-                                <span class="badge bg-dark text-white rounded-0 px-3 py-2">PREMIUM</span>
+                            <div class="position-absolute top-0 start-0 m-2 z-index-2"
+                                *ngIf="isShopEnabled && product.p_price > 5000">
+                                <span class="badge bg-dark text-white rounded-pill px-2 py-1"
+                                    style="font-size: 8px;">PREMIUM</span>
                             </div>
                         </div>
 
                         <div class="product-details">
                             <a class="product-name">{{product.p_name}}</a>
-                            <span class="product-category">{{ product.p_short_name || product.p_category_name || product.p_sub_category_name }}</span>
+                            <span class="product-category">{{ product.p_short_name || product.p_category_name ||
+                                product.p_sub_category_name }}</span>
 
-                            <div class="product-price" *ngIf="isShopEnabled && product.p_price >= 0">
+                            <div class="product-price" *ngIf="isShopEnabled && product.p_price > 0">
                                 <span class="small">₹</span>{{ product.p_price | number }}
                             </div>
                         </div>
@@ -96,7 +103,7 @@
     style="background-color: #111; min-height: 80vh;">
     <video autoplay loop [muted]="true" playsinline class="position-absolute w-100 h-100"
         style="object-fit: cover; top: 0; left: 0; z-index: 0;">
-        <source src="./assets/video/front_page_video2.MOV" type="video/mp4">
+        <source src="./assets/video/front_page_video2.MP4" type="video/mp4">
     </video>
     <div class="position-absolute w-100 h-100 bg-dark opacity-50" style="top: 0; left: 0; z-index: 1; opacity: 0.5;">
     </div>
@@ -104,11 +111,10 @@
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <h5 class="text-uppercase fw-bold mb-4 text-white-50" style="letter-spacing: 5px;">Limited Edition</h5>
-                <h2 class="showcase-title" style="color: #D6DE23 !important; text-align: center;">THE VELOCITY<br>SERIES
+                <h2 class="showcase-title" style="color: #D6DE23 !important; text-align: center;">LEAD EVERY STEP
                 </h2>
                 <p class="mb-5 text-white" style="text-align: center;">
-                    Unleash your potential with the all-new Velocity sneakers. Lightweight construction meets unmatched
-                    durability for the modern athlete.
+                    Performance built into every stride
                 </p>
                 <div class="d-flex align-items-center justify-content-center gap-4">
                     <button class="btn btn-light btn-lg px-5 rounded-pill fw-bold text-uppercase py-3"
@@ -125,7 +131,7 @@
     <div class="container">
         <div class="section-wrapper text-center mb-5">
             <h2 class="section-title text-uppercase" style="font-size: 3.5rem; font-weight: 600;">LAUNCHPAD</h2>
-            <p class="text-muted">What’s Next Starts Here</p>
+            <p class="text-muted">what’s next starts here</p>
         </div>
 
         <div class="row">

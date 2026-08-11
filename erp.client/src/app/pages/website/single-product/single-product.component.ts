@@ -51,7 +51,7 @@ export class SingleProductComponent implements OnInit {
   favourite: Favourite = new Favourite();
   productAttachements: any[] = [];
   userFavourites: Favourite[] = [];
-  isShopEnabled: boolean = true;
+  isShopEnabled: boolean = false;
 
   // IMAGE ZOOM VARIABLES
   isZoomed: boolean = false;

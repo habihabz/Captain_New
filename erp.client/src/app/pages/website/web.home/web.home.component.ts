@@ -45,19 +45,19 @@ export class WebHomeComponent implements OnInit {
   product: Product = new Product();
   products: Product[] = [];
   tempProducts: Product[] = [];
-  categories: Category[] = [];
-  subcategories: MasterData[] = [];
-  isShopEnabled: boolean = true;
+  favourite: Favourite = new Favourite();
+  userFavourites: Favourite[] = [];
+  isShopEnabled: boolean = false;
   requestParms: RequestParms = new RequestParms();
   subscription: Subscription = new Subscription();
+  categories: Category[] = [];
+  subcategories: MasterData[] = [];
   attachments: ProdAttachement[] = [];
   attachment: ProdAttachement = new ProdAttachement();
   sliders: Slider[] = [];
   blogs: Blog[] = [];
   latestBlog: Blog = new Blog();
-  favourite: Favourite = new Favourite();
   currentUser: User = new User();
-  userFavourites: Favourite[] = [];
 
   constructor(
     private elRef: ElementRef,
@@ -157,6 +157,45 @@ export class WebHomeComponent implements OnInit {
 
   selectCategory(id: number) {
     this.selectedCategoryId = id;
+  }
+
+  touchStartX = 0;
+  touchEndX = 0;
+
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.handleSwipe();
+  }
+
+  handleSwipe() {
+    const swipeThreshold = 50;
+    if (this.touchEndX < this.touchStartX - swipeThreshold) {
+      this.nextCategory();
+    } else if (this.touchEndX > this.touchStartX + swipeThreshold) {
+      this.previousCategory();
+    }
+  }
+
+  nextCategory() {
+    if (!this.categories || this.categories.length === 0) return;
+    const currentIndex = this.categories.findIndex(c => c.ct_id === this.selectedCategoryId);
+    if (currentIndex < this.categories.length - 1) {
+      this.selectCategory(this.categories[currentIndex + 1].ct_id);
+      this.scrollTabs(1);
+    }
+  }
+
+  previousCategory() {
+    if (!this.categories || this.categories.length === 0) return;
+    const currentIndex = this.categories.findIndex(c => c.ct_id === this.selectedCategoryId);
+    if (currentIndex > 0) {
+      this.selectCategory(this.categories[currentIndex - 1].ct_id);
+      this.scrollTabs(-1);
+    }
   }
 
   getMasterDatasByType(masterType: string, callback: (data: MasterData[]) => void): void {

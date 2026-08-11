@@ -11,6 +11,8 @@ import { RequestParms } from '../../../models/requestParms';
 import { Favourite } from '../../../models/favourite.model';
 import { IFavouriteService } from '../../../services/ifavourite.service';
 import { GeolocationService } from '../../../services/GeoCurrentLocation.service';
+import { IConstantValueService } from '../../../services/iconstant.values.service';
+import { ConstantValue } from '../../../models/constant.value.model';
 
 @Component({
   selector: 'app-favourite',
@@ -25,6 +27,7 @@ export class FavouriteComponent implements OnInit {
   favourite: Favourite = new Favourite();
   currentUser: User = new User();
   requestParms: RequestParms = new RequestParms();
+  isShopEnabled: boolean = true;
 
   constructor(
     private router: Router,
@@ -33,6 +36,7 @@ export class FavouriteComponent implements OnInit {
     private snackbarService: SnackBarService,
      private geolocationService: GeolocationService,
     private ifavouriteService: IFavouriteService,
+    private constantService: IConstantValueService,
     private iuser: IuserService
   ) {
     this.currentUser = iuser.getCurrentUser();
@@ -41,6 +45,17 @@ export class FavouriteComponent implements OnInit {
 
   ngOnInit(): void {
     this.getFavourites();
+    this.checkShopStatus();
+  }
+
+  checkShopStatus() {
+    this.constantService.getConstantValueByName('SHOP_ENABLED').subscribe({
+      next: (res: ConstantValue) => {
+        if (res && res.cv_name === 'SHOP_ENABLED') {
+          this.isShopEnabled = res.cv_value?.toUpperCase() === 'TRUE';
+        }
+      }
+    });
   }
 
   getAttachementOfaProduct(p_attachements: string) {

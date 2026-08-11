@@ -14,7 +14,7 @@
   <div class="container p-4" *ngIf="blogId === 0">
 
     <div class="text-center mb-5 ">
-      <p class="text-muted">Latest articles and updates</p>
+      <p class="text-muted">what’s next starts here</p>
     </div>
 
     <div class="row justify-content-center">
@@ -22,8 +22,7 @@
       <!-- FEATURED BLOG -->
       <div class="col-lg-8 mb-5">
 
-        <img [src]="attachmentUrl + LatestBlog.b_image_url" class="img-fluid rounded mb-3 w-100"
-          style="max-height:400px; object-fit:cover;" alt="blog">
+        <img [src]="attachmentUrl + LatestBlog.b_image_url" class="img-fluid rounded mb-3 w-100" alt="blog">
 
         <h3 class="font-weight-bold">
           <a (click)="navigateTo(LatestBlog.b_id)">
@@ -43,8 +42,9 @@
 
       <!-- OTHER BLOGS -->
       <div class="col-lg-8">
+        <hr class="mb-5 text-muted" style="opacity: 0.15;">
 
-        <div class="media mb-4" *ngFor="let blog of blogs.slice(1,4)">
+        <div class="media mb-4 pb-4 border-bottom" style="border-color: rgba(0,0,0,0.05) !important;" *ngFor="let blog of blogs.slice(1,4)">
 
           <img [src]="attachmentUrl + blog.b_image_url" class="mr-3 rounded" width="90" alt="blog">
 
@@ -81,8 +81,7 @@
         <hr />
 
 
-        <img [src]="attachmentUrl + blog.b_image_url" class="img-fluid rounded mb-4 w-100"
-          style="max-height:500px; object-fit:cover;" alt="blog">
+        <img [src]="attachmentUrl + blog.b_image_url" class="img-fluid rounded mb-4 w-100" alt="blog">
 
         <div class="blog-content" [innerHTML]="safeBlogContent"></div>
 
