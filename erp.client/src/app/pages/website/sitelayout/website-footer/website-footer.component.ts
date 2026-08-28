@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { IProductService } from '../../../../services/iproduct.service';
 import { IMasterDataService } from '../../../../services/imaster.data.service';
 import { ICategoryService } from '../../../../services/icategory.service';
+import { IConstantValueService } from '../../../../services/iconstant.values.service';
 
 @Component({
   selector: 'app-website-footer',
@@ -24,11 +25,16 @@ export class WebsiteFooterComponent implements OnInit{
   showContact: boolean = false;
   currentYear: number = new Date().getFullYear();
   
+  companyAddress: string = 'Husi International, Kallachal, Pulpatta, Malappuram, Kerala 676121';
+  companyEmail: string = 'info@captain.net.in';
+  companyPhone: string = '+91 7558030666';
+  
   constructor(
     private elRef: ElementRef,
     private router: Router,
     private imasterDataService: IMasterDataService,
     private icategoryService: ICategoryService,
+    private iconstantValueService: IConstantValueService
   ) {
     
   }
@@ -36,7 +42,23 @@ export class WebsiteFooterComponent implements OnInit{
 
     this.loadCategories();
     this.getMasterDatasByType("SubCategory", (data) => { this.subcategories = data; });
- 
+    this.loadContactInfo();
+  }
+
+  loadContactInfo(): void {
+    this.iconstantValueService.getConstantValues().subscribe({
+      next: (constants) => {
+        const address = constants.find(c => c.cv_name === 'Company Address');
+        if (address && address.cv_value) this.companyAddress = address.cv_value;
+
+        const email = constants.find(c => c.cv_name === 'Support Email');
+        if (email && email.cv_value) this.companyEmail = email.cv_value;
+
+        const phone = constants.find(c => c.cv_name === 'Company Phone');
+        if (phone && phone.cv_value) this.companyPhone = phone.cv_value;
+      },
+      error: (err) => console.error('Error loading contact info:', err)
+    });
   }
   loadCategories(): void {
     this.icategoryService.getCategories().subscribe(

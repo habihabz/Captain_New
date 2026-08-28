@@ -138,9 +138,8 @@
             <div class="col-lg-8">
                 <div class="card border-0 rounded-0 shadow-sm overflow-hidden mb-4 h-100">
                     <div class="row g-0 h-100">
-                        <div class="col-md-6 h-100">
-                            <img [src]="attachmentUrl + latestBlog.b_image_url" class="w-100 h-100"
-                                style="object-fit: cover;" alt="blog">
+                        <div class="col-md-6 blog-featured-img-container">
+                            <img [src]="attachmentUrl + latestBlog.b_image_url" class="blog-featured-img" alt="blog">
                         </div>
                         <div class="col-md-6">
                             <div class="card-body p-4 d-flex flex-column justify-content-center h-100">
@@ -150,9 +149,7 @@
                                         {{ latestBlog.b_title }}
                                     </a>
                                 </h3>
-                                <p class="text-muted small mb-4">
-                                    {{ latestBlog.b_cre_date | date:'MMMM dd, yyyy' }}
-                                </p>
+                                <!-- Date removed per request -->
                                 <a (click)="navigateToBlog(latestBlog.b_id)"
                                     class="fw-bold text-uppercase text-dark small cursor-pointer">
                                     Read Article <i class="fa fa-arrow-right ms-2"></i>
@@ -167,7 +164,7 @@
                 <div class="d-flex flex-column gap-4">
                     <div class="d-flex gap-3 align-items-center bg-white p-3 shadow-sm"
                         *ngFor="let blog of blogs.slice(1,4)">
-                        <img [src]="attachmentUrl + blog.b_image_url" class="rounded-0" width="100" height="80"
+                        <img [src]="attachmentUrl + blog.b_image_url" class="rounded-0" width="140" height="100"
                             style="object-fit: cover;" alt="blog">
                         <div>
                             <h6 class="fw-bold mb-1">
@@ -175,7 +172,7 @@
                                     {{ blog.b_title }}
                                 </a>
                             </h6>
-                            <p class="text-muted small mb-0">{{ blog.b_cre_date | date:'MMM dd' }}</p>
+                            <!-- Date removed per request -->
                         </div>
                     </div>
                 </div>

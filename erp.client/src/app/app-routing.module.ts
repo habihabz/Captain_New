@@ -51,6 +51,10 @@ import { DelhiveryPickupRequestComponent } from './pages/admin/delhivery-pickup-
 import { DelhiveryShipmentComponent } from './pages/admin/delhivery-shipment/delhivery-shipment.component';
 import { SettingsComponent } from './pages/admin/settings/settings.component';
 import { TermsAndConditionsComponent } from './pages/website/terms-and-conditions/terms-and-conditions.component';
+import { DeliveryInfoComponent } from './pages/website/delivery-info/delivery-info.component';
+import { PrivacyNoticeComponent } from './pages/website/privacy-notice/privacy-notice.component';
+import { FaqsComponent } from './pages/website/faqs/faqs.component';
+import { ReturnsAndRefundsComponent } from './pages/website/returns-and-refunds/returns-and-refunds.component';
 
 const routes: Routes = [
   // Redirect empty path to login
@@ -101,6 +105,10 @@ const routes: Routes = [
       { path: 'payment-failure', component: PaymentFailureComponent },
       { path: 'profile', component: UserProfileComponent },
       { path: 'terms-and-conditions', component: TermsAndConditionsComponent },
+      { path: 'delivery-info', component: DeliveryInfoComponent },
+      { path: 'privacy-notice', component: PrivacyNoticeComponent },
+      { path: 'faqs', component: FaqsComponent },
+      { path: 'returns-and-refunds', component: ReturnsAndRefundsComponent },
     ]
   },
   {
